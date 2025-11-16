@@ -110,15 +110,24 @@ graph TB
 - [`docs/technology.md`](docs/technology.md)  
   Stack tecnológico, decisiones de diseño, pruebas y validación.
 
----
 
-## Estado del proyecto
+[`docs/requirements.md`](docs/requirements.md)  
+Requisitos funcionales, no funcionales y casos de uso principales.
 
-- [ ] Modelo de dominio (entidades y motor de juego).  
-- [ ] Persistencia con EF Core y migraciones iniciales.  
-- [ ] Hubs de SignalR y contrato de mensajes.  
-- [ ] Interfaz Blazor (pantalla principal y jugadores).  
-- [ ] Integración con IA generativa para el comentarista.  
+[`docs/design.md`](docs/design.md)  
+Diseño técnico, diagramas y especificación de interfaces.
+
+[`docs/planning.md`](docs/planning.md)  
+Roadmap, hitos, riesgos y estrategia de pruebas.
+
+[`docs/architecture.md`](docs/architecture.md)  
+Arquitectura de la solución, proyectos, capas y comunicación entre componentes.
+
+[`docs/game-logic.md`](docs/game-logic.md)  
+Modelo de dominio, fases del juego, reglas de votación, defensa y puntuación.
+
+[`docs/technology.md`](docs/technology.md)  
+Stack tecnológico, decisiones de diseño, pruebas y validación.
 - [ ] Pruebas técnicas (unitarias, integración, carga) y pruebas con usuarios.
 
 ---
