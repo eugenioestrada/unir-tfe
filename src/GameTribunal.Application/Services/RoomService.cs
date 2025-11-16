@@ -27,15 +27,15 @@ public sealed class RoomService
 
     public async Task<RoomDto> CreateRoomAsync(GameMode mode, CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("Iniciando creación de sala para modo {GameMode}.", mode);
+        _logger.LogInformation("Starting room creation for mode {GameMode}.", mode);
 
         var uniqueCode = await GenerateUniqueRoomCodeAsync(cancellationToken).ConfigureAwait(false);
         var room = Room.Create(uniqueCode, mode);
 
-        _logger.LogInformation("Sala {RoomCode} generada. Persistiendo sala en el repositorio.", room.Code.Value);
+        _logger.LogInformation("Room {RoomCode} generated. Persisting room to repository.", room.Code.Value);
         await _roomRepository.AddAsync(room, cancellationToken).ConfigureAwait(false);
 
-        _logger.LogInformation("Sala {RoomCode} persistida correctamente para modo {GameMode}.", room.Code.Value, mode);
+        _logger.LogInformation("Room {RoomCode} persisted successfully for mode {GameMode}.", room.Code.Value, mode);
 
         return new RoomDto(room.Code.Value, room.Mode);
     }
@@ -44,21 +44,21 @@ public sealed class RoomService
     {
         for (var attempt = 0; attempt < MaxGenerationAttempts; attempt++)
         {
-            _logger.LogInformation("Generando código de sala. Intento {Attempt} de {MaxAttempts}.", attempt + 1, MaxGenerationAttempts);
+            _logger.LogInformation("Generating room code. Attempt {Attempt} of {MaxAttempts}.", attempt + 1, MaxGenerationAttempts);
 
             var candidate = _roomCodeGenerator.Generate();
-            _logger.LogInformation("Código generado {RoomCode}. Verificando unicidad.", candidate.Value);
+            _logger.LogInformation("Generated code {RoomCode}. Verifying uniqueness.", candidate.Value);
             var exists = await _roomRepository.ExistsAsync(candidate, cancellationToken).ConfigureAwait(false);
             if (!exists)
             {
-                _logger.LogInformation("Código de sala {RoomCode} aceptado en el intento {Attempt}.", candidate.Value, attempt + 1);
+                _logger.LogInformation("Room code {RoomCode} accepted on attempt {Attempt}.", candidate.Value, attempt + 1);
                 return candidate;
             }
 
-            _logger.LogWarning("Colisión detectada para el código {RoomCode} en el intento {Attempt}. Reintentando.", candidate.Value, attempt + 1);
+            _logger.LogWarning("Collision detected for code {RoomCode} on attempt {Attempt}. Retrying.", candidate.Value, attempt + 1);
         }
 
-        _logger.LogError("No fue posible generar un código de sala único después de {MaxAttempts} intentos.", MaxGenerationAttempts);
+        _logger.LogError("Unable to generate a unique room code after {MaxAttempts} attempts.", MaxGenerationAttempts);
         throw new InvalidOperationException("Unable to generate a unique room code after several attempts.");
     }
 }
