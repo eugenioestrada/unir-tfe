@@ -425,3 +425,61 @@ Su rol es únicamente:
 Esto permite mantener el **motor de juego totalmente determinista**, al tiempo que se añade una capa de entretenimiento dinámico.
 
 ---
+## 8. Resumen y completitud de la especificación
+
+Este documento define de forma exhaustiva:
+
+✅ **Modelo de dominio**: Todas las entidades y sus relaciones están identificadas  
+✅ **Fases del juego**: Flujo completo de una partida desde Lobby hasta Finished  
+✅ **Reglas de votación**: Acusaciones, predicciones y defensas con casos de empate  
+✅ **Sistema de puntuación**: Reglas claras para asignar puntos  
+✅ **Títulos sociales**: Cómo se asignan y persisten  
+✅ **Rol de la IA**: Claramente separado de la lógica determinista  
+
+### Información adicional necesaria para la implementación
+
+Para convertir esta especificación en código, será necesario definir:
+
+1. **Casos concretos (CaseDefinition):**
+   - Crear una lista de casos para cada GameMode (Suave, Normal, Spicy)
+   - Ejemplo: "¿Quién es más probable que olvide su cumpleaños?" → Título: "Desmemoriado/a oficial"
+   - Recomendado: Mínimo 30-50 casos por modo para evitar repetición
+
+2. **Textos de defensa:**
+   - Mensajes predefinidos para cada tipo de defensa (Admitir, Negar, Desviar)
+   - Pueden ser templates con placeholders: "{acusado} admite que {caso}"
+
+3. **Configuración de puntuación:**
+   - Valores exactos de puntos (actualmente sugeridos en sección 5)
+   - Posibilidad de ajustar por dificultad o modo de juego
+
+4. **Número de rondas por partida:**
+   - Valor por defecto sugerido: 8-10 rondas
+   - Configurable por el host al crear sala (opcional)
+
+5. **Criterios de desempate en acusaciones:**
+   - Orden determinista (por ejemplo: jugador con menor ID, o random con seed fija)
+
+6. **Timeouts y límites de tiempo:**
+   - ¿Hay tiempo límite para votar? (ej: 60 segundos por fase)
+   - ¿Qué pasa si un jugador no vota? (voto nulo o se omite)
+
+### Estado de la especificación
+
+**Estado actual:** ✅ **COMPLETO** para diseño y planificación  
+
+La especificación es suficiente para:
+- Comunicar la idea del juego a stakeholders
+- Comenzar la implementación del modelo de dominio
+- Crear tests unitarios del GameEngine
+- Diseñar la base de datos
+
+**Próximos pasos:**
+- Crear archivo `cases-seed-data.json` con casos iniciales
+- Definir configuración de timeouts en `appsettings.json`
+- Documentar textos de UI en archivo de recursos (i18n futuro)
+
+---
+
+**Última actualización:** 2025-11-16  
+**Versión:** 1.1 - Especificación completada y revisada

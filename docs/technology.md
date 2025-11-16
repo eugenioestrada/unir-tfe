@@ -6,9 +6,9 @@ Este documento describe las tecnologías utilizadas en **Tribunal Social**, just
 
 ## 1. Plataforma base
 
-### .NET 10 y C#
+### .NET 9 y C#
 
-Se utiliza **.NET 10** con **C#** como lenguaje principal para toda la lógica del proyecto:
+Se utiliza **.NET 9** (versión LTS más reciente al inicio del proyecto) con **C#** como lenguaje principal para toda la lógica del proyecto:
 
 - **Ventajas:**
   - Ecosistema unificado para backend, tiempo real y UI (Blazor).
@@ -23,7 +23,7 @@ Se utiliza **.NET 10** con **C#** como lenguaje principal para toda la lógica d
 
 ## 2. Entorno de desarrollo y orquestación
 
-### Visual Studio 2026
+### Visual Studio 2022
 
 - IDE principal utilizado para:
   - gestión de soluciones y proyectos,
@@ -35,7 +35,7 @@ La elección de Visual Studio responde a:
 
 - nivel de integración con .NET,
 - herramientas para refactorización y navegación por código,
-- soporte para nuevas capacidades de .NET 10 y Blazor.
+- soporte para las capacidades de .NET 9 y Blazor.
 
 ### Aspire
 
