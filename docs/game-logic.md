@@ -57,9 +57,123 @@ No hay un “ganador absoluto” en términos profundos: la competición existe 
   - Título recibido.
   - Ronda en la que se otorgó.
 
+```mermaid
+classDiagram
+    class Room {
+        +String RoomCode
+        +GameMode GameMode
+        +GamePhase CurrentPhase
+        +List~Player~ Players
+        +List~Round~ Rounds
+        +Round CurrentRound
+    }
+    
+    class Player {
+        +Guid Id
+        +String Alias
+        +int Score
+        +List~TitleAssignment~ Titles
+    }
+    
+    class CaseDefinition {
+        +Guid Id
+        +String Text
+        +GameMode Mode
+        +String SocialTitle
+    }
+    
+    class Round {
+        +CaseDefinition Case
+        +List~Accusation~ Accusations
+        +List~Prediction~ Predictions
+        +List~DefenseVote~ DefenseVotes
+        +Player InitialAccused
+        +Player AlternativeAccused
+        +Player FinalAccused
+        +DefenseType DefenseChosen
+    }
+    
+    class TitleAssignment {
+        +Player Player
+        +String Title
+        +Round Round
+    }
+    
+    class GameMode {
+        <<enumeration>>
+        Suave
+        Normal
+        Spicy
+    }
+    
+    class GamePhase {
+        <<enumeration>>
+        Lobby
+        CaseVoting
+        Defense
+        DefenseVoting
+        Scoring
+        Finished
+    }
+    
+    Room "1" --> "*" Player
+    Room "1" --> "*" Round
+    Room --> GameMode
+    Room --> GamePhase
+    Round --> CaseDefinition
+    Round --> Player : InitialAccused
+    Round --> Player : AlternativeAccused
+    Round --> Player : FinalAccused
+    Player "1" --> "*" TitleAssignment
+    TitleAssignment --> Round
+```
+
 ---
 
 ## 3. Fases de la partida (`GamePhase`)
+
+```mermaid
+stateDiagram-v2
+    [*] --> Lobby
+    Lobby --> CaseVoting : Iniciar partida<br/>(mín. 4 jugadores)
+    
+    CaseVoting --> Defense : Todos votan
+    
+    Defense --> DefenseVoting : Defensa tipo<br/>"Desviar"
+    Defense --> Scoring : Defensa tipo<br/>"Admitir" o "Negar"
+    
+    DefenseVoting --> Scoring : Votación<br/>completada
+    
+    Scoring --> CaseVoting : Más rondas<br/>pendientes
+    Scoring --> Finished : Rondas<br/>completadas
+    
+    Finished --> [*]
+    
+    note right of Lobby
+        Creación de sala
+        Unión de jugadores
+        Selección de GameMode
+    end note
+    
+    note right of CaseVoting
+        Caso aleatorio
+        Acusaciones (1-2)
+        Predicciones (1)
+    end note
+    
+    note right of Defense
+        Acusado inicial decide:
+        - Admitir
+        - Negar
+        - Desviar
+    end note
+    
+    note right of Scoring
+        Cálculo de puntos
+        Asignación de título
+        Actualización ranking
+    end note
+```
 
 Una partida progresa por varias fases:
 
@@ -145,14 +259,78 @@ Toda la transición entre fases la gestiona el `GameEngine` con métodos que gar
 
 - Sólo se aplica si hubo defensa de desvío.
 - El resto de jugadores vota `Aceptar` / `Rechazar`.
-- Si hay mayoría de “Aceptar”:
+- Si hay mayoría de "Aceptar":
   - acusado final = `altAccused`.
-- Si hay mayoría de “Rechazar” o empate:
+- Si hay mayoría de "Rechazar" o empate:
   - acusado final = acusado inicial.
+
+```mermaid
+flowchart TD
+    Start[Inicio de Ronda] --> SelectCase[Seleccionar CaseDefinition]
+    SelectCase --> Vote[Fase CaseVoting]
+    
+    Vote --> Accuse[Todos los jugadores<br/>acusan 1-2 personas]
+    Accuse --> Predict[Todos los jugadores<br/>predicen quién será acusado]
+    
+    Predict --> CalcAccused[Calcular acusado inicial<br/>jugador con más votos]
+    
+    CalcAccused --> Defense{Acusado inicial<br/>elige defensa}
+    
+    Defense -->|Admitir| FinalAdmit[Acusado final =<br/>Acusado inicial]
+    Defense -->|Negar| FinalDeny[Acusado final =<br/>Acusado inicial]
+    Defense -->|Desviar| SelectAlt[Acusado selecciona<br/>jugador alternativo]
+    
+    SelectAlt --> DefenseVote[Resto de jugadores<br/>votan Aceptar/Rechazar]
+    
+    DefenseVote --> VoteResult{Mayoría<br/>acepta?}
+    
+    VoteResult -->|Sí| FinalAlt[Acusado final =<br/>Acusado alternativo]
+    VoteResult -->|No/Empate| FinalOriginal[Acusado final =<br/>Acusado inicial]
+    
+    FinalAdmit --> Score[Calcular puntuación]
+    FinalDeny --> Score
+    FinalAlt --> Score
+    FinalOriginal --> Score
+    
+    Score --> AssignTitle[Asignar título social<br/>al acusado final]
+    AssignTitle --> UpdateScores[Actualizar puntuaciones]
+    
+    UpdateScores --> CheckRounds{Quedan<br/>rondas?}
+    
+    CheckRounds -->|Sí| Start
+    CheckRounds -->|No| End[Fase Finished<br/>Ranking y títulos]
+    
+    style Start fill:#e1f5ff
+    style Vote fill:#fff4e1
+    style Defense fill:#ffe1e1
+    style Score fill:#e8f5e9
+    style End fill:#f3e5f5
+```
 
 ---
 
 ## 5. Sistema de puntuación (ejemplo base)
+
+```mermaid
+flowchart LR
+    subgraph Puntuación
+        A[Acusaciones correctas] -->|+2 pts| Points[Puntos totales]
+        P[Predicciones correctas] -->|+1 pt| Points
+        D[Defensa exitosa<br/>desvío aceptado] -->|+2 pts al<br/>acusado original| Points
+    end
+    
+    subgraph Títulos
+        Points --> Title[Acusado final<br/>recibe título social]
+        Title --> Persist[Título persistente<br/>en perfil del jugador]
+    end
+    
+    style A fill:#e8f5e9
+    style P fill:#e1f5ff
+    style D fill:#fff4e1
+    style Title fill:#f3e5f5
+```
+
+### Reglas de puntuación
 
 La lógica concreta puede ajustarse, pero un esquema base podría ser:
 
@@ -201,6 +379,29 @@ Este sistema de títulos está pensado para generar conversaciones posteriores (
 ---
 
 ## 7. Rol de la IA generativa en la lógica de juego
+
+```mermaid
+sequenceDiagram
+    participant GE as GameEngine
+    participant Room as Room State
+    participant AI as ICommentaryService
+    participant UI as Pantalla Principal
+    
+    GE->>Room: Iniciar nueva ronda
+    GE->>Room: Calcular acusado final
+    GE->>Room: Calcular puntuaciones
+    GE->>Room: Asignar título social
+    
+    Note over GE,Room: Lógica determinista<br/>completamente independiente de IA
+    
+    GE->>AI: Solicitar comentario<br/>(resumen de estado)
+    AI-->>GE: Texto generado<br/>(sin afectar estado)
+    
+    GE->>UI: Actualizar estado de juego
+    GE->>UI: Mostrar comentario IA
+    
+    Note over AI: Solo genera texto<br/>NO modifica Room, Round,<br/>ni puntuaciones
+```
 
 La IA **no forma parte** de la lógica de juego. Detalles clave:
 
