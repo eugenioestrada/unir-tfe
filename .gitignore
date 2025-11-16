@@ -1,0 +1,105 @@
+## Ignore Visual Studio temporary files, build results, and user-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+## Ignore build directories
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+
+## Visual Studio 2022+ generated files
+.vs/
+GeneratedFiles/
+TestResults/
+BenchmarkDotNet.Artifacts/
+
+## Rider and other IDEs
+.idea/
+*.sln.iml
+
+## NuGet packages
+*.nupkg
+*.snupkg
+.packages/
+**/packages/*
+!**/packages/build/
+!**/packages/build*/
+!**/packages/repositories.config
+
+## ASP.NET scaffolding
+ScaffoldingReadMe.txt
+
+## Publish outputs
+**/publish/
+**/PublishProfiles/
+*.pubxml
+*.publishsettings
+
+## Azure artifacts
+.csproj.user
+*.azurePubxml
+
+## Entity Framework
+_MigrationBackup/
+
+## StyleCop and analysis
+StyleCopReport.xml
+
+## Generated documentation
+*.docstates
+*.cache
+
+## TFS
+$tf/
+
+## DotCover
+.idea/.idea.DotSettings.user
+*.dotCover
+
+## Resharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+
+## Backup & report files
+*.bak
+*.backup
+*.log
+*.svclog
+*.scc
+
+## DotNet tools
+.dotnet-tools/
+
+## Node artifacts (for Blazor Web projects)
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+node_modules/
+
+## VS Code
+.vscode/
+.history/
+
+## Local configuration
+appsettings.Development.json
+secrets.json
+
+## Generated QR codes or assets
+**/wwwroot/qrcodes/
+
+## System files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+
+## Temporary
+*.tmp
+*.temp
+

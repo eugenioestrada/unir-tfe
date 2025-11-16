@@ -1,0 +1,110 @@
+@page "/"
+@rendermode InteractiveServer
+
+<PageTitle>Lobby</PageTitle>
+
+<h1 class="display-4">Lobby</h1>
+<p class="lead">Crea una sala y comparte el código para que los jugadores se unan.</p>
+
+<div class="card mb-4">
+    <div class="card-header">Configuración</div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label" for="gameMode">Modo de juego</label>
+                <select id="gameMode" class="form-select" @bind="_selectedMode">
+                    @foreach (var mode in _availableModes)
+                    {
+                        <option value="@mode">@mode</option>
+                    }
+                </select>
+            </div>
+        </div>
+        <div class="mt-3 d-flex gap-2">
+            <button class="btn btn-primary" @onclick="CreateRoomAsync" disabled="@_isCreating">
+                @(_isCreating ? "Creando..." : "Crear sala")
+            </button>
+            @if (_room is not null)
+            {
+                <button class="btn btn-outline-secondary" @onclick="CreateAnotherRoomAsync" disabled="@_isCreating">
+                    Crear otra sala
+                </button>
+            }
+        </div>
+        @if (_errorMessage is not null)
+        {
+            <div class="alert alert-danger mt-3" role="alert">
+                @_errorMessage
+            </div>
+        }
+    </div>
+</div>
+
+@if (_room is null)
+{
+    <div class="alert alert-info" role="alert">
+        Selecciona un modo y pulsa "Crear sala" para generar un código de acceso.
+    </div>
+}
+else
+{
+    <div class="card">
+        <div class="card-header">Sala creada</div>
+        <div class="card-body">
+            <p>Comparte este código con los jugadores:</p>
+            <div class="d-flex align-items-center gap-3">
+                <span class="display-6 fw-bold text-primary">@_room.Code</span>
+                <span class="badge text-bg-secondary">@_room.Mode</span>
+            </div>
+            <p class="mt-3 mb-0">Próximamente podrás ver aquí la lista de jugadores conectados y el estado de la partida.</p>
+        </div>
+    </div>
+}
+
+@code {
+    private GameMode _selectedMode = GameMode.Normal;
+    private RoomDto? _room;
+    private string? _errorMessage;
+    private bool _isCreating;
+    private readonly GameMode[] _availableModes = Enum.GetValues<GameMode>();
+
+    [Inject]
+    private RoomService RoomService { get; set; } = default!;
+
+    private async Task CreateRoomAsync()
+    {
+        if (_isCreating)
+        {
+            return;
+        }
+
+        _errorMessage = null;
+        _isCreating = true;
+
+        try
+        {
+            _room = await RoomService.CreateRoomAsync(_selectedMode);
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = ex.Message;
+        }
+        finally
+        {
+            _isCreating = false;
+        }
+    }
+
+    private async Task CreateAnotherRoomAsync()
+    {
+        if (_isCreating)
+        {
+            return;
+        }
+
+        _room = null;
+        _errorMessage = null;
+
+        await CreateRoomAsync();
+    }
+}

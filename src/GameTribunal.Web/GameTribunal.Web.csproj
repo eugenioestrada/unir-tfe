@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <ItemGroup>
+    <ProjectReference Include="..\GameTribunal.Application\GameTribunal.Application.csproj" />
+    <ProjectReference Include="..\GameTribunal.Infrastructure\GameTribunal.Infrastructure.csproj" />
+    <ProjectReference Include="..\GameTribunal.ServiceDefaults\GameTribunal.ServiceDefaults.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
+  </PropertyGroup>
+
+</Project>
