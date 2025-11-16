@@ -43,7 +43,7 @@ El objetivo del proyecto es proporcionar un **party game web zero-install** que 
     - Blazor.
   - Permite escribir **toda** la solución (backend + frontend Blazor) en C#, facilitando la coherencia del código y el mantenimiento.
 
-- **Visual Studio 2026**
+- **Visual Studio 2026 Community**
   - IDE principal para desarrollo .NET.
   - Integración nativa con:
     - depuración,
