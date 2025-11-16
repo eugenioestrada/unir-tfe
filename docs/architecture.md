@@ -36,42 +36,19 @@ Opcional (para desarrollo con Aspire):
 
 ## Diagrama lógico
 
-```text
-+-------------------------+
-|   GameTribunal.Web      |
-|-------------------------|
-| - ASP.NET Core          |
-| - SignalR Hubs          |
-| - Blazor (Host/Player)  |
-+-----------+-------------+
-            |
-            v
-+-----------+-------------+
-|   GameTribunal.Application
-|-------------------------|
-| - RoomService           |
-| - RoundService          |
-| - DTOs                  |
-| - IRoomRepository       |
-| - ICaseRepository       |
-| - ICommentaryService    |
-+-----------+-------------+
-            |
-            v
-+-----------+-------------+
-|   GameTribunal.Domain   |
-|-------------------------|
-| - Room, Player, Round   |
-| - CaseDefinition        |
-| - GameMode, GamePhase   |
-| - GameEngine            |
-+-------------------------+
-
-+-------------------------+
-| GameTribunal.Infrastructure
-|-------------------------|
-| - GameDbContext (EF)    |
-| - RoomRepository        |
-| - CaseRepository        |
-| - CommentaryService     |
-+-------------------------+
+```mermaid
+graph TB
+    Web[GameTribunal.Web<br/>------------------------<br/>ASP.NET Core<br/>SignalR Hubs<br/>Blazor Host/Player]
+    App[GameTribunal.Application<br/>------------------------<br/>RoomService<br/>RoundService<br/>DTOs<br/>IRoomRepository<br/>ICaseRepository<br/>ICommentaryService]
+    Domain[GameTribunal.Domain<br/>------------------------<br/>Room, Player, Round<br/>CaseDefinition<br/>GameMode, GamePhase<br/>GameEngine]
+    Infra[GameTribunal.Infrastructure<br/>------------------------<br/>GameDbContext EF<br/>RoomRepository<br/>CaseRepository<br/>CommentaryService]
+    
+    Web --> App
+    App --> Domain
+    App -.-> Infra
+    
+    style Web fill:#e1f5ff
+    style App fill:#fff4e1
+    style Domain fill:#e8f5e9
+    style Infra fill:#f3e5f5
+```
