@@ -99,29 +99,71 @@ graph TB
 
 ---
 
+## Cómo empezar
+
+### Requisitos previos
+
+- .NET 10 SDK
+- Visual Studio 2026 Community o Visual Studio Code
+- SQL Server o PostgreSQL (para desarrollo local)
+- Git
+
+### Configuración del entorno de desarrollo
+
+1. Clonar el repositorio:
+   ```bash
+   git clone https://github.com/eugenioestrada/unir-tfe.git
+   cd unir-tfe
+   ```
+
+2. Restaurar dependencias (cuando el código esté disponible):
+   ```bash
+   dotnet restore
+   ```
+
+3. Configurar la cadena de conexión a la base de datos en `appsettings.Development.json`
+
+4. Ejecutar migraciones de base de datos:
+   ```bash
+   dotnet ef database update
+   ```
+
+5. Ejecutar la aplicación:
+   ```bash
+   dotnet run --project GameTribunal.Web
+   ```
+
+**Nota:** La implementación del código aún no está disponible. Esta sección se actualizará cuando los proyectos estén creados.
+
+---
+
 ## Estructura de la documentación
+
+La documentación del proyecto está organizada de la siguiente manera:
 
 - [`docs/requirements.md`](docs/requirements.md)  
   Requisitos funcionales, no funcionales y casos de uso principales.
 
 - [`docs/design.md`](docs/design.md)  
-  Diseño técnico, diagramas y especificación de interfaces.
+  Diseño técnico detallado: diagramas de arquitectura, secuencia, modelo de datos (ERD), especificación completa de interfaces SignalR y DTOs.
 
 - [`docs/planning.md`](docs/planning.md)  
-  Roadmap, hitos, riesgos y estrategia de pruebas.
+  Roadmap, hitos, análisis de riesgos detallado y estrategia completa de pruebas.
 
 - [`docs/architecture.md`](docs/architecture.md)  
-  Arquitectura de la solución, proyectos, capas y comunicación entre componentes.
+  Arquitectura de la solución: proyectos, capas, responsabilidades, flujo de datos, inyección de dependencias y consideraciones de escalabilidad.
 
 - [`docs/game-logic.md`](docs/game-logic.md)  
-  Modelo de dominio, fases del juego, reglas de votación, defensa y puntuación.
+  Modelo de dominio, fases del juego, reglas completas de votación, defensa, puntuación y títulos sociales.
 
 - [`docs/technology.md`](docs/technology.md)  
-  Stack tecnológico, decisiones de diseño, pruebas y validación.
+  Stack tecnológico (.NET 10, ASP.NET Core, SignalR, Blazor, EF Core), justificación de decisiones y estrategia de validación.
 
 ---
 
 ## Estado del proyecto
+
+**Nota:** Este proyecto se encuentra en fase de diseño y planificación. Los siguientes componentes están pendientes de implementación:
 
 - [ ] Modelo de dominio (entidades y motor de juego).
 - [ ] Persistencia con EF Core y migraciones iniciales.
@@ -134,4 +176,4 @@ graph TB
 
 ## Licencia
 
-_(Pendiente de definir: MIT, Apache 2.0, etc.)_
+MIT License - Ver archivo LICENSE para más detalles (pendiente de crear).
