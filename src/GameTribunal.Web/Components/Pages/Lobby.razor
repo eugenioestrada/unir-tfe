@@ -1,5 +1,6 @@
 @page "/"
 @rendermode InteractiveServer
+@using GameTribunal.Web.Services
 
 <PageTitle>Lobby</PageTitle>
 
@@ -48,15 +49,79 @@
 }
 else
 {
-    <div class="card">
-        <div class="card-header">Sala creada</div>
-        <div class="card-body">
-            <p>Comparte este código con los jugadores:</p>
-            <div class="d-flex align-items-center gap-3">
-                <span class="display-6 fw-bold text-primary">@_room.Code</span>
-                <span class="badge text-bg-secondary">@_room.Mode</span>
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">Sala creada</div>
+                <div class="card-body">
+                    <p>Comparte este código con los jugadores:</p>
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <span class="display-6 fw-bold text-primary">@_room.Code</span>
+                        <span class="badge text-bg-secondary">@_room.Mode</span>
+                    </div>
+                    
+                    @if (_qrCodeBase64 is not null)
+                    {
+                        <div class="text-center mb-3">
+                            <p class="fw-semibold">O escanea este código QR:</p>
+                            <img src="data:image/png;base64,@_qrCodeBase64" 
+                                 alt="QR Code" 
+                                 class="img-fluid" 
+                                 style="max-width: 250px;" />
+                            <p class="text-muted small mt-2">@_roomUrl</p>
+                        </div>
+                    }
+
+                    <div class="alert alert-info mb-0">
+                        <p class="mb-1"><strong>Jugadores:</strong> @_room.Players.Count/@Room.MaxPlayers</p>
+                        @if (!_room.CanStartGame)
+                        {
+                            <p class="mb-0 text-warning">
+                                <small>⚠️ Se necesitan al menos @Room.MinPlayers jugadores para iniciar (@_room.Players.Count/@Room.MinPlayers)</small>
+                            </p>
+                        }
+                        else
+                        {
+                            <p class="mb-0 text-success">
+                                <small>✓ La partida puede iniciarse</small>
+                            </p>
+                            <button class="btn btn-success mt-2 w-100" @onclick="StartGameAsync" disabled="@_isStarting">
+                                @(_isStarting ? "Iniciando..." : "Iniciar partida")
+                            </button>
+                        }
+                    </div>
+                </div>
             </div>
-            <p class="mt-3 mb-0">Próximamente podrás ver aquí la lista de jugadores conectados y el estado de la partida.</p>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Jugadores conectados (@_room.Players.Count/@Room.MaxPlayers)</h5>
+                </div>
+                <div class="card-body">
+                    @if (_room.Players.Count == 0)
+                    {
+                        <p class="text-muted text-center py-3">
+                            Esperando jugadores...
+                        </p>
+                    }
+                    else
+                    {
+                        <ul class="list-group list-group-flush">
+                            @foreach (var player in _room.Players)
+                            {
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>@player.Alias</span>
+                                    <span class="badge bg-primary rounded-pill">
+                                        @player.Id.ToString().Substring(0, 8)
+                                    </span>
+                                </li>
+                            }
+                        </ul>
+                    }
+                </div>
+            </div>
         </div>
     </div>
 }
@@ -66,10 +131,19 @@ else
     private RoomDto? _room;
     private string? _errorMessage;
     private bool _isCreating;
+    private bool _isStarting;
+    private string? _qrCodeBase64;
+    private string? _roomUrl;
     private readonly GameMode[] _availableModes = Enum.GetValues<GameMode>();
 
     [Inject]
     private RoomService RoomService { get; set; } = default!;
+
+    [Inject]
+    private QrCodeService QrCodeService { get; set; } = default!;
+
+    [Inject]
+    private IConfiguration Configuration { get; set; } = default!;
 
     private async Task CreateRoomAsync()
     {
@@ -84,6 +158,11 @@ else
         try
         {
             _room = await RoomService.CreateRoomAsync(_selectedMode);
+            
+            // Generate QR code URL (RF-004)
+            var baseUrl = Configuration["BaseUrl"] ?? "https://localhost:7000";
+            _roomUrl = RoomService.GenerateRoomUrl(_room.Code, baseUrl);
+            _qrCodeBase64 = QrCodeService.GenerateQrCodeBase64(_roomUrl);
         }
         catch (Exception ex)
         {
@@ -104,7 +183,35 @@ else
 
         _room = null;
         _errorMessage = null;
+        _qrCodeBase64 = null;
+        _roomUrl = null;
 
         await CreateRoomAsync();
+    }
+
+    private async Task StartGameAsync()
+    {
+        if (_isStarting || _room is null || !_room.CanStartGame)
+        {
+            return;
+        }
+
+        _isStarting = true;
+        _errorMessage = null;
+
+        try
+        {
+            // TODO: Implement game start logic
+            await Task.Delay(1000); // Simulate async operation
+            _errorMessage = "Funcionalidad de inicio de partida pendiente de implementación.";
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"Error al iniciar la partida: {ex.Message}";
+        }
+        finally
+        {
+            _isStarting = false;
+        }
     }
 }
