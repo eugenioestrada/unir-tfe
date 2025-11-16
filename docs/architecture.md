@@ -2,7 +2,7 @@
 
 La arquitectura del proyecto está diseñada para ser **simple de implementar**, **fácil de explicar** en un TFG y **suficientemente modular** como para facilitar pruebas y evolución.
 
-Se sigue una estructura en capas ligera sobre **.NET 9**, diferenciando:
+Se sigue una estructura en capas ligera sobre **.NET 10**, diferenciando:
 
 - **Dominio**: reglas del juego, entidades y motor de juego.
 - **Aplicación**: casos de uso y contratos de servicios.

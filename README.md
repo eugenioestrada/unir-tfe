@@ -23,7 +23,7 @@ Un **comentarista automático** basado en IA generativa narra lo que ocurre (acu
 - Mecánicas pensadas para:
   - generar risas y pequeñas fricciones amistosas,
   - crear "títulos sociales" y running gags para el grupo.
-- Arquitectura **.NET 9** con:
+- Arquitectura **.NET 10** con:
   - ASP.NET Core, SignalR, Blazor, EF Core, Aspire.
 - Motor de juego **determinista**, desacoplado de la IA.
 - Módulo de comentariado con **IA generativa** como capa extra de ambientación.
@@ -103,8 +103,8 @@ graph TB
 
 ### Requisitos previos
 
-- .NET 9 SDK
-- Visual Studio 2022 (versión 17.8 o superior) o Visual Studio Code
+- .NET 10 SDK
+- Visual Studio 2026 Community o Visual Studio Code
 - SQL Server o PostgreSQL (para desarrollo local)
 - Git
 
@@ -157,13 +157,7 @@ La documentación del proyecto está organizada de la siguiente manera:
   Modelo de dominio, fases del juego, reglas completas de votación, defensa, puntuación y títulos sociales.
 
 - [`docs/technology.md`](docs/technology.md)  
-  Stack tecnológico (.NET 9, ASP.NET Core, SignalR, Blazor, EF Core), justificación de decisiones y estrategia de validación.
-
-- [`docs/REVIEW_SUMMARY.md`](docs/REVIEW_SUMMARY.md)  
-  Resumen de la revisión de documentación realizada, inconsistencias corregidas y estado actual.
-
-- [`CONTRIBUTING.md`](CONTRIBUTING.md)  
-  Guía completa para contribuidores: cómo reportar issues, crear PRs, estándares de código y proceso de revisión.
+  Stack tecnológico (.NET 10, ASP.NET Core, SignalR, Blazor, EF Core), justificación de decisiones y estrategia de validación.
 
 ---
 
