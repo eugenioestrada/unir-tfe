@@ -22,11 +22,80 @@ Un **comentarista automático** basado en IA generativa narra lo que ocurre (acu
 - Admite **4–16 jugadores** en la misma sala física.
 - Mecánicas pensadas para:
   - generar risas y pequeñas fricciones amistosas,
-  - crear “títulos sociales” y running gags para el grupo.
+  - crear "títulos sociales" y running gags para el grupo.
 - Arquitectura **.NET 10** con:
   - ASP.NET Core, SignalR, Blazor, EF Core, Aspire.
 - Motor de juego **determinista**, desacoplado de la IA.
 - Módulo de comentariado con **IA generativa** como capa extra de ambientación.
+
+---
+
+## Topología de red y modelo BYOD
+
+El proyecto está diseñado bajo el concepto **Bring Your Own Device (BYOD)**, aprovechando dispositivos que los jugadores ya poseen y tecnologías web estándar para eliminar barreras de entrada.
+
+```mermaid
+graph TB
+    subgraph Internet["☁️ Internet"]
+        Server["🖥️ Servidor ASP.NET Core<br/>SignalR + Blazor<br/>Puerto 443/HTTPS"]
+    end
+    
+    subgraph SalaFisica["🏠 Sala Física - Mismo Espacio"]
+        subgraph PantallaCompartida["📺 Pantalla Compartida"]
+            Host["💻 PC / Smart TV<br/>Navegador Web<br/>Vista Host/Tablero<br/>Muestra QR de sala"]
+        end
+        
+        subgraph DispositivosJugadores["📱 Dispositivos Personales (BYOD)"]
+            P1["📱 Smartphone 1<br/>Navegador Web"]
+            P2["📱 Smartphone 2<br/>Navegador Web"]
+            P3["📱 Tablet 1<br/>Navegador Web"]
+            P4["📱 Smartphone 3<br/>Navegador Web"]
+            PN["📱 ...<br/>Hasta 16 jugadores"]
+        end
+    end
+    
+    Server <-->|"WebSocket/SignalR<br/>Sincronización<br/>Tiempo Real"| Host
+    Server <-->|"WebSocket/SignalR<br/>Votos, Defensas<br/>Predicciones"| P1
+    Server <-->|"WebSocket/SignalR"| P2
+    Server <-->|"WebSocket/SignalR"| P3
+    Server <-->|"WebSocket/SignalR"| P4
+    Server <-->|"WebSocket/SignalR"| PN
+    
+    Host -.->|"📷 Escaneo QR<br/>URL + RoomCode"| P1
+    Host -.->|"📷 Escaneo QR"| P2
+    Host -.->|"📷 Escaneo QR"| P3
+    Host -.->|"📷 Escaneo QR"| P4
+    
+    style Server fill:#e8f5e9
+    style Host fill:#e1f5ff
+    style P1 fill:#fff4e1
+    style P2 fill:#fff4e1
+    style P3 fill:#fff4e1
+    style P4 fill:#fff4e1
+    style PN fill:#fff4e1
+    style SalaFisica fill:#f5f5f5,stroke:#333,stroke-width:3px,stroke-dasharray: 5 5
+```
+
+### Ventajas del modelo BYOD + Tecnologías estándar
+
+| Aspecto | Beneficio |
+|---------|-----------|
+| **Sin instalación** | Los jugadores solo necesitan un navegador web moderno (Chrome, Safari, Edge, Firefox). No se requiere descarga de apps. |
+| **Acceso vía QR** | La pantalla principal muestra un código QR que, al escanearse, abre directamente la sala en el navegador móvil. |
+| **Multiplataforma** | Compatible con iOS, Android, Windows, macOS, Linux. Cualquier dispositivo con navegador. |
+| **Cero hardware propietario** | No se necesitan mandos, consolas o periféricos específicos. |
+| **Escalabilidad** | Soporta 4-16 jugadores simultáneos usando sus propios dispositivos. |
+| **Tecnologías web estándar** | HTML5, CSS3, JavaScript/WebAssembly (Blazor), WebSockets (SignalR). |
+| **Pantalla compartida flexible** | Puede ser un PC conectado a TV, una Smart TV con navegador, o proyección vía Chromecast/AirPlay/Miracast. |
+
+### Flujo de conexión
+
+1. **Host** accede a la aplicación web y crea una sala
+2. **Servidor** genera un código de sala único y lo muestra como QR en pantalla
+3. **Jugadores** escanean el QR con la cámara de sus dispositivos
+4. **Navegador móvil** abre automáticamente la URL con el código de sala
+5. **Jugador** introduce su alias y se une a la partida
+6. **SignalR** mantiene sincronizados en tiempo real todos los dispositivos
 
 ---
 
