@@ -1,0 +1,102 @@
+@*
+    GameButton - Reusable button component with consistent styling
+    
+    Usage:
+    <GameButton Variant="primary" Size="lg" OnClick="HandleClick">
+        Click Me
+    </GameButton>
+    
+    Props:
+    - Variant: primary, secondary, outline (default: primary)
+    - Size: sm, md, lg (default: md)
+    - FullWidth: Makes button full width (default: false)
+    - Disabled: Disables the button (default: false)
+    - IsLoading: Shows loading spinner (default: false)
+    - Type: button, submit (default: button)
+    - OnClick: Click event handler
+    - ChildContent: Button content
+*@
+
+<button 
+    type="@Type"
+    class="@GetCssClasses()"
+    disabled="@(Disabled || IsLoading)"
+    @onclick="HandleClick"
+    @attributes="AdditionalAttributes">
+    @if (IsLoading)
+    {
+        <span class="game-spinner"></span>
+    }
+    @ChildContent
+</button>
+
+@code {
+    [Parameter]
+    public string Variant { get; set; } = "primary";
+    
+    [Parameter]
+    public string Size { get; set; } = "md";
+    
+    [Parameter]
+    public bool FullWidth { get; set; }
+    
+    [Parameter]
+    public bool Disabled { get; set; }
+    
+    [Parameter]
+    public bool IsLoading { get; set; }
+    
+    [Parameter]
+    public string Type { get; set; } = "button";
+    
+    [Parameter]
+    public EventCallback OnClick { get; set; }
+    
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+    
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object>? AdditionalAttributes { get; set; }
+    
+    private string GetCssClasses()
+    {
+        var classes = new List<string> { "game-btn" };
+        
+        // Variant
+        classes.Add(Variant switch
+        {
+            "primary" => "game-btn-primary",
+            "secondary" => "game-btn-secondary",
+            "outline" => "game-btn-outline",
+            _ => "game-btn-primary"
+        });
+        
+        // Size
+        if (Size == "lg")
+        {
+            classes.Add("game-btn-lg");
+        }
+        
+        // Full width
+        if (FullWidth)
+        {
+            classes.Add("game-btn-block");
+        }
+        
+        // Loading state
+        if (IsLoading)
+        {
+            classes.Add("is-loading");
+        }
+        
+        return string.Join(" ", classes);
+    }
+    
+    private async Task HandleClick()
+    {
+        if (!Disabled && !IsLoading && OnClick.HasDelegate)
+        {
+            await OnClick.InvokeAsync();
+        }
+    }
+}

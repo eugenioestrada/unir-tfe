@@ -1,0 +1,81 @@
+@*
+    GameAlert - Alert/notification component with icons and variants
+    
+    Usage:
+    <GameAlert Variant="success" Icon="✅">
+        <Title>Success!</Title>
+        <Message>Your action was completed successfully.</Message>
+    </GameAlert>
+    
+    Props:
+    - Variant: success, warning, danger, info (default: info)
+    - Icon: Optional icon/emoji to display (default: auto-selected based on variant)
+    - Title: Alert title (optional)
+    - Message: Alert message content (required)
+*@
+
+<div class="@GetCssClasses()" @attributes="AdditionalAttributes">
+    <span style="font-size: 1.5rem;">@GetIcon()</span>
+    <div>
+        @if (Title != null)
+        {
+            <strong>@Title</strong>
+        }
+        @if (Message != null)
+        {
+            <p class="mb-0">@Message</p>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string Variant { get; set; } = "info";
+    
+    [Parameter]
+    public string? Icon { get; set; }
+    
+    [Parameter]
+    public RenderFragment? Title { get; set; }
+    
+    [Parameter]
+    public RenderFragment? Message { get; set; }
+    
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object>? AdditionalAttributes { get; set; }
+    
+    private string GetCssClasses()
+    {
+        var classes = new List<string> { "game-alert" };
+        
+        // Variant
+        classes.Add(Variant switch
+        {
+            "success" => "game-alert-success",
+            "warning" => "game-alert-warning",
+            "danger" => "game-alert-danger",
+            "info" => "game-alert-info",
+            _ => "game-alert-info"
+        });
+        
+        return string.Join(" ", classes);
+    }
+    
+    private string GetIcon()
+    {
+        // Use custom icon if provided, otherwise use default based on variant
+        if (!string.IsNullOrEmpty(Icon))
+        {
+            return Icon;
+        }
+        
+        return Variant switch
+        {
+            "success" => "✅",
+            "warning" => "⚠️",
+            "danger" => "❌",
+            "info" => "ℹ️",
+            _ => "ℹ️"
+        };
+    }
+}

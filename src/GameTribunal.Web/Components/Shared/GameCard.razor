@@ -1,0 +1,92 @@
+@*
+    GameCard - Reusable card component with header, body, and footer sections
+    
+    Usage:
+    <GameCard>
+        <Header>
+            <h3 class="game-card-title">Title</h3>
+        </Header>
+        <Body>
+            Content goes here
+        </Body>
+        <Footer>
+            <button>Action</button>
+        </Footer>
+    </GameCard>
+    
+    Props:
+    - Header: Card header content (optional)
+    - Body: Card body content (required)
+    - Footer: Card footer content (optional)
+    - Elevated: Uses elevated shadow (default: false)
+    - Interactive: Makes card interactive with hover effects (default: false)
+    - OnClick: Click event handler for interactive cards
+*@
+
+<div class="@GetCssClasses()" @onclick="HandleClick" @attributes="AdditionalAttributes">
+    @if (Header != null)
+    {
+        <div class="game-card-header">
+            @Header
+        </div>
+    }
+    
+    <div class="game-card-body">
+        @Body
+    </div>
+    
+    @if (Footer != null)
+    {
+        <div class="game-card-footer">
+            @Footer
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public RenderFragment? Header { get; set; }
+    
+    [Parameter]
+    public RenderFragment? Body { get; set; }
+    
+    [Parameter]
+    public RenderFragment? Footer { get; set; }
+    
+    [Parameter]
+    public bool Elevated { get; set; }
+    
+    [Parameter]
+    public bool Interactive { get; set; }
+    
+    [Parameter]
+    public EventCallback OnClick { get; set; }
+    
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object>? AdditionalAttributes { get; set; }
+    
+    private string GetCssClasses()
+    {
+        var classes = new List<string> { "game-card" };
+        
+        if (Elevated)
+        {
+            classes.Add("game-card-elevated");
+        }
+        
+        if (Interactive)
+        {
+            classes.Add("game-card-interactive");
+        }
+        
+        return string.Join(" ", classes);
+    }
+    
+    private async Task HandleClick()
+    {
+        if (Interactive && OnClick.HasDelegate)
+        {
+            await OnClick.InvokeAsync();
+        }
+    }
+}
