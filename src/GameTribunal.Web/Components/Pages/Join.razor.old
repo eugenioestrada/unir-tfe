@@ -1,0 +1,370 @@
+@page "/join/{roomCode}"
+@rendermode InteractiveServer
+@using Microsoft.AspNetCore.SignalR.Client
+@implements IAsyncDisposable
+
+<PageTitle>Unirse a la sala</PageTitle>
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="mb-0">Unirse a la sala</h3>
+                </div>
+                <div class="card-body">
+                    @if (_room is null && !_isLoading)
+                    {
+                        <div class="alert alert-danger" role="alert">
+                            <strong>Sala no encontrada</strong>
+                            <p class="mb-0">El código de sala "@RoomCode" no existe o ya no está disponible.</p>
+                        </div>
+                    }
+                    else if (_isLoading)
+                    {
+                        <div class="text-center py-4">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Cargando...</span>
+                            </div>
+                            <p class="mt-2">Verificando sala...</p>
+                        </div>
+                    }
+                    else if (_hasJoined)
+                    {
+                        <div class="alert alert-success" role="alert">
+                            <strong>¡Bienvenido!</strong>
+                            <p class="mb-0">Te has unido a la sala con el alias <strong>@_playerAlias</strong>.</p>
+                        </div>
+                        <div class="alert alert-info" role="alert">
+                            <p class="mb-0">
+                                Jugadores en la sala: <strong>@_room!.Players.Count</strong>
+                                @if (_hubConnection?.State == HubConnectionState.Connected)
+                                {
+                                    <span class="badge bg-success ms-2">● Conectado</span>
+                                }
+                                else if (_isReconnecting)
+                                {
+                                    <span class="badge bg-warning ms-2">● Reconectando...</span>
+                                }
+                            </p>
+                            @if (!_room.CanStartGame)
+                            {
+                                <p class="mb-0 mt-2">
+                                    <small>Esperando al menos @Room.MinPlayers jugadores para iniciar (@(_room.Players.Count)/@Room.MinPlayers)</small>
+                                </p>
+                            }
+                            else
+                            {
+                                <p class="mb-0 mt-2 text-success">
+                                    <small>✓ La partida puede iniciarse</small>
+                                </p>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="mb-3">
+                            <p>Código de sala: <strong class="text-primary">@RoomCode</strong></p>
+                            <p class="text-muted">Modo: @_room!.Mode</p>
+                        </div>
+
+                        @if (_errorMessage is not null)
+                        {
+                            <div class="alert alert-danger" role="alert">
+                                @_errorMessage
+                            </div>
+                        }
+
+                        <div class="mb-3">
+                            <label for="alias" class="form-label">Tu alias</label>
+                            <input 
+                                type="text" 
+                                class="form-control" 
+                                id="alias" 
+                                @bind="_alias"
+                                @bind:event="oninput"
+                                placeholder="Escribe tu nombre (2-20 caracteres)"
+                                maxlength="20"
+                                disabled="@_isJoining" />
+                            <small class="form-text text-muted">
+                                Los alias deben ser únicos en la sala (sin distinción de mayúsculas/minúsculas).
+                            </small>
+                        </div>
+
+                        <button 
+                            class="btn btn-primary w-100" 
+                            @onclick="JoinRoomAsync" 
+                            disabled="@(_isJoining || string.IsNullOrWhiteSpace(_alias))">
+                            @(_isJoining ? "Uniéndose..." : "Unirse a la sala")
+                        </button>
+                    }
+                </div>
+            </div>
+
+            @if (_hasJoined && _room is not null)
+            {
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h5 class="mb-0">Jugadores en la sala (@_room.Players.Count/@Room.MaxPlayers)</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            @foreach (var player in _room.Players)
+                            {
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    @player.Alias
+                                    @if (player.Alias == _playerAlias)
+                                    {
+                                        <span class="badge bg-primary">Tú</span>
+                                    }
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string RoomCode { get; set; } = default!;
+
+    [Inject]
+    private SignalRRoomService RoomService { get; set; } = default!;
+
+    [Inject]
+    private IRoomRepository RoomRepository { get; set; } = default!;
+
+    [Inject]
+    private NavigationManager NavigationManager { get; set; } = default!;
+
+    private RoomDto? _room;
+    private string _alias = string.Empty;
+    private string? _errorMessage;
+    private bool _isLoading = true;
+    private bool _isJoining;
+    private bool _hasJoined;
+    private string? _playerAlias;
+    private Guid? _playerId;
+    private HubConnection? _hubConnection;
+    private bool _isReconnecting;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadRoomAsync();
+        
+        // Initialize SignalR connection (RF-011, RF-012)
+        await InitializeSignalRConnectionAsync();
+    }
+
+    private async Task LoadRoomAsync()
+    {
+        _isLoading = true;
+        _errorMessage = null;
+
+        try
+        {
+            if (GameTribunal.Domain.ValueObjects.RoomCode.TryFrom(RoomCode, out var code))
+            {
+                var room = await RoomRepository.GetByCodeAsync(code);
+                if (room is not null)
+                {
+                    _room = new RoomDto(
+                        room.Code.Value,
+                        room.Mode,
+                        room.Players.Select(p => new PlayerDto(p.Id, p.Alias)).ToList(),
+                        room.CanStartGame()
+                    );
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"Error al cargar la sala: {ex.Message}";
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task JoinRoomAsync()
+    {
+        if (_isJoining || string.IsNullOrWhiteSpace(_alias))
+        {
+            return;
+        }
+
+        _errorMessage = null;
+        _isJoining = true;
+
+        try
+        {
+            _room = await RoomService.JoinRoomAsync(RoomCode, _alias.Trim());
+            _hasJoined = true;
+            _playerAlias = _alias.Trim();
+            
+            // Find the player ID
+            var player = _room.Players.FirstOrDefault(p => p.Alias == _playerAlias);
+            if (player != null)
+            {
+                _playerId = player.Id;
+                
+                // Store player ID in browser storage for reconnection (RF-012)
+                await StorePlayerIdAsync();
+                
+                // Join SignalR room group (RF-011)
+                if (_hubConnection?.State == HubConnectionState.Connected)
+                {
+                    await _hubConnection.InvokeAsync("JoinRoom", RoomCode, _playerId);
+                }
+            }
+        }
+        catch (InvalidOperationException ex)
+        {
+            if (ex.Message.Contains("already exists"))
+            {
+                _errorMessage = $"El alias '{_alias.Trim()}' ya está en uso en esta sala. Por favor, elige otro.";
+            }
+            else if (ex.Message.Contains("maximum capacity"))
+            {
+                _errorMessage = "La sala está llena. No se pueden agregar más jugadores.";
+            }
+            else
+            {
+                _errorMessage = ex.Message;
+            }
+        }
+        catch (ArgumentException ex)
+        {
+            _errorMessage = $"Alias inválido: {ex.Message}";
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"Error al unirse a la sala: {ex.Message}";
+        }
+        finally
+        {
+            _isJoining = false;
+        }
+    }
+
+    /// <summary>
+    /// Initializes SignalR connection for real-time updates (RF-011, RF-012).
+    /// </summary>
+    private async Task InitializeSignalRConnectionAsync()
+    {
+        _hubConnection = new HubConnectionBuilder()
+            .WithUrl(NavigationManager.ToAbsoluteUri("/gamehub"))
+            .WithAutomaticReconnect() // RF-012: Automatic reconnection
+            .Build();
+
+        // Handle room state updates (RF-011)
+        _hubConnection.On<RoomDto>("RoomStateUpdated", async (roomDto) =>
+        {
+            _room = roomDto;
+            await InvokeAsync(StateHasChanged);
+        });
+
+        // Handle reconnecting state (RF-012)
+        _hubConnection.Reconnecting += error =>
+        {
+            _isReconnecting = true;
+            InvokeAsync(StateHasChanged);
+            return Task.CompletedTask;
+        };
+
+        // Handle reconnected state (RF-012)
+        _hubConnection.Reconnected += async connectionId =>
+        {
+            _isReconnecting = false;
+            
+            // Re-join the room after reconnection
+            if (_hasJoined && _playerId.HasValue)
+            {
+                await _hubConnection.InvokeAsync("JoinRoom", RoomCode, _playerId.Value);
+            }
+            
+            await InvokeAsync(StateHasChanged);
+        };
+
+        // Handle disconnection (RF-012)
+        _hubConnection.Closed += async error =>
+        {
+            _isReconnecting = false;
+            await InvokeAsync(StateHasChanged);
+        };
+
+        try
+        {
+            await _hubConnection.StartAsync();
+            
+            // Check for existing session (RF-012: reconnection support)
+            await CheckExistingSessionAsync();
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"No se pudo conectar al servidor: {ex.Message}";
+        }
+    }
+
+    /// <summary>
+    /// Checks if player has an existing session and can reconnect (RF-012).
+    /// </summary>
+    private async Task CheckExistingSessionAsync()
+    {
+        // Try to retrieve stored player ID
+        var storedPlayerId = await GetStoredPlayerIdAsync();
+        if (storedPlayerId.HasValue && _hubConnection?.State == HubConnectionState.Connected)
+        {
+            var existingRoomCode = await _hubConnection.InvokeAsync<string?>("CheckPlayerSession", storedPlayerId.Value);
+            if (existingRoomCode == RoomCode)
+            {
+                // Player has an existing session in this room, attempt to restore
+                _playerId = storedPlayerId.Value;
+                await _hubConnection.InvokeAsync("JoinRoom", RoomCode, _playerId.Value);
+                
+                // Reload room state
+                await LoadRoomAsync();
+                
+                // Set player info if they're still in the room
+                var player = _room?.Players.FirstOrDefault(p => p.Id == _playerId.Value);
+                if (player != null)
+                {
+                    _hasJoined = true;
+                    _playerAlias = player.Alias;
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Stores player ID in browser session storage for reconnection.
+    /// </summary>
+    private Task StorePlayerIdAsync()
+    {
+        // In a real implementation, use JSInterop to store in sessionStorage
+        // For now, we rely on in-memory state
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// Retrieves stored player ID from browser session storage.
+    /// </summary>
+    private Task<Guid?> GetStoredPlayerIdAsync()
+    {
+        // In a real implementation, use JSInterop to retrieve from sessionStorage
+        // For now, return null
+        return Task.FromResult<Guid?>(null);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_hubConnection is not null)
+        {
+            await _hubConnection.DisposeAsync();
+        }
+    }
+}

@@ -3,128 +3,234 @@
 @using Microsoft.AspNetCore.SignalR.Client
 @implements IAsyncDisposable
 
-<PageTitle>Unirse a la sala</PageTitle>
+<PageTitle>Unirse - Tribunal Social</PageTitle>
 
-<div class="container py-4">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="mb-0">Unirse a la sala</h3>
+<div class="game-container game-animate-fadeIn">
+    <!-- Mobile-optimized header -->
+    <div class="text-center mb-4">
+        <h1 style="font-size: 2.5rem; font-weight: 800; color: var(--color-light); text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+            ⚖️ TRIBUNAL SOCIAL
+        </h1>
+    </div>
+
+    @if (_room is null && !_isLoading)
+    {
+        <!-- Room Not Found -->
+        <div class="game-card">
+            <div class="game-alert game-alert-danger">
+                <span style="font-size: 2rem;">❌</span>
+                <div>
+                    <strong>Sala no encontrada</strong>
+                    <p class="mb-0">
+                        El código "<strong>@RoomCode</strong>" no existe o ya no está disponible.
+                    </p>
                 </div>
-                <div class="card-body">
-                    @if (_room is null && !_isLoading)
-                    {
-                        <div class="alert alert-danger" role="alert">
-                            <strong>Sala no encontrada</strong>
-                            <p class="mb-0">El código de sala "@RoomCode" no existe o ya no está disponible.</p>
-                        </div>
-                    }
-                    else if (_isLoading)
-                    {
-                        <div class="text-center py-4">
-                            <div class="spinner-border text-primary" role="status">
-                                <span class="visually-hidden">Cargando...</span>
-                            </div>
-                            <p class="mt-2">Verificando sala...</p>
-                        </div>
-                    }
-                    else if (_hasJoined)
-                    {
-                        <div class="alert alert-success" role="alert">
-                            <strong>¡Bienvenido!</strong>
-                            <p class="mb-0">Te has unido a la sala con el alias <strong>@_playerAlias</strong>.</p>
-                        </div>
-                        <div class="alert alert-info" role="alert">
-                            <p class="mb-0">
-                                Jugadores en la sala: <strong>@_room!.Players.Count</strong>
-                                @if (_hubConnection?.State == HubConnectionState.Connected)
-                                {
-                                    <span class="badge bg-success ms-2">● Conectado</span>
-                                }
-                                else if (_isReconnecting)
-                                {
-                                    <span class="badge bg-warning ms-2">● Reconectando...</span>
-                                }
-                            </p>
-                            @if (!_room.CanStartGame)
-                            {
-                                <p class="mb-0 mt-2">
-                                    <small>Esperando al menos @Room.MinPlayers jugadores para iniciar (@(_room.Players.Count)/@Room.MinPlayers)</small>
-                                </p>
-                            }
-                            else
-                            {
-                                <p class="mb-0 mt-2 text-success">
-                                    <small>✓ La partida puede iniciarse</small>
-                                </p>
-                            }
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="mb-3">
-                            <p>Código de sala: <strong class="text-primary">@RoomCode</strong></p>
-                            <p class="text-muted">Modo: @_room!.Mode</p>
-                        </div>
-
-                        @if (_errorMessage is not null)
-                        {
-                            <div class="alert alert-danger" role="alert">
-                                @_errorMessage
-                            </div>
-                        }
-
-                        <div class="mb-3">
-                            <label for="alias" class="form-label">Tu alias</label>
-                            <input 
-                                type="text" 
-                                class="form-control" 
-                                id="alias" 
-                                @bind="_alias"
-                                @bind:event="oninput"
-                                placeholder="Escribe tu nombre (2-20 caracteres)"
-                                maxlength="20"
-                                disabled="@_isJoining" />
-                            <small class="form-text text-muted">
-                                Los alias deben ser únicos en la sala (sin distinción de mayúsculas/minúsculas).
-                            </small>
-                        </div>
-
-                        <button 
-                            class="btn btn-primary w-100" 
-                            @onclick="JoinRoomAsync" 
-                            disabled="@(_isJoining || string.IsNullOrWhiteSpace(_alias))">
-                            @(_isJoining ? "Uniéndose..." : "Unirse a la sala")
-                        </button>
-                    }
+            </div>
+            <div class="mt-3 text-center">
+                <a href="/" class="game-btn game-btn-primary game-btn-lg">
+                    <span style="font-size: 1.5rem;">🏠</span>
+                    <span>Volver al Inicio</span>
+                </a>
+            </div>
+        </div>
+    }
+    else if (_isLoading)
+    {
+        <!-- Loading State -->
+        <div class="game-card">
+            <div class="game-loading-container">
+                <div class="game-spinner game-spinner-lg"></div>
+                <p class="game-loading-text">Verificando sala...</p>
+            </div>
+        </div>
+    }
+    else if (_hasJoined)
+    {
+        <!-- Successfully Joined -->
+        <div class="game-card game-animate-fadeIn">
+            <div class="game-alert game-alert-success">
+                <span style="font-size: 2rem;">🎉</span>
+                <div>
+                    <strong>¡Bienvenido/a!</strong>
+                    <p class="mb-0">
+                        Te has unido como <strong>@_playerAlias</strong>
+                    </p>
                 </div>
             </div>
 
-            @if (_hasJoined && _room is not null)
-            {
-                <div class="card mt-3">
-                    <div class="card-header">
-                        <h5 class="mb-0">Jugadores en la sala (@_room.Players.Count/@Room.MaxPlayers)</h5>
-                    </div>
-                    <div class="card-body">
-                        <ul class="list-group list-group-flush">
-                            @foreach (var player in _room.Players)
-                            {
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    @player.Alias
-                                    @if (player.Alias == _playerAlias)
-                                    {
-                                        <span class="badge bg-primary">Tú</span>
-                                    }
-                                </li>
-                            }
-                        </ul>
-                    </div>
+            <div class="mt-4">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h3 style="font-size: 1.5rem; font-weight: 700; margin: 0;">
+                        👥 Sala: @_room!.Code
+                    </h3>
+                    @if (_hubConnection?.State == HubConnectionState.Connected)
+                    {
+                        <span class="game-badge game-badge-success">● En vivo</span>
+                    }
+                    else if (_isReconnecting)
+                    {
+                        <span class="game-badge game-badge-warning">● Reconectando...</span>
+                    }
                 </div>
-            }
+
+                <div class="mb-3">
+                    <span class="game-badge game-badge-lg" 
+                          style="background: @GetModeGradient(_room.Mode)">
+                        @GetModeEmoji(_room.Mode) Modo @_room.Mode
+                    </span>
+                    <span class="game-badge game-badge-lg game-badge-primary ms-2">
+                        @_room.Players.Count / @Room.MaxPlayers jugadores
+                    </span>
+                </div>
+
+                @if (!_room.CanStartGame)
+                {
+                    <div class="game-alert game-alert-info">
+                        <span style="font-size: 1.5rem;">⏳</span>
+                        <div>
+                            <strong>Esperando más jugadores</strong>
+                            <p class="mb-0">
+                                Se necesitan al menos @Room.MinPlayers jugadores 
+                                (@_room.Players.Count/@Room.MinPlayers)
+                            </p>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="game-alert game-alert-success">
+                        <span style="font-size: 1.5rem;">✅</span>
+                        <div>
+                            <strong>¡Listos para empezar!</strong>
+                            <p class="mb-0">El host puede iniciar la partida</p>
+                        </div>
+                    </div>
+                }
+            </div>
         </div>
-    </div>
+
+        <!-- Players List -->
+        <div class="game-card mt-3 game-animate-slideIn">
+            <div class="game-card-header">
+                <h3 class="game-card-title" style="font-size: 1.25rem;">
+                    Jugadores Conectados (@_room!.Players.Count)
+                </h3>
+            </div>
+            <div class="game-card-body">
+                <ul class="game-player-list">
+                    @{
+                        var playerIndex = 0;
+                    }
+                    @foreach (var player in _room.Players)
+                    {
+                        playerIndex++;
+                        <li class="game-player-item">
+                            <div class="d-flex align-items-center gap-2">
+                                <span style="font-size: 1.5rem;">
+                                    @(player.Alias == _playerAlias ? "👤" : "👥")
+                                </span>
+                                <span class="game-player-name">@player.Alias</span>
+                            </div>
+                            @if (player.Alias == _playerAlias)
+                            {
+                                <span class="game-badge game-badge-primary">Tú</span>
+                            }
+                            else
+                            {
+                                <span class="game-badge game-badge-secondary">
+                                    #@playerIndex
+                                </span>
+                            }
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Join Form -->
+        <div class="game-card game-animate-fadeIn">
+            <div class="game-card-header">
+                <h2 class="game-card-title">
+                    🎮 Unirse a la Sala
+                </h2>
+            </div>
+            <div class="game-card-body">
+                <div class="mb-4 text-center">
+                    <div class="game-room-code" style="font-size: 3rem;">
+                        @RoomCode
+                    </div>
+                    <div class="mt-2">
+                        <span class="game-badge game-badge-lg" 
+                              style="background: @GetModeGradient(_room!.Mode)">
+                            @GetModeEmoji(_room.Mode) Modo @_room.Mode
+                        </span>
+                    </div>
+                    <p class="text-muted mt-2" style="font-size: 0.875rem;">
+                        @GetModeDescription(_room.Mode)
+                    </p>
+                </div>
+
+                @if (_errorMessage is not null)
+                {
+                    <div class="game-alert game-alert-danger">
+                        <span style="font-size: 1.5rem;">⚠️</span>
+                        <div>
+                            <strong>Error</strong>
+                            <p class="mb-0">@_errorMessage</p>
+                        </div>
+                    </div>
+                }
+
+                <div class="game-form-group">
+                    <label class="game-label" for="alias">
+                        <span style="font-size: 1.25rem;">👤</span> Tu Alias
+                    </label>
+                    <input 
+                        type="text" 
+                        class="game-input" 
+                        id="alias" 
+                        @bind="_alias"
+                        @bind:event="oninput"
+                        placeholder="Escribe tu nombre..."
+                        maxlength="20"
+                        disabled="@_isJoining"
+                        style="font-size: 1.25rem; padding: 1rem 1.25rem;" />
+                    <small class="text-muted mt-1" style="display: block; font-size: 0.875rem;">
+                        2-20 caracteres. Debe ser único en la sala.
+                    </small>
+                </div>
+
+                <button 
+                    class="game-btn game-btn-primary game-btn-lg game-btn-block" 
+                    @onclick="JoinRoomAsync" 
+                    disabled="@(_isJoining || string.IsNullOrWhiteSpace(_alias))">
+                    @if (_isJoining)
+                    {
+                        <span class="game-spinner"></span>
+                        <span>Uniéndose...</span>
+                    }
+                    else
+                    {
+                        <span style="font-size: 1.5rem;">🚀</span>
+                        <span>Unirse a la Sala</span>
+                    }
+                </button>
+            </div>
+        </div>
+
+        <!-- Info Card -->
+        <div class="game-card mt-3">
+            <div style="text-align: center;">
+                <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📱</div>
+                <h4 style="font-size: 1.125rem; font-weight: 600;">Mantén tu móvil cerca</h4>
+                <p class="text-muted" style="font-size: 0.875rem; margin: 0;">
+                    Usarás tu dispositivo para votar y participar durante la partida
+                </p>
+            </div>
+        </div>
+    }
 </div>
 
 @code {
@@ -158,6 +264,30 @@
         // Initialize SignalR connection (RF-011, RF-012)
         await InitializeSignalRConnectionAsync();
     }
+
+    private string GetModeDescription(GameMode mode) => mode switch
+    {
+        GameMode.Suave => "Casos suaves para conocerse mejor",
+        GameMode.Normal => "Casos equilibrados y divertidos",
+        GameMode.Spicy => "Casos atrevidos para grupos de confianza",
+        _ => ""
+    };
+
+    private string GetModeEmoji(GameMode mode) => mode switch
+    {
+        GameMode.Suave => "😊",
+        GameMode.Normal => "😎",
+        GameMode.Spicy => "🔥",
+        _ => "🎮"
+    };
+
+    private string GetModeGradient(GameMode mode) => mode switch
+    {
+        GameMode.Suave => "linear-gradient(135deg, #06D6A0 0%, #4CC9F0 100%)",
+        GameMode.Normal => "linear-gradient(135deg, #FF6B35 0%, #F72585 100%)",
+        GameMode.Spicy => "linear-gradient(135deg, #F72585 0%, #7209B7 100%)",
+        _ => "linear-gradient(135deg, #FF6B35 0%, #F72585 100%)"
+    };
 
     private async Task LoadRoomAsync()
     {
@@ -226,7 +356,7 @@
         {
             if (ex.Message.Contains("already exists"))
             {
-                _errorMessage = $"El alias '{_alias.Trim()}' ya está en uso en esta sala. Por favor, elige otro.";
+                _errorMessage = $"El alias '{_alias.Trim()}' ya está en uso. Por favor, elige otro.";
             }
             else if (ex.Message.Contains("maximum capacity"))
             {
