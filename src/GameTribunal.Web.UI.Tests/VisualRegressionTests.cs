@@ -1,5 +1,4 @@
 using GameTribunal.Web.UI.Tests.Infrastructure;
-using Microsoft.Playwright;
 
 namespace GameTribunal.Web.UI.Tests;
 
@@ -8,11 +7,10 @@ namespace GameTribunal.Web.UI.Tests;
 /// Takes screenshots and validates visual consistency.
 /// </summary>
 [Collection(TestServerFixture.CollectionName)]
-public class VisualRegressionTests : PlaywrightTest
+public class VisualRegressionTests(TestServerFixture serverFixture) : PlaywrightTest(serverFixture)
 {
-    public VisualRegressionTests(TestServerFixture serverFixture) : base(serverFixture)
-    {
-    }
+    private const int WAIT_FOR_TIMEOUT = 300;
+
     [Fact]
     // Captures screenshot of the lobby page for visual validation
     public async Task LobbyPage_ShouldLookStunning()
@@ -20,7 +18,7 @@ public class VisualRegressionTests : PlaywrightTest
         await Page.GotoAsync("/");
         
         // Wait for animations to complete
-        await Page.WaitForTimeoutAsync(1000);
+        await Page.WaitForTimeoutAsync(WAIT_FOR_TIMEOUT);
 
         // Take full page screenshot
         await Page.ScreenshotAsync(new PageScreenshotOptions
@@ -40,7 +38,7 @@ public class VisualRegressionTests : PlaywrightTest
         await Page.SetViewportSizeAsync(375, 667);
         await Page.GotoAsync("/");
         
-        await Page.WaitForTimeoutAsync(1000);
+        await Page.WaitForTimeoutAsync(WAIT_FOR_TIMEOUT);
 
         await Page.ScreenshotAsync(new PageScreenshotOptions
         {
@@ -58,7 +56,7 @@ public class VisualRegressionTests : PlaywrightTest
         await Page.SetViewportSizeAsync(768, 1024);
         await Page.GotoAsync("/");
         
-        await Page.WaitForTimeoutAsync(1000);
+        await Page.WaitForTimeoutAsync(WAIT_FOR_TIMEOUT);
 
         await Page.ScreenshotAsync(new PageScreenshotOptions
         {
@@ -80,7 +78,7 @@ public class VisualRegressionTests : PlaywrightTest
         await createButton.ClickAsync();
         
         // Wait for room creation and QR code rendering
-        await Page.WaitForTimeoutAsync(3000);
+        await Page.WaitForTimeoutAsync(WAIT_FOR_TIMEOUT);
 
         await Page.ScreenshotAsync(new PageScreenshotOptions
         {
@@ -100,7 +98,7 @@ public class VisualRegressionTests : PlaywrightTest
 
         var createButton = Page.Locator("button:has-text('Crear Sala')");
         await createButton.ClickAsync();
-        await Page.WaitForTimeoutAsync(3000);
+        await Page.WaitForTimeoutAsync(WAIT_FOR_TIMEOUT);
 
         await Page.ScreenshotAsync(new PageScreenshotOptions
         {
@@ -116,7 +114,7 @@ public class VisualRegressionTests : PlaywrightTest
     public async Task HeroSection_ShouldLookStunning()
     {
         await Page.GotoAsync("/");
-        await Page.WaitForTimeoutAsync(1000);
+        await Page.WaitForTimeoutAsync(WAIT_FOR_TIMEOUT);
 
         var hero = Page.Locator(".game-hero");
         await Expect(hero).ToBeVisibleAsync();
@@ -134,7 +132,7 @@ public class VisualRegressionTests : PlaywrightTest
     public async Task GameCards_ShouldLookStunning()
     {
         await Page.GotoAsync("/");
-        await Page.WaitForTimeoutAsync(1000);
+        await Page.WaitForTimeoutAsync(WAIT_FOR_TIMEOUT);
 
         var card = Page.Locator(".game-card").First;
         await Expect(card).ToBeVisibleAsync();
@@ -152,7 +150,7 @@ public class VisualRegressionTests : PlaywrightTest
     public async Task PrimaryButton_ShouldLookStunning()
     {
         await Page.GotoAsync("/");
-        await Page.WaitForTimeoutAsync(1000);
+        await Page.WaitForTimeoutAsync(WAIT_FOR_TIMEOUT);
 
         var button = Page.Locator(".game-btn-primary").First;
         await Expect(button).ToBeVisibleAsync();
@@ -170,14 +168,14 @@ public class VisualRegressionTests : PlaywrightTest
     public async Task ButtonHover_ShouldLookStunning()
     {
         await Page.GotoAsync("/");
-        await Page.WaitForTimeoutAsync(1000);
+        await Page.WaitForTimeoutAsync(WAIT_FOR_TIMEOUT);
 
         var button = Page.Locator(".game-btn-primary").First;
         await Expect(button).ToBeVisibleAsync();
 
         // Hover over button
         await button.HoverAsync();
-        await Page.WaitForTimeoutAsync(300);
+        await Page.WaitForTimeoutAsync(WAIT_FOR_TIMEOUT);
 
         await button.ScreenshotAsync(new LocatorScreenshotOptions
         {
@@ -192,7 +190,7 @@ public class VisualRegressionTests : PlaywrightTest
     public async Task HomePage_ShouldLookStunning()
     {
         await Page.GotoAsync("/home");
-        await Page.WaitForTimeoutAsync(1000);
+        await Page.WaitForTimeoutAsync(WAIT_FOR_TIMEOUT);
 
         await Page.ScreenshotAsync(new PageScreenshotOptions
         {

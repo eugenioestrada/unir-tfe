@@ -1,5 +1,4 @@
 using GameTribunal.Web.UI.Tests.Infrastructure;
-using Microsoft.Playwright;
 
 namespace GameTribunal.Web.UI.Tests;
 
@@ -8,11 +7,9 @@ namespace GameTribunal.Web.UI.Tests;
 /// Validates mobile, tablet, desktop, and TV (10-foot UI) experiences.
 /// </summary>
 [Collection(TestServerFixture.CollectionName)]
-public class ResponsiveDesignTests : PlaywrightTest
+public class ResponsiveDesignTests(TestServerFixture serverFixture) : PlaywrightTest(serverFixture)
 {
-    public ResponsiveDesignTests(TestServerFixture serverFixture) : base(serverFixture)
-    {
-    }
+    private const int WAIT_FOR_TIMEOUT = 300;
 
     [Fact]
     // Validates design on mobile portrait (375x667 - iPhone SE)
@@ -121,7 +118,7 @@ public class ResponsiveDesignTests : PlaywrightTest
         // Verify QR code is prominently displayed
         var createButton = Page.Locator("button:has-text('Crear Sala')");
         await createButton.ClickAsync();
-        await Page.WaitForTimeoutAsync(2000);
+        await Page.WaitForTimeoutAsync(WAIT_FOR_TIMEOUT);
 
         var qrImage = Page.Locator(".game-qr-image img");
         if (await qrImage.CountAsync() > 0)
@@ -152,7 +149,7 @@ public class ResponsiveDesignTests : PlaywrightTest
         // Verify room code is extra large for TV display
         var createButton = Page.Locator("button:has-text('Crear Sala')");
         await createButton.ClickAsync();
-        await Page.WaitForTimeoutAsync(2000);
+        await Page.WaitForTimeoutAsync(WAIT_FOR_TIMEOUT);
 
         var roomCode = Page.Locator(".game-room-code");
         if (await roomCode.CountAsync() > 0)
@@ -203,7 +200,7 @@ public class ResponsiveDesignTests : PlaywrightTest
             // Create room to see QR code
             var createButton = Page.Locator("button:has-text('Crear Sala')");
             await createButton.ClickAsync();
-            await Page.WaitForTimeoutAsync(2000);
+            await Page.WaitForTimeoutAsync(WAIT_FOR_TIMEOUT);
 
             var qrImage = Page.Locator(".game-qr-image img");
             if (await qrImage.CountAsync() > 0)

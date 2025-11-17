@@ -7,11 +7,10 @@ namespace GameTribunal.Web.UI.Tests;
 /// These tests ensure visual consistency, accessibility, and stunning aesthetics.
 /// </summary>
 [Collection(TestServerFixture.CollectionName)]
-public class DesignSystemTests : PlaywrightTest
+public class DesignSystemTests(TestServerFixture serverFixture) : PlaywrightTest(serverFixture)
 {
-    public DesignSystemTests(TestServerFixture serverFixture) : base(serverFixture)
-    {
-    }
+    private const int WAIT_FOR_TIMEOUT = 300;
+
     [Fact]
     // Validates that the hero section has impressive visual effects
     public async Task HeroSection_ShouldHaveStunningVisualEffects()
@@ -55,7 +54,7 @@ public class DesignSystemTests : PlaywrightTest
         await primaryButton.HoverAsync();
 
         // Wait a bit for animation
-        await Page.WaitForTimeoutAsync(300);
+        await Page.WaitForTimeoutAsync(WAIT_FOR_TIMEOUT);
 
         // Get transform after hover
         var hoverTransform = await WaitForComputedStyleAsync(primaryButton, "transform");
@@ -251,7 +250,7 @@ public class DesignSystemTests : PlaywrightTest
 
         // Focus the button
         await button.FocusAsync();
-        await Page.WaitForTimeoutAsync(100);
+        await Page.WaitForTimeoutAsync(WAIT_FOR_TIMEOUT);
 
         // Check for outline or box-shadow on focus
         var outline = await button.EvaluateAsync<string>("el => window.getComputedStyle(el).outline");
@@ -272,7 +271,7 @@ public class DesignSystemTests : PlaywrightTest
         await createButton.ClickAsync();
 
         // Wait for room creation
-        await Page.WaitForTimeoutAsync(2000);
+        await Page.WaitForTimeoutAsync(WAIT_FOR_TIMEOUT);
 
         var qrContainer = Page.Locator(".game-qr-container");
         if (await qrContainer.CountAsync() > 0)

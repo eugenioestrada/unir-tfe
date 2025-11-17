@@ -1,5 +1,4 @@
 using GameTribunal.Web.UI.Tests.Infrastructure;
-using Microsoft.Playwright;
 
 namespace GameTribunal.Web.UI.Tests;
 
@@ -8,11 +7,9 @@ namespace GameTribunal.Web.UI.Tests;
 /// Ensures the stunning design is also inclusive and accessible to all users.
 /// </summary>
 [Collection(TestServerFixture.CollectionName)]
-public class AccessibilityTests : PlaywrightTest
+public class AccessibilityTests(TestServerFixture serverFixture) : PlaywrightTest(serverFixture)
 {
-    public AccessibilityTests(TestServerFixture serverFixture) : base(serverFixture)
-    {
-    }
+    private const int WAIT_FOR_TIMEOUT = 300;
 
     [Fact]
     // Validates that color contrast meets WCAG AA standards
@@ -51,7 +48,7 @@ public class AccessibilityTests : PlaywrightTest
 
         // Tab through interactive elements
         await Page.Keyboard.PressAsync("Tab");
-        await Page.WaitForTimeoutAsync(100);
+        await Page.WaitForTimeoutAsync(WAIT_FOR_TIMEOUT);
 
         // Verify focus is visible
         var focusedElement = await Page.EvaluateAsync<string>("document.activeElement.tagName");
@@ -89,7 +86,7 @@ public class AccessibilityTests : PlaywrightTest
         // Create room to see QR code
         var createButton = Page.Locator("button:has-text('Crear Sala')");
         await createButton.ClickAsync();
-        await Page.WaitForTimeoutAsync(2000);
+        await Page.WaitForTimeoutAsync(WAIT_FOR_TIMEOUT);
 
         var images = await Page.Locator("img").AllAsync();
         
@@ -213,7 +210,7 @@ public class AccessibilityTests : PlaywrightTest
 
         // Increase font size by 200% (WCAG requirement)
         await Page.EvaluateAsync("document.documentElement.style.fontSize = '32px'");
-        await Page.WaitForTimeoutAsync(500);
+        await Page.WaitForTimeoutAsync(WAIT_FOR_TIMEOUT);
 
         // Check that content doesn't overflow
         var hasHorizontalScroll = await Page.EvaluateAsync<bool>(
