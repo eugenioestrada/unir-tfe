@@ -6,6 +6,8 @@
 - Preserve asynchronous patterns: propagate `CancellationToken` parameters and call `ConfigureAwait(false)` inside non-UI libraries.
 - Use constructor injection and guard clauses (`ArgumentNullException`) for required dependencies.
 - Model DTOs as `record` types and keep business logic inside domain entities or services, not DTOs.
+- Comment method signatures with XML documentation comments and add explanatory comments wherever future reviews may require additional context.
+- Follow Clean Code principles across the entire codebase.
 
 ## Architecture Reminders
 - Respect the layered layout described in `docs/architecture.md`: Domain → Application → Infrastructure → Web. Infrastructure implementations should be consumed via interfaces declared in the Application layer.
