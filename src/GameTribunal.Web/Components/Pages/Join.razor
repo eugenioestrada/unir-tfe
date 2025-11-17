@@ -1,5 +1,7 @@
 @page "/join/{roomCode}"
 @rendermode InteractiveServer
+@using Microsoft.AspNetCore.SignalR.Client
+@implements IAsyncDisposable
 
 <PageTitle>Unirse a la sala</PageTitle>
 
@@ -34,7 +36,17 @@
                             <p class="mb-0">Te has unido a la sala con el alias <strong>@_playerAlias</strong>.</p>
                         </div>
                         <div class="alert alert-info" role="alert">
-                            <p class="mb-0">Jugadores en la sala: <strong>@_room!.Players.Count</strong></p>
+                            <p class="mb-0">
+                                Jugadores en la sala: <strong>@_room!.Players.Count</strong>
+                                @if (_hubConnection?.State == HubConnectionState.Connected)
+                                {
+                                    <span class="badge bg-success ms-2">● Conectado</span>
+                                }
+                                else if (_isReconnecting)
+                                {
+                                    <span class="badge bg-warning ms-2">● Reconectando...</span>
+                                }
+                            </p>
                             @if (!_room.CanStartGame)
                             {
                                 <p class="mb-0 mt-2">
@@ -120,10 +132,13 @@
     public string RoomCode { get; set; } = default!;
 
     [Inject]
-    private RoomService RoomService { get; set; } = default!;
+    private SignalRRoomService RoomService { get; set; } = default!;
 
     [Inject]
     private IRoomRepository RoomRepository { get; set; } = default!;
+
+    [Inject]
+    private NavigationManager NavigationManager { get; set; } = default!;
 
     private RoomDto? _room;
     private string _alias = string.Empty;
@@ -132,10 +147,16 @@
     private bool _isJoining;
     private bool _hasJoined;
     private string? _playerAlias;
+    private Guid? _playerId;
+    private HubConnection? _hubConnection;
+    private bool _isReconnecting;
 
     protected override async Task OnInitializedAsync()
     {
         await LoadRoomAsync();
+        
+        // Initialize SignalR connection (RF-011, RF-012)
+        await InitializeSignalRConnectionAsync();
     }
 
     private async Task LoadRoomAsync()
@@ -184,6 +205,22 @@
             _room = await RoomService.JoinRoomAsync(RoomCode, _alias.Trim());
             _hasJoined = true;
             _playerAlias = _alias.Trim();
+            
+            // Find the player ID
+            var player = _room.Players.FirstOrDefault(p => p.Alias == _playerAlias);
+            if (player != null)
+            {
+                _playerId = player.Id;
+                
+                // Store player ID in browser storage for reconnection (RF-012)
+                await StorePlayerIdAsync();
+                
+                // Join SignalR room group (RF-011)
+                if (_hubConnection?.State == HubConnectionState.Connected)
+                {
+                    await _hubConnection.InvokeAsync("JoinRoom", RoomCode, _playerId);
+                }
+            }
         }
         catch (InvalidOperationException ex)
         {
@@ -211,6 +248,123 @@
         finally
         {
             _isJoining = false;
+        }
+    }
+
+    /// <summary>
+    /// Initializes SignalR connection for real-time updates (RF-011, RF-012).
+    /// </summary>
+    private async Task InitializeSignalRConnectionAsync()
+    {
+        _hubConnection = new HubConnectionBuilder()
+            .WithUrl(NavigationManager.ToAbsoluteUri("/gamehub"))
+            .WithAutomaticReconnect() // RF-012: Automatic reconnection
+            .Build();
+
+        // Handle room state updates (RF-011)
+        _hubConnection.On<RoomDto>("RoomStateUpdated", async (roomDto) =>
+        {
+            _room = roomDto;
+            await InvokeAsync(StateHasChanged);
+        });
+
+        // Handle reconnecting state (RF-012)
+        _hubConnection.Reconnecting += error =>
+        {
+            _isReconnecting = true;
+            InvokeAsync(StateHasChanged);
+            return Task.CompletedTask;
+        };
+
+        // Handle reconnected state (RF-012)
+        _hubConnection.Reconnected += async connectionId =>
+        {
+            _isReconnecting = false;
+            
+            // Re-join the room after reconnection
+            if (_hasJoined && _playerId.HasValue)
+            {
+                await _hubConnection.InvokeAsync("JoinRoom", RoomCode, _playerId.Value);
+            }
+            
+            await InvokeAsync(StateHasChanged);
+        };
+
+        // Handle disconnection (RF-012)
+        _hubConnection.Closed += async error =>
+        {
+            _isReconnecting = false;
+            await InvokeAsync(StateHasChanged);
+        };
+
+        try
+        {
+            await _hubConnection.StartAsync();
+            
+            // Check for existing session (RF-012: reconnection support)
+            await CheckExistingSessionAsync();
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"No se pudo conectar al servidor: {ex.Message}";
+        }
+    }
+
+    /// <summary>
+    /// Checks if player has an existing session and can reconnect (RF-012).
+    /// </summary>
+    private async Task CheckExistingSessionAsync()
+    {
+        // Try to retrieve stored player ID
+        var storedPlayerId = await GetStoredPlayerIdAsync();
+        if (storedPlayerId.HasValue && _hubConnection?.State == HubConnectionState.Connected)
+        {
+            var existingRoomCode = await _hubConnection.InvokeAsync<string?>("CheckPlayerSession", storedPlayerId.Value);
+            if (existingRoomCode == RoomCode)
+            {
+                // Player has an existing session in this room, attempt to restore
+                _playerId = storedPlayerId.Value;
+                await _hubConnection.InvokeAsync("JoinRoom", RoomCode, _playerId.Value);
+                
+                // Reload room state
+                await LoadRoomAsync();
+                
+                // Set player info if they're still in the room
+                var player = _room?.Players.FirstOrDefault(p => p.Id == _playerId.Value);
+                if (player != null)
+                {
+                    _hasJoined = true;
+                    _playerAlias = player.Alias;
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Stores player ID in browser session storage for reconnection.
+    /// </summary>
+    private Task StorePlayerIdAsync()
+    {
+        // In a real implementation, use JSInterop to store in sessionStorage
+        // For now, we rely on in-memory state
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// Retrieves stored player ID from browser session storage.
+    /// </summary>
+    private Task<Guid?> GetStoredPlayerIdAsync()
+    {
+        // In a real implementation, use JSInterop to retrieve from sessionStorage
+        // For now, return null
+        return Task.FromResult<Guid?>(null);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_hubConnection is not null)
+        {
+            await _hubConnection.DisposeAsync();
         }
     }
 }
