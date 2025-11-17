@@ -1,7 +1,91 @@
 ﻿@page "/home"
 
-<PageTitle>Acerca</PageTitle>
+<PageTitle>Acerca - Tribunal Social</PageTitle>
 
-<h1>Tribunal Social</h1>
+<div class="game-container game-animate-fadeIn">
+    <!-- Hero Section -->
+    <div class="game-hero">
+        <div class="game-hero-content">
+            <h1 class="game-title">⚖️ TRIBUNAL SOCIAL</h1>
+            <p class="game-subtitle">
+                El juego social definitivo para grupos de amigos
+            </p>
+        </div>
+    </div>
 
-<p>Esta sección contendrá información sobre el proyecto. La vista principal está en el lobby.</p>
+    <GameCard>
+        <Header>
+            <h2 class="game-card-title">📖 Acerca del Juego</h2>
+        </Header>
+        <Body>
+            <GameStack Direction="vertical" Gap="3">
+                <p style="font-size: var(--font-size-lg); line-height: 1.6;">
+                    <strong>Tribunal Social</strong> es un juego social de salón pensado para grupos de 
+                    <strong>4 a 16 jugadores</strong> que comparten una misma sala física.
+                </p>
+
+                <div>
+                    <h3 style="font-size: var(--font-size-xl); margin-bottom: var(--space-sm);">
+                        🎮 Cómo se Juega
+                    </h3>
+                    <p style="line-height: 1.6;">
+                        El juego plantea casos o situaciones sociales en los que los jugadores acusan 
+                        en secreto a quien creen que encaja mejor en cada caso, realizan apuestas sobre 
+                        qué decidirá la mayoría, y resuelven defensas y contraacusaciones.
+                    </p>
+                </div>
+
+                <div>
+                    <h3 style="font-size: var(--font-size-xl); margin-bottom: var(--space-sm);">
+                        🎯 Características
+                    </h3>
+                    <ul class="game-player-list" style="list-style: none;">
+                        <li class="game-player-item" style="margin-bottom: var(--space-sm);">
+                            <div class="d-flex align-items-center gap-2">
+                                <span style="font-size: 1.5rem;">📱</span>
+                                <span class="game-player-name">Sin instalación - Solo navegador web</span>
+                            </div>
+                            <GameBadge Variant="success">Zero-install</GameBadge>
+                        </li>
+                        <li class="game-player-item" style="margin-bottom: var(--space-sm);">
+                            <div class="d-flex align-items-center gap-2">
+                                <span style="font-size: 1.5rem;">👥</span>
+                                <span class="game-player-name">4-16 jugadores simultáneos</span>
+                            </div>
+                            <GameBadge Variant="primary">Multijugador</GameBadge>
+                        </li>
+                        <li class="game-player-item" style="margin-bottom: var(--space-sm);">
+                            <div class="d-flex align-items-center gap-2">
+                                <span style="font-size: 1.5rem;">🔥</span>
+                                <span class="game-player-name">3 modos de juego (Suave, Normal, Spicy)</span>
+                            </div>
+                            <GameBadge Variant="secondary">Variedad</GameBadge>
+                        </li>
+                        <li class="game-player-item">
+                            <div class="d-flex align-items-center gap-2">
+                                <span style="font-size: 1.5rem;">🏆</span>
+                                <span class="game-player-name">Sistema de títulos sociales</span>
+                            </div>
+                            <GameBadge Variant="warning">Competitivo</GameBadge>
+                        </li>
+                    </ul>
+                </div>
+
+                <GameAlert Variant="info">
+                    <Title>Vista Principal</Title>
+                    <Message>
+                        La vista principal del juego está en el <a href="/" class="text-primary font-bold">Lobby</a>. 
+                        ¡Comienza creando una nueva sala!
+                    </Message>
+                </GameAlert>
+
+                <div class="text-center">
+                    <a href="/" class="game-btn game-btn-primary game-btn-lg">
+                        <span style="font-size: 1.5rem;">🚀</span>
+                        <span>Ir al Lobby</span>
+                    </a>
+                </div>
+            </GameStack>
+        </Body>
+    </GameCard>
+</div>
