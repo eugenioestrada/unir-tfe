@@ -6,7 +6,7 @@ namespace GameTribunal.UI.Tests;
 /// </summary>
 [Parallelizable(ParallelScope.Self)]
 [TestFixture]
-public class ResponsiveDesignTests : PageTest
+public class ResponsiveDesignTests : PlaywrightTest
 {
     private const string BaseUrl = "https://localhost:7000";
 

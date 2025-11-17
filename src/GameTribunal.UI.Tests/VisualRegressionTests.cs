@@ -1,3 +1,5 @@
+using Microsoft.Playwright;
+
 namespace GameTribunal.UI.Tests;
 
 /// <summary>
@@ -6,7 +8,7 @@ namespace GameTribunal.UI.Tests;
 /// </summary>
 [Parallelizable(ParallelScope.Self)]
 [TestFixture]
-public class VisualRegressionTests : PageTest
+public class VisualRegressionTests : PlaywrightTest
 {
     private const string BaseUrl = "https://localhost:7000";
 
