@@ -9,8 +9,7 @@ namespace GameTribunal.Web.UI.Tests;
 public class AccessibilityTests : PlaywrightTest
 {
     private const string BaseUrl = "https://localhost:7000";
-
-                [Fact]
+    [Fact]
     // Validates that color contrast meets WCAG AA standards
     public async Task ColorContrast_ShouldMeetWCAGStandards()
     {
@@ -24,8 +23,8 @@ public class AccessibilityTests : PlaywrightTest
         var titleBackground = await title.EvaluateAsync<string>(
             "el => { let parent = el.parentElement; while (parent) { const bg = window.getComputedStyle(parent).backgroundColor; if (bg !== 'rgba(0, 0, 0, 0)') return bg; parent = parent.parentElement; } return 'rgb(0, 0, 0)'; }");
 
-        // TODO: Convert to xUnit - Assert.That(titleColor, Is.Not.Empty, "Title should have a defined color");
-        // TODO: Convert to xUnit - Assert.That(titleBackground, Is.Not.Empty, "Title should have a background (even if inherited)");
+        Assert.NotEmpty(titleColor);
+        Assert.NotEmpty(titleBackground);
 
         // Test button contrast
         var button = Page.Locator(".game-btn-primary").First;
@@ -34,9 +33,8 @@ public class AccessibilityTests : PlaywrightTest
             var buttonColor = await button.EvaluateAsync<string>("el => window.getComputedStyle(el).color");
             var buttonBackground = await button.EvaluateAsync<string>("el => window.getComputedStyle(el).backgroundColor");
 
-            // TODO: Convert to xUnit - Assert.That(buttonColor, Is.Not.Empty, "Button text should have a defined color");
-            Assert.NotEqual("rgba(0, 0, 0, 0, buttonBackground)"), 
-                "Button should have a solid background color for contrast");
+            Assert.NotEmpty(buttonColor);
+            Assert.NotEqual("rgba(0, 0, 0, 0)", buttonBackground);
         }
     }
 
@@ -52,16 +50,14 @@ public class AccessibilityTests : PlaywrightTest
 
         // Verify focus is visible
         var focusedElement = await Page.EvaluateAsync<string>("document.activeElement.tagName");
-        Assert.NotEqual("BODY", focusedElement), 
-            "Tab should move focus to an interactive element");
+        Assert.NotEqual("BODY", focusedElement);
 
         // Verify focus indicator is visible
         var focusedOutline = await Page.EvaluateAsync<string>("window.getComputedStyle(document.activeElement).outline");
         var focusedBoxShadow = await Page.EvaluateAsync<string>("window.getComputedStyle(document.activeElement).boxShadow");
 
         var hasFocusIndicator = focusedOutline != "none" || focusedBoxShadow.Contains("rgb");
-        // TODO: Convert to xUnit - Assert.That(hasFocusIndicator, Is.True, 
-            "Focused element should have a visible focus indicator");
+        Assert.True(hasFocusIndicator);
     }
 
     [Fact]
@@ -72,12 +68,11 @@ public class AccessibilityTests : PlaywrightTest
 
         // Check for proper heading hierarchy
         var h1Count = await Page.Locator("h1").CountAsync();
-        Assert.True(h1Count > 0), "Page should have at least one h1 element");
+        Assert.True(h1Count > 0);
 
         // Check for proper button elements (not divs with click handlers)
         var allButtons = await Page.Locator("button, a.game-btn").AllAsync();
-        Assert.True(allButtons.Count > 0), 
-            "Interactive elements should use proper button or link elements");
+        Assert.True(allButtons.Count > 0);
     }
 
     [Fact]
@@ -96,8 +91,7 @@ public class AccessibilityTests : PlaywrightTest
         foreach (var image in images)
         {
             var alt = await image.GetAttributeAsync("alt");
-            // TODO: Convert to xUnit - Assert.That(alt, Is.Not.Null.And.Not.Empty, 
-                "All images should have descriptive alt text for accessibility");
+            Assert.False(string.IsNullOrEmpty(alt));
             break; // Test first image only
         }
     }
@@ -109,10 +103,9 @@ public class AccessibilityTests : PlaywrightTest
         await Page.GotoAsync($"{BaseUrl}/");
 
         var title = await Page.TitleAsync();
-        // TODO: Convert to xUnit - Assert.That(title, Is.Not.Empty, "Page should have a title");
-        Assert.True(title.Length > 5), "Page title should be descriptive");
-        Assert.Contains("Pandorium", title).Or.Contain("Lobby"), 
-            "Page title should be relevant to the content");
+        Assert.NotEmpty(title);
+        Assert.True(title.Length > 5);
+        Assert.True(title.Contains("Pandorium") || title.Contains("Lobby"));
     }
 
     [Fact]
@@ -130,8 +123,7 @@ public class AccessibilityTests : PlaywrightTest
             {
                 var label = Page.Locator($"label[for='{id}']");
                 var labelExists = await label.CountAsync() > 0;
-                // TODO: Convert to xUnit - Assert.That(labelExists, Is.True, 
-                    $"Select element with id '{id}' should have an associated label");
+                Assert.True(labelExists);
             }
             break; // Test first select only
         }
@@ -154,10 +146,8 @@ public class AccessibilityTests : PlaywrightTest
                 var opacity = await button.EvaluateAsync<string>("el => window.getComputedStyle(el).opacity");
                 var cursor = await button.EvaluateAsync<string>("el => window.getComputedStyle(el).cursor");
 
-                Assert.NotEqual("1", opacity), 
-                    "Disabled buttons should have reduced opacity");
-                Assert.Contains("not-allowed", cursor).Or.Contain("default"), 
-                    "Disabled buttons should show not-allowed cursor");
+                Assert.NotEqual("1", opacity);
+                Assert.True(cursor.Contains("not-allowed") || cursor.Contains("default"));
                 break;
             }
         }
@@ -176,8 +166,7 @@ public class AccessibilityTests : PlaywrightTest
         {
             // Verify modal has proper ARIA attributes
             var role = await modals[0].GetAttributeAsync("role");
-            Assert.Equal("dialog", role).Or.EqualTo("alertdialog"), 
-                "Modals should have proper ARIA role");
+            Assert.True(role == "dialog" || role == "alertdialog");
         }
     }
 
@@ -198,8 +187,7 @@ public class AccessibilityTests : PlaywrightTest
             }
             """);
 
-        // TODO: Convert to xUnit - Assert.That(hasReducedMotionSupport, Is.True,
-            "Page should support prefers-reduced-motion media query");
+        Assert.True(hasReducedMotionSupport);
 
         // Verify animations exist normally
         var animatedElement = Page.Locator(".game-animate-fadeIn").First;
@@ -226,13 +214,11 @@ public class AccessibilityTests : PlaywrightTest
         var hasHorizontalScroll = await Page.EvaluateAsync<bool>(
             "document.documentElement.scrollWidth > document.documentElement.clientWidth");
         
-        // TODO: Convert to xUnit - Assert.That(hasHorizontalScroll, Is.False, 
-            "Page should not have horizontal scroll when text is enlarged");
+        Assert.False(hasHorizontalScroll);
 
         // Verify container expands to accommodate larger text
         var newContainerHeight = await Page.Locator(".game-container").EvaluateAsync<double>("el => el.offsetHeight");
-        Assert.True(newContainerHeight >= containerHeight), 
-            "Container should expand to accommodate larger text");
+        Assert.True(newContainerHeight >= containerHeight);
     }
 
     [Fact]
@@ -253,8 +239,7 @@ public class AccessibilityTests : PlaywrightTest
                 var className = await alert.GetAttributeAsync("class");
                 
                 var isAccessible = role == "alert" || (className?.Contains("game-alert") ?? false);
-                // TODO: Convert to xUnit - Assert.That(isAccessible, Is.True, 
-                    "Alert messages should have proper ARIA role or semantic class");
+                Assert.True(isAccessible);
                 
                 break; // Test first alert only
             }

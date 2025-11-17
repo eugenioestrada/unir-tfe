@@ -22,6 +22,7 @@
   <ItemGroup>
     <Using Include="Xunit" />
     <Using Include="Microsoft.Playwright" />
+    <Using Include="Microsoft.Playwright.Assertions" Static="true" />
     <Using Include="System.Text.RegularExpressions" />
     <Using Include="System.Threading.Tasks" />
   </ItemGroup>

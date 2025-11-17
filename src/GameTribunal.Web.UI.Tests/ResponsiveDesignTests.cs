@@ -22,20 +22,18 @@ public class ResponsiveDesignTests : PlaywrightTest
         await Expect(hero).ToBeVisibleAsync();
 
         var heroPadding = await hero.EvaluateAsync<string>("el => window.getComputedStyle(el).padding");
-        // TODO: Convert to xUnit - Assert.That(heroPadding, Is.Not.Empty, "Hero should have appropriate padding on mobile");
+        Assert.NotEmpty(heroPadding);
 
         // Verify title is readable
         var title = Page.Locator(".game-title");
         var fontSize = await title.EvaluateAsync<string>("el => window.getComputedStyle(el).fontSize");
         var fontSizeValue = double.Parse(fontSize.Replace("px", ""));
-        Assert.True(fontSizeValue >= 24), 
-            "Title should be readable on mobile (>=24px)");
+        Assert.True(fontSizeValue >= 24);
 
         // Verify buttons are touch-friendly
         var button = Page.Locator(".game-btn").First;
         var buttonHeight = await button.EvaluateAsync<double>("el => el.offsetHeight");
-        Assert.True(buttonHeight >= 48), 
-            "Buttons should meet minimum touch target size (48px) on mobile");
+        Assert.True(buttonHeight >= 48);
 
         // Verify cards stack vertically
         var cards = Page.Locator(".game-card");
@@ -44,8 +42,7 @@ public class ResponsiveDesignTests : PlaywrightTest
         {
             var firstCardBottom = await cards.Nth(0).EvaluateAsync<double>("el => el.getBoundingClientRect().bottom");
             var secondCardTop = await cards.Nth(1).EvaluateAsync<double>("el => el.getBoundingClientRect().top");
-            Assert.True(secondCardTop >= firstCardBottom - 5), 
-                "Cards should stack vertically on mobile");
+            Assert.True(secondCardTop >= firstCardBottom - 5);
         }
     }
 
@@ -61,14 +58,13 @@ public class ResponsiveDesignTests : PlaywrightTest
 
         // Verify compact layout for landscape
         var containerPadding = await container.EvaluateAsync<string>("el => window.getComputedStyle(el).padding");
-        // TODO: Convert to xUnit - Assert.That(containerPadding, Is.Not.Empty, "Container should have optimized padding for landscape");
+        Assert.NotEmpty(containerPadding);
 
         // Verify title is scaled appropriately
         var title = Page.Locator(".game-title");
         var fontSize = await title.EvaluateAsync<string>("el => window.getComputedStyle(el).fontSize");
         var fontSizeValue = double.Parse(fontSize.Replace("px", ""));
-        Assert.True(fontSizeValue > 0).And.LessThanOrEqualTo(48), 
-            "Title should be scaled down for landscape orientation");
+        Assert.True(fontSizeValue > 0 && fontSizeValue <= 48);
     }
 
     [Fact]
@@ -83,23 +79,21 @@ public class ResponsiveDesignTests : PlaywrightTest
 
         // Verify spacing is appropriate for tablet
         var heroPadding = await hero.EvaluateAsync<string>("el => window.getComputedStyle(el).padding");
-        // TODO: Convert to xUnit - Assert.That(heroPadding, Is.Not.Empty, "Hero should have tablet-optimized padding");
+        Assert.NotEmpty(heroPadding);
 
         // Verify grid adapts to tablet
         var grid = Page.Locator(".game-grid-2");
         if (await grid.CountAsync() > 0)
         {
             var gridTemplate = await grid.EvaluateAsync<string>("el => window.getComputedStyle(el).gridTemplateColumns");
-            Assert.Contains("px", gridTemplate).Or.Contain("fr"), 
-                "Grid should adapt to tablet screen size");
+            Assert.True(gridTemplate.Contains("px") || gridTemplate.Contains("fr"));
         }
 
         // Verify buttons are appropriately sized
         var button = Page.Locator(".game-btn-lg").First;
         var buttonMinHeight = await button.EvaluateAsync<string>("el => window.getComputedStyle(el).minHeight");
         var minHeightValue = double.Parse(buttonMinHeight.Replace("px", ""));
-        Assert.True(minHeightValue >= 52), 
-            "Large buttons should be easy to tap on tablet");
+        Assert.True(minHeightValue >= 52);
     }
 
     [Fact]
@@ -114,13 +108,11 @@ public class ResponsiveDesignTests : PlaywrightTest
 
         // Verify container has max-width for readability
         var maxWidth = await container.EvaluateAsync<string>("el => window.getComputedStyle(el).maxWidth");
-        Assert.NotEqual("none", maxWidth), 
-            "Container should have max-width for optimal readability on large screens");
+        Assert.NotEqual("none", maxWidth);
 
         // Verify generous spacing
         var containerPadding = await container.EvaluateAsync<string>("el => window.getComputedStyle(el).padding");
-        Assert.Contains("px", containerPadding), 
-            "Container should have generous padding on desktop");
+        Assert.Contains("px", containerPadding);
 
         // Verify QR code is prominently displayed
         var createButton = Page.Locator("button:has-text('Crear Sala')");
@@ -131,8 +123,7 @@ public class ResponsiveDesignTests : PlaywrightTest
         if (await qrImage.CountAsync() > 0)
         {
             var width = await qrImage.EvaluateAsync<double>("el => el.offsetWidth");
-            Assert.True(width >= 250), 
-                "QR code should be large and easy to scan on desktop (>=250px)");
+            Assert.True(width >= 250);
         }
     }
 
@@ -147,14 +138,12 @@ public class ResponsiveDesignTests : PlaywrightTest
         var baseFontSize = await Page.EvaluateAsync<string>(
             "getComputedStyle(document.documentElement).fontSize");
         var fontSizeValue = double.Parse(baseFontSize.Replace("px", ""));
-        Assert.True(fontSizeValue >= 16), 
-            "Base font size should be readable from distance on TV");
+        Assert.True(fontSizeValue >= 16);
 
         // Verify buttons are large enough for remote control navigation
         var button = Page.Locator(".game-btn-lg").First;
         var buttonHeight = await button.EvaluateAsync<double>("el => el.offsetHeight");
-        Assert.True(buttonHeight >= 60), 
-            "Buttons should be large for TV remote control (>=60px height)");
+        Assert.True(buttonHeight >= 60);
 
         // Verify room code is extra large for TV display
         var createButton = Page.Locator("button:has-text('Crear Sala')");
@@ -166,8 +155,7 @@ public class ResponsiveDesignTests : PlaywrightTest
         {
             var fontSize = await roomCode.EvaluateAsync<string>("el => window.getComputedStyle(el).fontSize");
             var codeFontSize = double.Parse(fontSize.Replace("px", ""));
-            Assert.True(codeFontSize >= 48), 
-                "Room code should be extra large for TV viewing (>=48px)");
+            Assert.True(codeFontSize >= 48);
         }
     }
 
@@ -182,16 +170,14 @@ public class ResponsiveDesignTests : PlaywrightTest
         var hasHorizontalScroll = await Page.EvaluateAsync<bool>(
             "document.documentElement.scrollWidth > document.documentElement.clientWidth");
         
-        // TODO: Convert to xUnit - Assert.That(hasHorizontalScroll, Is.False, 
-            "Page should not have horizontal scroll on small screens");
+        Assert.False(hasHorizontalScroll);
 
         // Verify all content is visible within viewport
         var container = Page.Locator(".game-container");
         var containerWidth = await container.EvaluateAsync<double>("el => el.offsetWidth");
         var viewportWidth = await Page.EvaluateAsync<double>("window.innerWidth");
         
-        Assert.True(containerWidth <= viewportWidth), 
-            "Container should fit within viewport width");
+        Assert.True(containerWidth <= viewportWidth);
     }
 
     [Fact]
@@ -222,13 +208,11 @@ public class ResponsiveDesignTests : PlaywrightTest
                 var imageWidth = await qrImage.EvaluateAsync<double>("el => el.offsetWidth");
                 var containerWidth = await Page.Locator(".game-qr-image").EvaluateAsync<double>("el => el.offsetWidth");
                 
-                Assert.True(imageWidth <= containerWidth + 1), 
-                    $"QR image should not overflow container on {viewport.Name}");
+                Assert.True(imageWidth <= containerWidth + 1);
 
                 // Verify image has max-width
                 var maxWidth = await qrImage.EvaluateAsync<string>("el => window.getComputedStyle(el).maxWidth");
-                Assert.NotEqual("none", maxWidth), 
-                    $"QR image should have max-width constraint on {viewport.Name}");
+                Assert.NotEqual("none", maxWidth);
             }
         }
     }
@@ -251,10 +235,8 @@ public class ResponsiveDesignTests : PlaywrightTest
                 var width = await button.EvaluateAsync<double>("el => el.offsetWidth");
 
                 // WCAG 2.1 Level AAA recommends 44x44px minimum
-                Assert.True(height >= 44), 
-                    "Interactive elements should be at least 44px tall for accessibility");
-                Assert.True(width >= 44), 
-                    "Interactive elements should be at least 44px wide for accessibility");
+                Assert.True(height >= 44);
+                Assert.True(width >= 44);
                 
                 break; // Test first button to avoid timeout
             }
@@ -289,8 +271,7 @@ public class ResponsiveDesignTests : PlaywrightTest
                 // Count columns by counting "px" or "fr" occurrences
                 var columnCount = gridTemplate.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).Length;
                 
-                Assert.True(columnCount > 0), 
-                    $"Grid should have defined columns on {testCase.Name}");
+                Assert.True(columnCount > 0);
             }
         }
     }

@@ -7,9 +7,7 @@ namespace GameTribunal.Web.UI.Tests;
 public class DesignSystemTests : PlaywrightTest
 {
     private const string BaseUrl = "https://localhost:7000";
-
-            // Configure viewport for desktop testing
-            [Fact]
+    [Fact]
     // Validates that the hero section has impressive visual effects
     public async Task HeroSection_ShouldHaveStunningVisualEffects()
     {
@@ -21,23 +19,19 @@ public class DesignSystemTests : PlaywrightTest
 
         // Check for gradient background
         var backgroundStyle = await WaitForComputedStyleAsync(heroSection, "background");
-        Assert.Contains("gradient", backgroundStyle).Or.Contain("rgba"), 
-            "Hero section should have a gradient or transparent background for visual depth");
+        Assert.True(backgroundStyle.Contains("gradient") || backgroundStyle.Contains("rgba"));
 
         // Verify backdrop-filter blur for glassmorphism effect
         var backdropFilter = await WaitForComputedStyleAsync(heroSection, "backdropFilter");
-        Assert.Contains("blur", backdropFilter), 
-            "Hero section should have backdrop-filter blur for modern glassmorphism effect");
+        Assert.Contains("blur", backdropFilter);
 
         // Check for border-radius for rounded corners
         var borderRadius = await WaitForComputedStyleAsync(heroSection, "borderRadius");
-        Assert.NotEqual("0px", borderRadius), 
-            "Hero section should have rounded corners for a modern look");
+        Assert.NotEqual("0px", borderRadius);
 
         // Verify box-shadow for depth
         var boxShadow = await WaitForComputedStyleAsync(heroSection, "boxShadow");
-        Assert.NotEqual("none", boxShadow), 
-            "Hero section should have a box-shadow for visual depth");
+        Assert.NotEqual("none", boxShadow);
     }
 
     [Fact]
@@ -62,18 +56,15 @@ public class DesignSystemTests : PlaywrightTest
         var hoverTransform = await WaitForComputedStyleAsync(primaryButton, "transform");
 
         // Verify that transform changed (button should lift or scale on hover)
-        Assert.NotEqual(initialTransform, hoverTransform), 
-            "Button should have a transform effect on hover (lift or scale)");
+        Assert.NotEqual(initialTransform, hoverTransform);
 
         // Verify transition property exists
         var transition = await WaitForComputedStyleAsync(primaryButton, "transition");
-        Assert.NotEqual("all 0s ease 0s", transition), 
-            "Button should have smooth transitions");
+        Assert.NotEqual("all 0s ease 0s", transition);
 
         // Check for box-shadow enhancement on hover
         var boxShadow = await WaitForComputedStyleAsync(primaryButton, "boxShadow");
-        Assert.NotEqual("none", boxShadow), 
-            "Button should have an enhanced box-shadow on hover");
+        Assert.NotEqual("none", boxShadow);
     }
 
     [Fact]
@@ -87,32 +78,27 @@ public class DesignSystemTests : PlaywrightTest
 
         // Verify backdrop-filter for glassmorphism
         var backdropFilter = await WaitForComputedStyleAsync(gameCard, "backdropFilter");
-        Assert.Contains("blur", backdropFilter), 
-            "Cards should have backdrop-filter blur for glassmorphism effect");
+        Assert.Contains("blur", backdropFilter);
 
         // Verify border-radius
         var borderRadius = await WaitForComputedStyleAsync(gameCard, "borderRadius");
         var radiusValue = double.Parse(borderRadius.Replace("px", ""));
-        Assert.True(radiusValue >= 12), 
-            "Cards should have significant border-radius (>=12px) for modern design");
+        Assert.True(radiusValue >= 12);
 
         // Verify box-shadow for depth
         var boxShadow = await WaitForComputedStyleAsync(gameCard, "boxShadow");
-        Assert.NotEqual("none", boxShadow), 
-            "Cards should have box-shadow for depth");
+        Assert.NotEqual("none", boxShadow);
 
         // Verify border for subtle definition
         var border = await WaitForComputedStyleAsync(gameCard, "border");
-        Assert.NotEqual("0px none rgb(0, 0, 0, border)"), 
-            "Cards should have a subtle border for definition");
+        Assert.NotEqual("0px none rgb(0, 0, 0)", border);
 
         // Check for hover transform effect
         await gameCard.HoverAsync();
         await Page.WaitForTimeoutAsync(300);
         
         var transform = await WaitForComputedStyleAsync(gameCard, "transform");
-        Assert.NotEqual("none", transform), 
-            "Cards should have a subtle transform effect on hover");
+        Assert.NotEqual("none", transform);
     }
 
     [Fact]
@@ -125,20 +111,17 @@ public class DesignSystemTests : PlaywrightTest
         var primaryColor = await Page.EvaluateAsync<string>(
             "getComputedStyle(document.documentElement).getPropertyValue('--color-primary').trim()");
         
-        // TODO: Convert to xUnit - Assert.That(primaryColor, Is.Not.Empty, 
-            "Primary color should be defined as a CSS custom property");
+        Assert.NotEmpty(primaryColor);
 
         // Verify gradient usage
         var heroBackground = await WaitForComputedStyleAsync(Page.Locator(".game-hero"), "background");
         
-        Assert.Contains("gradient", heroBackground).Or.Contain("rgba"), 
-            "Hero should use gradients for visual impact");
+        Assert.True(heroBackground.Contains("gradient") || heroBackground.Contains("rgba"));
 
         // Check for primary button gradient
         var buttonBackground = await WaitForComputedStyleAsync(Page.Locator(".game-btn-primary").First, "background");
         
-        Assert.Contains("gradient", buttonBackground).Or.Contain("linear"), 
-            "Primary buttons should use gradients for vibrant appearance");
+        Assert.True(buttonBackground.Contains("gradient") || buttonBackground.Contains("linear"));
     }
 
     [Fact]
@@ -153,24 +136,20 @@ public class DesignSystemTests : PlaywrightTest
         // Verify font size is large and impactful
         var fontSize = await WaitForComputedStyleAsync(title, "fontSize");
         var fontSizeValue = double.Parse(fontSize.Replace("px", ""));
-        Assert.True(fontSizeValue >= 36), 
-            "Main title should have large font size (>=36px) for impact");
+        Assert.True(fontSizeValue >= 36);
 
         // Verify font weight is bold
         var fontWeight = await WaitForComputedStyleAsync(title, "fontWeight");
         var fontWeightValue = int.Parse(fontWeight);
-        Assert.True(fontWeightValue >= 700), 
-            "Main title should be bold (font-weight >= 700)");
+        Assert.True(fontWeightValue >= 700);
 
         // Verify text-shadow for depth
         var textShadow = await WaitForComputedStyleAsync(title, "textShadow");
-        Assert.NotEqual("none", textShadow), 
-            "Title should have text-shadow for visual depth");
+        Assert.NotEqual("none", textShadow);
 
         // Verify letter-spacing for premium feel
         var letterSpacing = await WaitForComputedStyleAsync(title, "letterSpacing");
-        Assert.NotEqual("normal", letterSpacing), 
-            "Title should have custom letter-spacing for refined typography");
+        Assert.NotEqual("normal", letterSpacing);
     }
 
     [Fact]
@@ -181,15 +160,13 @@ public class DesignSystemTests : PlaywrightTest
 
         // Check for CSS animations
         var animatedElements = await Page.Locator(".game-animate-fadeIn, .game-animate-slideIn").AllAsync();
-        Assert.True(animatedElements.Count > 0), 
-            "Page should have animated elements for dynamic feel");
+        Assert.True(animatedElements.Count > 0);
 
         // Verify animation properties
         if (animatedElements.Count > 0)
         {
             var animation = await animatedElements[0].EvaluateAsync<string>("el => window.getComputedStyle(el).animation");
-            Assert.NotEqual("none", animation), 
-                "Animated elements should have animation property defined");
+            Assert.NotEqual("none", animation);
         }
 
         // Check for smooth transitions
@@ -197,8 +174,7 @@ public class DesignSystemTests : PlaywrightTest
         if (allButtons.Count > 0)
         {
             var transition = await allButtons[0].EvaluateAsync<string>("el => window.getComputedStyle(el).transition");
-            Assert.Contains("cubic-bezier", transition).Or.Contain("ease"), 
-                "Buttons should use easing functions for smooth transitions");
+            Assert.True(transition.Contains("cubic-bezier") || transition.Contains("ease"));
         }
     }
 
@@ -216,8 +192,7 @@ public class DesignSystemTests : PlaywrightTest
             }).length
         ");
 
-        Assert.True(glassmorphElements > 0), 
-            "Design should use glassmorphism (backdrop-filter) for modern aesthetic");
+        Assert.True(glassmorphElements > 0);
 
         // Check for elements with gradients
         var gradientElements = await Page.EvaluateAsync<int>(@"
@@ -227,8 +202,7 @@ public class DesignSystemTests : PlaywrightTest
             }).length
         ");
 
-        Assert.True(gradientElements > 0), 
-            "Design should use gradients for vibrant, modern look");
+        Assert.True(gradientElements > 0);
     }
 
     [Fact]
@@ -247,9 +221,9 @@ public class DesignSystemTests : PlaywrightTest
 
         Assert.Multiple(() =>
         {
-            // TODO: Convert to xUnit - Assert.That(spaceSmall, Is.Not.Empty, "Small spacing token should be defined");
-            // TODO: Convert to xUnit - Assert.That(spaceMedium, Is.Not.Empty, "Medium spacing token should be defined");
-            // TODO: Convert to xUnit - Assert.That(spaceLarge, Is.Not.Empty, "Large spacing token should be defined");
+            Assert.NotEmpty(spaceSmall);
+            Assert.NotEmpty(spaceMedium);
+            Assert.NotEmpty(spaceLarge);
         });
 
         // Verify that elements use consistent gap/spacing
@@ -257,8 +231,7 @@ public class DesignSystemTests : PlaywrightTest
         if (stacks.Count > 0)
         {
             var gap = await stacks[0].EvaluateAsync<string>("el => window.getComputedStyle(el).gap");
-            Assert.NotEqual("normal", gap), 
-                "Stack components should use consistent gap spacing");
+            Assert.NotEqual("normal", gap);
         }
     }
 
@@ -280,8 +253,7 @@ public class DesignSystemTests : PlaywrightTest
         var boxShadow = await button.EvaluateAsync<string>("el => window.getComputedStyle(el).boxShadow");
 
         var hasFocusIndicator = outline != "none" || boxShadow.Contains("rgb");
-        // TODO: Convert to xUnit - Assert.That(hasFocusIndicator, Is.True, 
-            "Focused elements should have clear visual indicators (outline or box-shadow)");
+        Assert.True(hasFocusIndicator);
     }
 
     [Fact]
@@ -304,12 +276,10 @@ public class DesignSystemTests : PlaywrightTest
 
             // Verify visual enhancements
             var background = await qrContainer.EvaluateAsync<string>("el => window.getComputedStyle(el).background");
-            Assert.Contains("gradient", background).Or.Contain("rgba"), 
-                "QR container should have an eye-catching background");
+            Assert.True(background.Contains("gradient") || background.Contains("rgba"));
 
             var border = await qrContainer.EvaluateAsync<string>("el => window.getComputedStyle(el).border");
-            Assert.NotEqual("0px none rgb(0, 0, 0, border)"), 
-                "QR container should have a decorative border");
+            Assert.NotEqual("0px none rgb(0, 0, 0)", border);
 
             // Check room code styling
             var roomCode = Page.Locator(".game-room-code");
@@ -317,12 +287,10 @@ public class DesignSystemTests : PlaywrightTest
             {
                 var codeFontSize = await roomCode.EvaluateAsync<string>("el => window.getComputedStyle(el).fontSize");
                 var codeFontSizeValue = double.Parse(codeFontSize.Replace("px", ""));
-                Assert.True(codeFontSizeValue >= 36), 
-                    "Room code should be large and prominent (>=36px)");
+                Assert.True(codeFontSizeValue >= 36);
 
                 var codeBoxShadow = await roomCode.EvaluateAsync<string>("el => window.getComputedStyle(el).boxShadow");
-                Assert.NotEqual("none", codeBoxShadow), 
-                    "Room code should have visual emphasis with box-shadow");
+                Assert.NotEqual("none", codeBoxShadow);
             }
         }
     }

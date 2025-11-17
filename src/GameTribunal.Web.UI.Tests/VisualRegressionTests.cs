@@ -9,8 +9,7 @@ namespace GameTribunal.Web.UI.Tests;
 public class VisualRegressionTests : PlaywrightTest
 {
     private const string BaseUrl = "https://localhost:7000";
-
-                [Fact]
+    [Fact]
     // Captures screenshot of the lobby page for visual validation
     public async Task LobbyPage_ShouldLookStunning()
     {
@@ -27,8 +26,7 @@ public class VisualRegressionTests : PlaywrightTest
         });
 
         // Verify screenshot was created
-        // TODO: Convert to xUnit - Assert.That(File.Exists("screenshots/lobby-desktop.png"), Is.True, 
-            "Screenshot should be created successfully");
+        Assert.True(File.Exists("screenshots/lobby-desktop.png"));
     }
 
     [Fact]
@@ -46,8 +44,7 @@ public class VisualRegressionTests : PlaywrightTest
             FullPage = true
         });
 
-        // TODO: Convert to xUnit - Assert.That(File.Exists("screenshots/lobby-mobile.png"), Is.True, 
-            "Mobile screenshot should be created successfully");
+        Assert.True(File.Exists("screenshots/lobby-mobile.png"));
     }
 
     [Fact]
@@ -65,8 +62,7 @@ public class VisualRegressionTests : PlaywrightTest
             FullPage = true
         });
 
-        // TODO: Convert to xUnit - Assert.That(File.Exists("screenshots/lobby-tablet.png"), Is.True, 
-            "Tablet screenshot should be created successfully");
+        Assert.True(File.Exists("screenshots/lobby-tablet.png"));
     }
 
     [Fact]
@@ -88,8 +84,7 @@ public class VisualRegressionTests : PlaywrightTest
             FullPage = true
         });
 
-        // TODO: Convert to xUnit - Assert.That(File.Exists("screenshots/room-with-qr-desktop.png"), Is.True, 
-            "Room with QR code screenshot should be created successfully");
+        Assert.True(File.Exists("screenshots/room-with-qr-desktop.png"));
     }
 
     [Fact]
@@ -109,8 +104,7 @@ public class VisualRegressionTests : PlaywrightTest
             FullPage = true
         });
 
-        // TODO: Convert to xUnit - Assert.That(File.Exists("screenshots/room-with-qr-mobile.png"), Is.True, 
-            "Mobile room screenshot should be created successfully");
+        Assert.True(File.Exists("screenshots/room-with-qr-mobile.png"));
     }
 
     [Fact]
@@ -128,8 +122,7 @@ public class VisualRegressionTests : PlaywrightTest
             Path = "screenshots/hero-section.png"
         });
 
-        // TODO: Convert to xUnit - Assert.That(File.Exists("screenshots/hero-section.png"), Is.True, 
-            "Hero section screenshot should be created successfully");
+        Assert.True(File.Exists("screenshots/hero-section.png"));
     }
 
     [Fact]
@@ -147,8 +140,7 @@ public class VisualRegressionTests : PlaywrightTest
             Path = "screenshots/game-card.png"
         });
 
-        // TODO: Convert to xUnit - Assert.That(File.Exists("screenshots/game-card.png"), Is.True, 
-            "Game card screenshot should be created successfully");
+        Assert.True(File.Exists("screenshots/game-card.png"));
     }
 
     [Fact]
@@ -166,8 +158,7 @@ public class VisualRegressionTests : PlaywrightTest
             Path = "screenshots/primary-button.png"
         });
 
-        // TODO: Convert to xUnit - Assert.That(File.Exists("screenshots/primary-button.png"), Is.True, 
-            "Primary button screenshot should be created successfully");
+        Assert.True(File.Exists("screenshots/primary-button.png"));
     }
 
     [Fact]
@@ -189,8 +180,7 @@ public class VisualRegressionTests : PlaywrightTest
             Path = "screenshots/primary-button-hover.png"
         });
 
-        // TODO: Convert to xUnit - Assert.That(File.Exists("screenshots/primary-button-hover.png"), Is.True, 
-            "Button hover screenshot should be created successfully");
+        Assert.True(File.Exists("screenshots/primary-button-hover.png"));
     }
 
     [Fact]
@@ -206,8 +196,7 @@ public class VisualRegressionTests : PlaywrightTest
             FullPage = true
         });
 
-        // TODO: Convert to xUnit - Assert.That(File.Exists("screenshots/home-page-desktop.png"), Is.True, 
-            "Home page screenshot should be created successfully");
+        Assert.True(File.Exists("screenshots/home-page-desktop.png"));
     }
 
     [Fact]
@@ -221,7 +210,6 @@ public class VisualRegressionTests : PlaywrightTest
             Directory.CreateDirectory("screenshots");
         }
 
-        // TODO: Convert to xUnit - Assert.That(Directory.Exists("screenshots"), Is.True, 
-            "Screenshots directory should exist");
+        Assert.True(Directory.Exists("screenshots"));
     }
 }
