@@ -21,76 +21,76 @@
     @if (_room is null)
     {
         <!-- Pre-Game Setup Card -->
-        <div class="game-card game-animate-slideIn">
-            <div class="game-card-header">
+        <GameCard class="game-animate-slideIn">
+            <Header>
                 <h2 class="game-card-title">🎮 Configurar Partida</h2>
-            </div>
-            <div class="game-card-body">
-                <div class="game-form-group">
-                    <label class="game-label" for="gameMode">
-                        <span style="font-size: 1.5rem;">🎯</span> Modo de Juego
-                    </label>
-                    <select id="gameMode" class="game-select" @bind="_selectedMode">
-                        @foreach (var mode in _availableModes)
-                        {
-                            <option value="@mode">
-                                @(mode == GameMode.Suave ? "😊 Suave - Para conocerse" :
-                                  mode == GameMode.Normal ? "😎 Normal - Equilibrado" :
-                                  "🔥 Spicy - Solo para valientes")
-                            </option>
-                        }
-                    </select>
-                    <small class="text-muted mt-1" style="display: block; font-size: 0.875rem;">
-                        @GetModeDescription(_selectedMode)
-                    </small>
-                </div>
-
-                <div class="d-flex gap-2 flex-column flex-md-row">
-                    <button class="game-btn game-btn-primary game-btn-lg game-btn-block" 
-                            @onclick="CreateRoomAsync" 
-                            disabled="@_isCreating">
-                        @if (_isCreating)
-                        {
-                            <span class="game-spinner"></span>
-                            <span>Creando sala...</span>
-                        }
-                        else
-                        {
-                            <span style="font-size: 1.5rem;">🚀</span>
-                            <span>Crear Sala</span>
-                        }
-                    </button>
-                </div>
-
-                @if (_errorMessage is not null)
-                {
-                    <div class="game-alert game-alert-danger mt-3">
-                        <span style="font-size: 1.5rem;">⚠️</span>
-                        <div>
-                            <strong>Error</strong>
-                            <p class="mb-0">@_errorMessage</p>
-                        </div>
+            </Header>
+            <Body>
+                <GameStack Direction="vertical" Gap="3">
+                    <div class="game-form-group">
+                        <label class="game-label" for="gameMode">
+                            <span style="font-size: 1.5rem;">🎯</span> Modo de Juego
+                        </label>
+                        <select id="gameMode" class="game-select" @bind="_selectedMode">
+                            @foreach (var mode in _availableModes)
+                            {
+                                <option value="@mode">
+                                    @(mode == GameMode.Suave ? "😊 Suave - Para conocerse" :
+                                      mode == GameMode.Normal ? "😎 Normal - Equilibrado" :
+                                      "🔥 Spicy - Solo para valientes")
+                                </option>
+                            }
+                        </select>
+                        <small class="text-muted mt-1" style="display: block; font-size: 0.875rem;">
+                            @GetModeDescription(_selectedMode)
+                        </small>
                     </div>
-                }
-            </div>
-        </div>
+
+                    <GameButton 
+                        Variant="primary" 
+                        Size="lg" 
+                        FullWidth="true" 
+                        IsLoading="@_isCreating"
+                        OnClick="CreateRoomAsync">
+                        <span style="font-size: 1.5rem;">🚀</span>
+                        <span>Crear Sala</span>
+                    </GameButton>
+
+                    @if (_errorMessage is not null)
+                    {
+                        <GameAlert Variant="danger">
+                            <Title>Error</Title>
+                            <Message>@_errorMessage</Message>
+                        </GameAlert>
+                    }
+                </GameStack>
+            </Body>
+        </GameCard>
 
         <!-- Info Cards -->
         <div class="game-grid game-grid-2 mt-4">
-            <div class="game-card">
-                <div style="font-size: 3rem; text-align: center; margin-bottom: 1rem;">📱</div>
-                <h3 class="text-center mb-2" style="font-size: 1.5rem;">Sin Instalación</h3>
-                <p class="text-center text-muted">
-                    Solo necesitas un navegador web. Escanea el QR con tu móvil y listo.
-                </p>
-            </div>
-            <div class="game-card">
-                <div style="font-size: 3rem; text-align: center; margin-bottom: 1rem;">👥</div>
-                <h3 class="text-center mb-2" style="font-size: 1.5rem;">4-16 Jugadores</h3>
-                <p class="text-center text-muted">
-                    Perfecto para grupos pequeños y grandes. Todos en la misma sala física.
-                </p>
-            </div>
+            <GameCard>
+                <Body>
+                    <GameStack Direction="vertical" Gap="2" AlignItems="center">
+                        <div style="font-size: 3rem;">📱</div>
+                        <h3 class="text-center mb-0" style="font-size: 1.5rem;">Sin Instalación</h3>
+                        <p class="text-center text-muted mb-0">
+                            Solo necesitas un navegador web. Escanea el QR con tu móvil y listo.
+                        </p>
+                    </GameStack>
+                </Body>
+            </GameCard>
+            <GameCard>
+                <Body>
+                    <GameStack Direction="vertical" Gap="2" AlignItems="center">
+                        <div style="font-size: 3rem;">👥</div>
+                        <h3 class="text-center mb-0" style="font-size: 1.5rem;">4-16 Jugadores</h3>
+                        <p class="text-center text-muted mb-0">
+                            Perfecto para grupos pequeños y grandes. Todos en la misma sala física.
+                        </p>
+                    </GameStack>
+                </Body>
+            </GameCard>
         </div>
     }
     else
@@ -98,61 +98,60 @@
         <!-- Room Created - Display QR and Room Info -->
         <div class="game-grid game-grid-2">
             <!-- QR Code and Room Code Card -->
-            <div class="game-card game-animate-fadeIn">
-                <div class="game-qr-container">
-                    <h2 class="game-qr-title">📲 Escanea para Unirte</h2>
-                    
-                    <div class="game-room-code">
-                        @_room.Code
-                    </div>
-                    
-                    <div class="d-flex align-items-center justify-content-center gap-2 mb-3">
-                        <span class="game-badge game-badge-lg" 
-                              style="background: @GetModeGradient(_room.Mode)">
-                            @GetModeEmoji(_room.Mode) @_room.Mode
-                        </span>
-                    </div>
-
-                    @if (_qrCodeBase64 is not null)
-                    {
-                        <div class="game-qr-image">
-                            <img src="data:image/png;base64,@_qrCodeBase64" 
-                                 alt="Código QR para unirse" 
-                                 style="max-width: 350px; width: 100%;" />
+            <GameCard class="game-animate-fadeIn">
+                <Body>
+                    <div class="game-qr-container">
+                        <h2 class="game-qr-title">📲 Escanea para Unirte</h2>
+                        
+                        <div class="game-room-code">
+                            @_room.Code
                         </div>
-                        <p class="text-muted" style="font-size: 0.875rem; word-break: break-all;">
-                            @_roomUrl
-                        </p>
-                    }
-                </div>
-            </div>
+                        
+                        <div class="d-flex align-items-center justify-content-center gap-2 mb-3">
+                            <span style="background: @GetModeGradient(_room.Mode); display: inline-flex; align-items: center; padding: var(--space-xs) var(--space-lg); font-size: var(--font-size-base); font-weight: var(--font-weight-semibold); border-radius: var(--radius-full); white-space: nowrap; color: var(--color-light);">
+                                @GetModeEmoji(_room.Mode) @_room.Mode
+                            </span>
+                        </div>
+
+                        @if (_qrCodeBase64 is not null)
+                        {
+                            <div class="game-qr-image">
+                                <img src="data:image/png;base64,@_qrCodeBase64" 
+                                     alt="Código QR para unirse" 
+                                     style="max-width: 350px; width: 100%;" />
+                            </div>
+                            <p class="text-muted" style="font-size: 0.875rem; word-break: break-all;">
+                                @_roomUrl
+                            </p>
+                        }
+                    </div>
+                </Body>
+            </GameCard>
 
             <!-- Players List and Game Start Card -->
-            <div class="game-card game-animate-slideIn">
-                <div class="game-card-header">
+            <GameCard class="game-animate-slideIn">
+                <Header>
                     <h2 class="game-card-title">
                         👥 Jugadores
-                        <span class="game-badge game-badge-primary game-badge-lg ms-2">
+                        <GameBadge Variant="primary" Size="lg" class="ms-2">
                             @_room.Players.Count / @Room.MaxPlayers
-                        </span>
+                        </GameBadge>
                     </h2>
                     @if (_hubConnection?.State == HubConnectionState.Connected)
                     {
-                        <span class="game-badge game-badge-success">
+                        <GameBadge Variant="success">
                             ● En vivo
-                        </span>
+                        </GameBadge>
                     }
-                </div>
-                <div class="game-card-body">
+                </Header>
+                <Body>
                     @if (_room.Players.Count == 0)
                     {
-                        <div class="game-loading-container">
-                            <div class="game-spinner game-spinner-lg game-animate-pulse"></div>
-                            <p class="game-loading-text">Esperando jugadores...</p>
-                            <p class="text-muted text-center">
-                                Los jugadores pueden unirse escaneando el código QR
-                            </p>
-                        </div>
+                        <GameLoadingSpinner Size="lg" Text="Esperando jugadores..." Centered="true">
+                        </GameLoadingSpinner>
+                        <p class="text-muted text-center mt-2">
+                            Los jugadores pueden unirse escaneando el código QR
+                        </p>
                     }
                     else
                     {
@@ -168,9 +167,9 @@
                                         <span style="font-size: 1.5rem;">👤</span>
                                         <span class="game-player-name">@player.Alias</span>
                                     </div>
-                                    <span class="game-badge game-badge-secondary">
+                                    <GameBadge Variant="secondary">
                                         #@playerIndex
-                                    </span>
+                                    </GameBadge>
                                 </li>
                             }
                         </ul>
@@ -178,54 +177,48 @@
 
                     @if (!_room.CanStartGame)
                     {
-                        <div class="game-alert game-alert-warning mt-3">
-                            <span style="font-size: 1.5rem;">⏳</span>
-                            <div>
-                                <strong>Se necesitan más jugadores</strong>
-                                <p class="mb-0">
+                        <div class="mt-3">
+                            <GameAlert Variant="warning" Icon="⏳">
+                                <Title>Se necesitan más jugadores</Title>
+                                <Message>
                                     Mínimo @Room.MinPlayers jugadores para iniciar 
                                     (@_room.Players.Count/@Room.MinPlayers)
-                                </p>
-                            </div>
+                                </Message>
+                            </GameAlert>
                         </div>
                     }
                     else
                     {
-                        <div class="game-alert game-alert-success mt-3">
-                            <span style="font-size: 1.5rem;">✅</span>
-                            <div>
-                                <strong>¡Listo para empezar!</strong>
-                                <p class="mb-0">Ya tenéis @_room.Players.Count jugadores conectados</p>
-                            </div>
-                        </div>
-                        
-                        <button class="game-btn game-btn-secondary game-btn-lg game-btn-block mt-3" 
-                                @onclick="StartGameAsync" 
-                                disabled="@_isStarting">
-                            @if (_isStarting)
-                            {
-                                <span class="game-spinner"></span>
-                                <span>Iniciando...</span>
-                            }
-                            else
-                            {
+                        <GameStack Direction="vertical" Gap="2" class="mt-3">
+                            <GameAlert Variant="success">
+                                <Title>¡Listo para empezar!</Title>
+                                <Message>Ya tenéis @_room.Players.Count jugadores conectados</Message>
+                            </GameAlert>
+                            
+                            <GameButton 
+                                Variant="secondary" 
+                                Size="lg" 
+                                FullWidth="true"
+                                IsLoading="@_isStarting"
+                                OnClick="StartGameAsync">
                                 <span style="font-size: 1.5rem;">🎯</span>
                                 <span>Iniciar Partida</span>
-                            }
-                        </button>
+                            </GameButton>
+                        </GameStack>
                     }
-                </div>
-            </div>
+                </Body>
+            </GameCard>
         </div>
 
         <!-- Action Buttons -->
         <div class="mt-4 d-flex justify-content-center">
-            <button class="game-btn game-btn-outline" 
-                    @onclick="CreateAnotherRoomAsync" 
-                    disabled="@_isCreating">
+            <GameButton 
+                Variant="outline"
+                Disabled="@_isCreating"
+                OnClick="CreateAnotherRoomAsync">
                 <span style="font-size: 1.5rem;">🔄</span>
                 <span>Crear Nueva Sala</span>
-            </button>
+            </GameButton>
         </div>
     }
 </div>
