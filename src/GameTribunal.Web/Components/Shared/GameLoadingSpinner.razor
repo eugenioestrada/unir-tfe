@@ -1,0 +1,55 @@
+@*
+    GameLoadingSpinner - Loading spinner with optional text
+    
+    Usage:
+    <GameLoadingSpinner Size="lg" Text="Loading..." />
+    
+    Props:
+    - Size: md, lg (default: md)
+    - Text: Optional loading text to display
+    - Centered: Centers the spinner in its container (default: false)
+*@
+
+<div class="@GetContainerClasses()">
+    <div class="@GetSpinnerClasses()"></div>
+    @if (!string.IsNullOrEmpty(Text))
+    {
+        <p class="game-loading-text">@Text</p>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public string Size { get; set; } = "md";
+    
+    [Parameter]
+    public string? Text { get; set; }
+    
+    [Parameter]
+    public bool Centered { get; set; }
+    
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object>? AdditionalAttributes { get; set; }
+    
+    private string GetContainerClasses()
+    {
+        if (Centered)
+        {
+            return "game-loading-container";
+        }
+        
+        return "d-flex flex-column align-items-center gap-2";
+    }
+    
+    private string GetSpinnerClasses()
+    {
+        var classes = new List<string> { "game-spinner" };
+        
+        if (Size == "lg")
+        {
+            classes.Add("game-spinner-lg");
+        }
+        
+        return string.Join(" ", classes);
+    }
+}

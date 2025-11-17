@@ -1,0 +1,54 @@
+@*
+    GameBadge - Reusable badge component for status indicators
+    
+    Usage:
+    <GameBadge Variant="success" Size="lg">
+        Online
+    </GameBadge>
+    
+    Props:
+    - Variant: primary, secondary, success, warning, danger (default: primary)
+    - Size: md, lg (default: md)
+    - ChildContent: Badge content
+*@
+
+<span class="@GetCssClasses()" @attributes="AdditionalAttributes">
+    @ChildContent
+</span>
+
+@code {
+    [Parameter]
+    public string Variant { get; set; } = "primary";
+    
+    [Parameter]
+    public string Size { get; set; } = "md";
+    
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+    
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object>? AdditionalAttributes { get; set; }
+    
+    private string GetCssClasses()
+    {
+        var classes = new List<string> { "game-badge" };
+        
+        // Variant
+        classes.Add(Variant switch
+        {
+            "primary" => "game-badge-primary",
+            "secondary" => "game-badge-secondary",
+            "success" => "game-badge-success",
+            "warning" => "game-badge-warning",
+            _ => "game-badge-primary"
+        });
+        
+        // Size
+        if (Size == "lg")
+        {
+            classes.Add("game-badge-lg");
+        }
+        
+        return string.Join(" ", classes);
+    }
+}

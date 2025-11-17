@@ -16,107 +16,100 @@
     @if (_room is null && !_isLoading)
     {
         <!-- Room Not Found -->
-        <div class="game-card">
-            <div class="game-alert game-alert-danger">
-                <span style="font-size: 2rem;">❌</span>
-                <div>
-                    <strong>Sala no encontrada</strong>
-                    <p class="mb-0">
-                        El código "<strong>@RoomCode</strong>" no existe o ya no está disponible.
-                    </p>
-                </div>
-            </div>
-            <div class="mt-3 text-center">
-                <a href="/" class="game-btn game-btn-primary game-btn-lg">
-                    <span style="font-size: 1.5rem;">🏠</span>
-                    <span>Volver al Inicio</span>
-                </a>
-            </div>
-        </div>
+        <GameCard>
+            <Body>
+                <GameStack Direction="vertical" Gap="3">
+                    <GameAlert Variant="danger" Icon="❌">
+                        <Title>Sala no encontrada</Title>
+                        <Message>
+                            El código "<strong>@RoomCode</strong>" no existe o ya no está disponible.
+                        </Message>
+                    </GameAlert>
+                    
+                    <div class="text-center">
+                        <a href="/" class="game-btn game-btn-primary game-btn-lg">
+                            <span style="font-size: 1.5rem;">🏠</span>
+                            <span>Volver al Inicio</span>
+                        </a>
+                    </div>
+                </GameStack>
+            </Body>
+        </GameCard>
     }
     else if (_isLoading)
     {
         <!-- Loading State -->
-        <div class="game-card">
-            <div class="game-loading-container">
-                <div class="game-spinner game-spinner-lg"></div>
-                <p class="game-loading-text">Verificando sala...</p>
-            </div>
-        </div>
+        <GameCard>
+            <Body>
+                <GameLoadingSpinner Size="lg" Text="Verificando sala..." Centered="true" />
+            </Body>
+        </GameCard>
     }
     else if (_hasJoined)
     {
         <!-- Successfully Joined -->
-        <div class="game-card game-animate-fadeIn">
-            <div class="game-alert game-alert-success">
-                <span style="font-size: 2rem;">🎉</span>
-                <div>
-                    <strong>¡Bienvenido/a!</strong>
-                    <p class="mb-0">
-                        Te has unido como <strong>@_playerAlias</strong>
-                    </p>
-                </div>
-            </div>
+        <GameCard class="game-animate-fadeIn">
+            <Body>
+                <GameStack Direction="vertical" Gap="3">
+                    <GameAlert Variant="success" Icon="🎉">
+                        <Title>¡Bienvenido/a!</Title>
+                        <Message>
+                            Te has unido como <strong>@_playerAlias</strong>
+                        </Message>
+                    </GameAlert>
 
-            <div class="mt-4">
-                <div class="d-flex align-items-center justify-content-between mb-3">
-                    <h3 style="font-size: 1.5rem; font-weight: 700; margin: 0;">
-                        👥 Sala: @_room!.Code
-                    </h3>
-                    @if (_hubConnection?.State == HubConnectionState.Connected)
+                    <div class="d-flex align-items-center justify-content-between">
+                        <h3 style="font-size: 1.5rem; font-weight: 700; margin: 0;">
+                            👥 Sala: @_room!.Code
+                        </h3>
+                        @if (_hubConnection?.State == HubConnectionState.Connected)
+                        {
+                            <GameBadge Variant="success">● En vivo</GameBadge>
+                        }
+                        else if (_isReconnecting)
+                        {
+                            <GameBadge Variant="warning">● Reconectando...</GameBadge>
+                        }
+                    </div>
+
+                    <div>
+                        <span style="background: @GetModeGradient(_room.Mode); display: inline-flex; align-items: center; padding: var(--space-xs) var(--space-lg); font-size: var(--font-size-base); font-weight: var(--font-weight-semibold); border-radius: var(--radius-full); white-space: nowrap; color: var(--color-light);">
+                            @GetModeEmoji(_room.Mode) Modo @_room.Mode
+                        </span>
+                        <GameBadge Variant="primary" Size="lg" class="ms-2">
+                            @_room.Players.Count / @Room.MaxPlayers jugadores
+                        </GameBadge>
+                    </div>
+
+                    @if (!_room.CanStartGame)
                     {
-                        <span class="game-badge game-badge-success">● En vivo</span>
-                    }
-                    else if (_isReconnecting)
-                    {
-                        <span class="game-badge game-badge-warning">● Reconectando...</span>
-                    }
-                </div>
-
-                <div class="mb-3">
-                    <span class="game-badge game-badge-lg" 
-                          style="background: @GetModeGradient(_room.Mode)">
-                        @GetModeEmoji(_room.Mode) Modo @_room.Mode
-                    </span>
-                    <span class="game-badge game-badge-lg game-badge-primary ms-2">
-                        @_room.Players.Count / @Room.MaxPlayers jugadores
-                    </span>
-                </div>
-
-                @if (!_room.CanStartGame)
-                {
-                    <div class="game-alert game-alert-info">
-                        <span style="font-size: 1.5rem;">⏳</span>
-                        <div>
-                            <strong>Esperando más jugadores</strong>
-                            <p class="mb-0">
+                        <GameAlert Variant="info" Icon="⏳">
+                            <Title>Esperando más jugadores</Title>
+                            <Message>
                                 Se necesitan al menos @Room.MinPlayers jugadores 
                                 (@_room.Players.Count/@Room.MinPlayers)
-                            </p>
-                        </div>
-                    </div>
-                }
-                else
-                {
-                    <div class="game-alert game-alert-success">
-                        <span style="font-size: 1.5rem;">✅</span>
-                        <div>
-                            <strong>¡Listos para empezar!</strong>
-                            <p class="mb-0">El host puede iniciar la partida</p>
-                        </div>
-                    </div>
-                }
-            </div>
-        </div>
+                            </Message>
+                        </GameAlert>
+                    }
+                    else
+                    {
+                        <GameAlert Variant="success">
+                            <Title>¡Listos para empezar!</Title>
+                            <Message>El host puede iniciar la partida</Message>
+                        </GameAlert>
+                    }
+                </GameStack>
+            </Body>
+        </GameCard>
 
         <!-- Players List -->
-        <div class="game-card mt-3 game-animate-slideIn">
-            <div class="game-card-header">
+        <GameCard class="mt-3 game-animate-slideIn">
+            <Header>
                 <h3 class="game-card-title" style="font-size: 1.25rem;">
                     Jugadores Conectados (@_room!.Players.Count)
                 </h3>
-            </div>
-            <div class="game-card-body">
+            </Header>
+            <Body>
                 <ul class="game-player-list">
                     @{
                         var playerIndex = 0;
@@ -124,7 +117,7 @@
                     @foreach (var player in _room.Players)
                     {
                         playerIndex++;
-                        <li class="game-player-item">
+                        <li class="game-player-item @(player.Alias == _playerAlias ? "is-current-player" : "")">
                             <div class="d-flex align-items-center gap-2">
                                 <span style="font-size: 1.5rem;">
                                     @(player.Alias == _playerAlias ? "👤" : "👥")
@@ -133,103 +126,98 @@
                             </div>
                             @if (player.Alias == _playerAlias)
                             {
-                                <span class="game-badge game-badge-primary">Tú</span>
+                                <GameBadge Variant="primary">Tú</GameBadge>
                             }
                             else
                             {
-                                <span class="game-badge game-badge-secondary">
+                                <GameBadge Variant="secondary">
                                     #@playerIndex
-                                </span>
+                                </GameBadge>
                             }
                         </li>
                     }
                 </ul>
-            </div>
-        </div>
+            </Body>
+        </GameCard>
     }
     else
     {
         <!-- Join Form -->
-        <div class="game-card game-animate-fadeIn">
-            <div class="game-card-header">
+        <GameCard class="game-animate-fadeIn">
+            <Header>
                 <h2 class="game-card-title">
                     🎮 Unirse a la Sala
                 </h2>
-            </div>
-            <div class="game-card-body">
-                <div class="mb-4 text-center">
-                    <div class="game-room-code" style="font-size: 3rem;">
-                        @RoomCode
-                    </div>
-                    <div class="mt-2">
-                        <span class="game-badge game-badge-lg" 
-                              style="background: @GetModeGradient(_room!.Mode)">
-                            @GetModeEmoji(_room.Mode) Modo @_room.Mode
-                        </span>
-                    </div>
-                    <p class="text-muted mt-2" style="font-size: 0.875rem;">
-                        @GetModeDescription(_room.Mode)
-                    </p>
-                </div>
-
-                @if (_errorMessage is not null)
-                {
-                    <div class="game-alert game-alert-danger">
-                        <span style="font-size: 1.5rem;">⚠️</span>
-                        <div>
-                            <strong>Error</strong>
-                            <p class="mb-0">@_errorMessage</p>
+            </Header>
+            <Body>
+                <GameStack Direction="vertical" Gap="3">
+                    <div class="text-center">
+                        <div class="game-room-code" style="font-size: 3rem;">
+                            @RoomCode
                         </div>
+                        <div class="mt-2">
+                            <span style="background: @GetModeGradient(_room!.Mode); display: inline-flex; align-items: center; padding: var(--space-xs) var(--space-lg); font-size: var(--font-size-base); font-weight: var(--font-weight-semibold); border-radius: var(--radius-full); white-space: nowrap; color: var(--color-light);">
+                                @GetModeEmoji(_room.Mode) Modo @_room.Mode
+                            </span>
+                        </div>
+                        <p class="text-muted mt-2" style="font-size: 0.875rem;">
+                            @GetModeDescription(_room.Mode)
+                        </p>
                     </div>
-                }
 
-                <div class="game-form-group">
-                    <label class="game-label" for="alias">
-                        <span style="font-size: 1.25rem;">👤</span> Tu Alias
-                    </label>
-                    <input 
-                        type="text" 
-                        class="game-input" 
-                        id="alias" 
-                        @bind="_alias"
-                        @bind:event="oninput"
-                        placeholder="Escribe tu nombre..."
-                        maxlength="20"
-                        disabled="@_isJoining"
-                        style="font-size: 1.25rem; padding: 1rem 1.25rem;" />
-                    <small class="text-muted mt-1" style="display: block; font-size: 0.875rem;">
-                        2-20 caracteres. Debe ser único en la sala.
-                    </small>
-                </div>
-
-                <button 
-                    class="game-btn game-btn-primary game-btn-lg game-btn-block" 
-                    @onclick="JoinRoomAsync" 
-                    disabled="@(_isJoining || string.IsNullOrWhiteSpace(_alias))">
-                    @if (_isJoining)
+                    @if (_errorMessage is not null)
                     {
-                        <span class="game-spinner"></span>
-                        <span>Uniéndose...</span>
+                        <GameAlert Variant="danger">
+                            <Title>Error</Title>
+                            <Message>@_errorMessage</Message>
+                        </GameAlert>
                     }
-                    else
-                    {
+
+                    <div class="game-form-group">
+                        <label class="game-label" for="alias">
+                            <span style="font-size: 1.25rem;">👤</span> Tu Alias
+                        </label>
+                        <input 
+                            type="text" 
+                            class="game-input" 
+                            id="alias" 
+                            @bind="_alias"
+                            @bind:event="oninput"
+                            placeholder="Escribe tu nombre..."
+                            maxlength="20"
+                            disabled="@_isJoining"
+                            style="font-size: 1.25rem; padding: 1rem 1.25rem;" />
+                        <small class="text-muted mt-1" style="display: block; font-size: 0.875rem;">
+                            2-20 caracteres. Debe ser único en la sala.
+                        </small>
+                    </div>
+
+                    <GameButton 
+                        Variant="primary" 
+                        Size="lg" 
+                        FullWidth="true"
+                        IsLoading="@_isJoining"
+                        Disabled="@string.IsNullOrWhiteSpace(_alias)"
+                        OnClick="JoinRoomAsync">
                         <span style="font-size: 1.5rem;">🚀</span>
                         <span>Unirse a la Sala</span>
-                    }
-                </button>
-            </div>
-        </div>
+                    </GameButton>
+                </GameStack>
+            </Body>
+        </GameCard>
 
         <!-- Info Card -->
-        <div class="game-card mt-3">
-            <div style="text-align: center;">
-                <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📱</div>
-                <h4 style="font-size: 1.125rem; font-weight: 600;">Mantén tu móvil cerca</h4>
-                <p class="text-muted" style="font-size: 0.875rem; margin: 0;">
-                    Usarás tu dispositivo para votar y participar durante la partida
-                </p>
-            </div>
-        </div>
+        <GameCard class="mt-3">
+            <Body>
+                <GameStack Direction="vertical" Gap="2" AlignItems="center">
+                    <div style="font-size: 2.5rem;">📱</div>
+                    <h4 style="font-size: 1.125rem; font-weight: 600; margin: 0;">Mantén tu móvil cerca</h4>
+                    <p class="text-muted text-center" style="font-size: 0.875rem; margin: 0;">
+                        Usarás tu dispositivo para votar y participar durante la partida
+                    </p>
+                </GameStack>
+            </Body>
+        </GameCard>
     }
 </div>
 

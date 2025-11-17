@@ -1,0 +1,44 @@
+@*
+    GameContainer - Responsive container with max-width and padding
+    
+    Usage:
+    <GameContainer Size="lg">
+        Content goes here
+    </GameContainer>
+    
+    Props:
+    - Size: sm, md, lg, xl (default: lg) - Controls max-width
+    - ChildContent: Container content
+*@
+
+<div class="@GetCssClasses()" @attributes="AdditionalAttributes">
+    @ChildContent
+</div>
+
+@code {
+    [Parameter]
+    public string Size { get; set; } = "lg";
+    
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+    
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object>? AdditionalAttributes { get; set; }
+    
+    private string GetCssClasses()
+    {
+        var classes = new List<string> { "game-content-container" };
+        
+        // Size
+        classes.Add(Size switch
+        {
+            "sm" => "game-content-container-sm",
+            "md" => "game-content-container-md",
+            "lg" => "game-content-container-lg",
+            "xl" => "game-content-container-xl",
+            _ => "game-content-container-lg"
+        });
+        
+        return string.Join(" ", classes);
+    }
+}
