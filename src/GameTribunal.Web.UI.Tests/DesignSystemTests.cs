@@ -1,17 +1,22 @@
+using GameTribunal.Web.UI.Tests.Infrastructure;
+
 namespace GameTribunal.Web.UI.Tests;
 
 /// <summary>
 /// Tests to validate the game's design system meets the highest standards.
 /// These tests ensure visual consistency, accessibility, and stunning aesthetics.
 /// </summary>
+[Collection(TestServerFixture.CollectionName)]
 public class DesignSystemTests : PlaywrightTest
 {
-    private const string BaseUrl = "https://localhost:7000";
+    public DesignSystemTests(TestServerFixture serverFixture) : base(serverFixture)
+    {
+    }
     [Fact]
     // Validates that the hero section has impressive visual effects
     public async Task HeroSection_ShouldHaveStunningVisualEffects()
     {
-        await Page.GotoAsync($"{BaseUrl}/");
+        await Page.GotoAsync("/");
 
         // Verify hero section exists and is visible
         var heroSection = Page.Locator(".game-hero");
@@ -38,7 +43,7 @@ public class DesignSystemTests : PlaywrightTest
     // Validates that buttons have engaging hover effects and animations
     public async Task Buttons_ShouldHaveEngagingHoverEffects()
     {
-        await Page.GotoAsync($"{BaseUrl}/");
+        await Page.GotoAsync("/");
 
         var primaryButton = Page.Locator(".game-btn-primary").First;
         await Expect(primaryButton).ToBeVisibleAsync();
@@ -71,7 +76,7 @@ public class DesignSystemTests : PlaywrightTest
     // Validates that cards have professional styling with depth and shadows
     public async Task Cards_ShouldHaveProfessionalStyling()
     {
-        await Page.GotoAsync($"{BaseUrl}/");
+        await Page.GotoAsync("/");
 
         var gameCard = Page.Locator(".game-card").First;
         await Expect(gameCard).ToBeVisibleAsync();
@@ -105,7 +110,7 @@ public class DesignSystemTests : PlaywrightTest
     // Validates that the color palette is vibrant and eye-catching
     public async Task ColorPalette_ShouldBeVibrantAndEyeCatching()
     {
-        await Page.GotoAsync($"{BaseUrl}/");
+        await Page.GotoAsync("/");
 
         // Check CSS custom properties (design tokens)
         var primaryColor = await Page.EvaluateAsync<string>(
@@ -128,7 +133,7 @@ public class DesignSystemTests : PlaywrightTest
     // Validates that typography has proper hierarchy and readability
     public async Task Typography_ShouldHaveProperHierarchy()
     {
-        await Page.GotoAsync($"{BaseUrl}/");
+        await Page.GotoAsync("/");
 
         var title = Page.Locator(".game-title").First;
         await Expect(title).ToBeVisibleAsync();
@@ -156,7 +161,7 @@ public class DesignSystemTests : PlaywrightTest
     // Validates that animations are smooth and add to the user experience
     public async Task Animations_ShouldBeSmoothAndPolished()
     {
-        await Page.GotoAsync($"{BaseUrl}/");
+        await Page.GotoAsync("/");
 
         // Check for CSS animations
         var animatedElements = await Page.Locator(".game-animate-fadeIn, .game-animate-slideIn").AllAsync();
@@ -182,7 +187,7 @@ public class DesignSystemTests : PlaywrightTest
     // Validates that the design uses modern effects like glassmorphism
     public async Task ModernEffects_ShouldBePresent()
     {
-        await Page.GotoAsync($"{BaseUrl}/");
+        await Page.GotoAsync("/");
 
         // Count elements with backdrop-filter (glassmorphism effect)
         var glassmorphElements = await Page.EvaluateAsync<int>(@"
@@ -209,7 +214,7 @@ public class DesignSystemTests : PlaywrightTest
     // Validates that spacing and layout follow a consistent scale
     public async Task Spacing_ShouldFollowConsistentScale()
     {
-        await Page.GotoAsync($"{BaseUrl}/");
+        await Page.GotoAsync("/");
 
         // Verify spacing scale is defined
         var spaceSmall = await Page.EvaluateAsync<string>(
@@ -239,7 +244,7 @@ public class DesignSystemTests : PlaywrightTest
     // Validates that interactive elements have clear focus states for accessibility
     public async Task FocusStates_ShouldBeClearAndAccessible()
     {
-        await Page.GotoAsync($"{BaseUrl}/");
+        await Page.GotoAsync("/");
 
         var button = Page.Locator(".game-btn").First;
         await Expect(button).ToBeVisibleAsync();
@@ -260,7 +265,7 @@ public class DesignSystemTests : PlaywrightTest
     // Validates that the QR code display is visually stunning and prominent
     public async Task QRCodeDisplay_ShouldBeVisuallyStunning()
     {
-        await Page.GotoAsync($"{BaseUrl}/");
+        await Page.GotoAsync("/");
 
         // Create a room to see QR code
         var createButton = Page.Locator("button:has-text('Crear Sala')");

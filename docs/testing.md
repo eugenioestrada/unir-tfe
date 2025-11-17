@@ -170,6 +170,8 @@ cd src/GameTribunal.Web.UI.Tests
 pwsh bin/Debug/net10.0/playwright.ps1 install chromium
 ```
 
+Las suites Playwright arrancan automáticamente `GameTribunal.Web` mediante `WebApplicationFactory`, utilizando un puerto HTTPS dinámico para que el navegador pueda interactuar con la aplicación sin pasos manuales previos.
+
 ### Ejecutar UI Tests
 
 ```bash

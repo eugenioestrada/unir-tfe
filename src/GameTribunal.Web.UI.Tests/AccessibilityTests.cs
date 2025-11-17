@@ -1,3 +1,4 @@
+using GameTribunal.Web.UI.Tests.Infrastructure;
 using Microsoft.Playwright;
 
 namespace GameTribunal.Web.UI.Tests;
@@ -6,14 +7,18 @@ namespace GameTribunal.Web.UI.Tests;
 /// Tests to validate that the game meets accessibility standards (WCAG AA).
 /// Ensures the stunning design is also inclusive and accessible to all users.
 /// </summary>
+[Collection(TestServerFixture.CollectionName)]
 public class AccessibilityTests : PlaywrightTest
 {
-    private const string BaseUrl = "https://localhost:7000";
+    public AccessibilityTests(TestServerFixture serverFixture) : base(serverFixture)
+    {
+    }
+
     [Fact]
     // Validates that color contrast meets WCAG AA standards
     public async Task ColorContrast_ShouldMeetWCAGStandards()
     {
-        await Page.GotoAsync($"{BaseUrl}/");
+        await Page.GotoAsync("/");
 
         // Test title contrast
         var title = Page.Locator(".game-title").First;
@@ -42,7 +47,7 @@ public class AccessibilityTests : PlaywrightTest
     // Validates that interactive elements can be navigated with keyboard
     public async Task KeyboardNavigation_ShouldWork()
     {
-        await Page.GotoAsync($"{BaseUrl}/");
+        await Page.GotoAsync("/");
 
         // Tab through interactive elements
         await Page.Keyboard.PressAsync("Tab");
@@ -64,7 +69,7 @@ public class AccessibilityTests : PlaywrightTest
     // Validates that page has proper semantic HTML structure
     public async Task SemanticHTML_ShouldBeUsed()
     {
-        await Page.GotoAsync($"{BaseUrl}/");
+        await Page.GotoAsync("/");
 
         // Check for proper heading hierarchy
         var h1Count = await Page.Locator("h1").CountAsync();
@@ -79,7 +84,7 @@ public class AccessibilityTests : PlaywrightTest
     // Validates that images have alt text
     public async Task Images_ShouldHaveAltText()
     {
-        await Page.GotoAsync($"{BaseUrl}/");
+        await Page.GotoAsync("/");
 
         // Create room to see QR code
         var createButton = Page.Locator("button:has-text('Crear Sala')");
@@ -100,7 +105,7 @@ public class AccessibilityTests : PlaywrightTest
     // Validates that page has a proper title
     public async Task PageTitle_ShouldBeDescriptive()
     {
-        await Page.GotoAsync($"{BaseUrl}/");
+        await Page.GotoAsync("/");
 
         var title = await Page.TitleAsync();
         Assert.NotEmpty(title);
@@ -112,7 +117,7 @@ public class AccessibilityTests : PlaywrightTest
     // Validates that form inputs have associated labels
     public async Task FormInputs_ShouldHaveLabels()
     {
-        await Page.GotoAsync($"{BaseUrl}/");
+        await Page.GotoAsync("/");
 
         var selects = await Page.Locator("select.game-select").AllAsync();
         
@@ -133,7 +138,7 @@ public class AccessibilityTests : PlaywrightTest
     // Validates that disabled elements are clearly indicated
     public async Task DisabledElements_ShouldBeVisuallyDistinct()
     {
-        await Page.GotoAsync($"{BaseUrl}/");
+        await Page.GotoAsync("/");
 
         // Try to find a disabled button
         var buttons = await Page.Locator("button").AllAsync();
@@ -157,7 +162,7 @@ public class AccessibilityTests : PlaywrightTest
     // Validates that focus trap works in modals
     public async Task Modals_ShouldTrapFocus()
     {
-        await Page.GotoAsync($"{BaseUrl}/");
+        await Page.GotoAsync("/");
 
         // Check if there are any modal elements in the design system
         var modals = await Page.Locator(".game-modal, [role='dialog']").AllAsync();
@@ -174,7 +179,7 @@ public class AccessibilityTests : PlaywrightTest
     // Validates that animations respect prefers-reduced-motion
     public async Task Animations_ShouldRespectReducedMotionPreference()
     {
-        await Page.GotoAsync($"{BaseUrl}/");
+        await Page.GotoAsync("/");
 
         // Check for prefers-reduced-motion support in CSS
         var hasReducedMotionSupport = await Page.EvaluateAsync<bool>(
@@ -201,7 +206,7 @@ public class AccessibilityTests : PlaywrightTest
     // Validates that text can be resized without breaking layout
     public async Task TextResize_ShouldNotBreakLayout()
     {
-        await Page.GotoAsync($"{BaseUrl}/");
+        await Page.GotoAsync("/");
 
         // Get initial layout
         var containerHeight = await Page.Locator(".game-container").EvaluateAsync<double>("el => el.offsetHeight");
@@ -225,7 +230,7 @@ public class AccessibilityTests : PlaywrightTest
     // Validates that error messages are accessible
     public async Task ErrorMessages_ShouldBeAccessible()
     {
-        await Page.GotoAsync($"{BaseUrl}/");
+        await Page.GotoAsync("/");
 
         // Look for alert elements
         var alerts = await Page.Locator(".game-alert, [role='alert']").AllAsync();

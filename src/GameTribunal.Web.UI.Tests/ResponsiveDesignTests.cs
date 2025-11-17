@@ -1,3 +1,4 @@
+using GameTribunal.Web.UI.Tests.Infrastructure;
 using Microsoft.Playwright;
 
 namespace GameTribunal.Web.UI.Tests;
@@ -6,16 +7,19 @@ namespace GameTribunal.Web.UI.Tests;
 /// Tests to validate that the game design is responsive and looks amazing on all devices.
 /// Validates mobile, tablet, desktop, and TV (10-foot UI) experiences.
 /// </summary>
+[Collection(TestServerFixture.CollectionName)]
 public class ResponsiveDesignTests : PlaywrightTest
 {
-    private const string BaseUrl = "https://localhost:7000";
+    public ResponsiveDesignTests(TestServerFixture serverFixture) : base(serverFixture)
+    {
+    }
 
     [Fact]
     // Validates design on mobile portrait (375x667 - iPhone SE)
     public async Task MobilePortrait_ShouldLookAmazing()
     {
         await Page.SetViewportSizeAsync(375, 667);
-        await Page.GotoAsync($"{BaseUrl}/");
+        await Page.GotoAsync("/");
 
         // Verify hero section adapts to mobile
         var hero = Page.Locator(".game-hero");
@@ -51,7 +55,7 @@ public class ResponsiveDesignTests : PlaywrightTest
     public async Task MobileLandscape_ShouldOptimizeForSmallHeight()
     {
         await Page.SetViewportSizeAsync(667, 375);
-        await Page.GotoAsync($"{BaseUrl}/");
+        await Page.GotoAsync("/");
 
         var container = Page.Locator(".game-container");
         await Expect(container).ToBeVisibleAsync();
@@ -72,7 +76,7 @@ public class ResponsiveDesignTests : PlaywrightTest
     public async Task Tablet_ShouldProvideOptimalExperience()
     {
         await Page.SetViewportSizeAsync(768, 1024);
-        await Page.GotoAsync($"{BaseUrl}/");
+        await Page.GotoAsync("/");
 
         var hero = Page.Locator(".game-hero");
         await Expect(hero).ToBeVisibleAsync();
@@ -101,7 +105,7 @@ public class ResponsiveDesignTests : PlaywrightTest
     public async Task Desktop_ShouldShowFullGlory()
     {
         await Page.SetViewportSizeAsync(1920, 1080);
-        await Page.GotoAsync($"{BaseUrl}/");
+        await Page.GotoAsync("/");
 
         var container = Page.Locator(".game-container");
         await Expect(container).ToBeVisibleAsync();
@@ -132,7 +136,7 @@ public class ResponsiveDesignTests : PlaywrightTest
     public async Task TV_ShouldProvide10FootUIExperience()
     {
         await Page.SetViewportSizeAsync(1920, 1080);
-        await Page.GotoAsync($"{BaseUrl}/");
+        await Page.GotoAsync("/");
 
         // Verify base font size is increased for TV viewing
         var baseFontSize = await Page.EvaluateAsync<string>(
@@ -164,7 +168,7 @@ public class ResponsiveDesignTests : PlaywrightTest
     public async Task SmallScreens_ShouldNotOverflow()
     {
         await Page.SetViewportSizeAsync(320, 568); // iPhone 5/SE
-        await Page.GotoAsync($"{BaseUrl}/");
+        await Page.GotoAsync("/");
 
         // Check for horizontal scrollbar
         var hasHorizontalScroll = await Page.EvaluateAsync<bool>(
@@ -194,7 +198,7 @@ public class ResponsiveDesignTests : PlaywrightTest
         foreach (var viewport in viewports)
         {
             await Page.SetViewportSizeAsync(viewport.Width, viewport.Height);
-            await Page.GotoAsync($"{BaseUrl}/");
+            await Page.GotoAsync("/");
 
             // Create room to see QR code
             var createButton = Page.Locator("button:has-text('Crear Sala')");
@@ -222,7 +226,7 @@ public class ResponsiveDesignTests : PlaywrightTest
     public async Task TouchTargets_ShouldMeetMinimumSize()
     {
         await Page.SetViewportSizeAsync(375, 667);
-        await Page.GotoAsync($"{BaseUrl}/");
+        await Page.GotoAsync("/");
 
         // Get all interactive elements
         var buttons = await Page.Locator("button, a.game-btn, .game-btn").AllAsync();
@@ -257,7 +261,7 @@ public class ResponsiveDesignTests : PlaywrightTest
         foreach (var testCase in testCases)
         {
             await Page.SetViewportSizeAsync(testCase.Width, testCase.Height);
-            await Page.GotoAsync($"{BaseUrl}/");
+            await Page.GotoAsync("/");
 
             var grid = Page.Locator(".game-grid-2");
             if (await grid.CountAsync() > 0)
