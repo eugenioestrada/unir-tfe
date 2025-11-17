@@ -196,12 +196,15 @@ public class AccessibilityTests : PlaywrightTest
         await Page.GotoAsync($"{BaseUrl}/");
 
         // Check for prefers-reduced-motion support in CSS
-        var hasReducedMotionSupport = await Page.EvaluateAsync<bool>(@"
-            const style = document.createElement('style');
-            style.textContent = '@media (prefers-reduced-motion: reduce) { * { animation: none; } }';
-            document.head.appendChild(style);
-            return true;
-        ");
+        var hasReducedMotionSupport = await Page.EvaluateAsync<bool>(
+            """
+            () => {
+                const style = document.createElement('style');
+                style.textContent = '@media (prefers-reduced-motion: reduce) { * { animation: none; } }';
+                document.head.appendChild(style);
+                return true;
+            }
+            """);
 
         Assert.That(hasReducedMotionSupport, Is.True,
             "Page should support prefers-reduced-motion media query");

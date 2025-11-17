@@ -1,3 +1,5 @@
+using Microsoft.Playwright;
+
 namespace GameTribunal.UI.Tests;
 
 /// <summary>
@@ -280,6 +282,10 @@ public class ResponsiveDesignTests : PlaywrightTest
             var grid = Page.Locator(".game-grid-2");
             if (await grid.CountAsync() > 0)
             {
+                await grid.First.WaitForAsync(new LocatorWaitForOptions
+                {
+                    State = WaitForSelectorState.Visible
+                });
                 var gridTemplate = await grid.EvaluateAsync<string>("el => window.getComputedStyle(el).gridTemplateColumns");
                 
                 // Count columns by counting "px" or "fr" occurrences

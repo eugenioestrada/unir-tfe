@@ -460,7 +460,10 @@ h6 {
 }
 
 .game-btn-primary {
-    background: var(--gradient-primary);
+    background-color: var(--color-primary);
+    background-image: var(--gradient-primary);
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
     color: var(--color-light);
     border: 1px solid rgba(255, 255, 255, 0.2);
 }
@@ -862,6 +865,7 @@ h6 {
 .game-grid {
     display: grid;
     gap: var(--space-md);
+    grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
 }
 
 .game-grid-2 {
@@ -1396,7 +1400,7 @@ a:focus-visible {
     }
     
     .game-title {
-        font-size: var(--font-size-3xl);
+        font-size: clamp(1.6rem, 8vw, var(--font-size-5xl));
         margin-bottom: var(--space-sm);
     }
     
@@ -1525,7 +1529,7 @@ a:focus-visible {
     }
     
     .game-grid-2 {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(2, minmax(280px, 1fr));
         gap: var(--space-md);
     }
     
@@ -1538,6 +1542,11 @@ a:focus-visible {
 @media (min-width: 1025px) {
     .game-container {
         padding: var(--space-md) var(--space-lg);
+    }
+    
+    .game-grid-2 {
+        grid-template-columns: repeat(2, minmax(320px, 1fr));
+        gap: var(--space-lg);
     }
     
     .game-qr-image img {

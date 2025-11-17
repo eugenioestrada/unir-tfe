@@ -31,7 +31,7 @@
                         <label class="game-label" for="gameMode">
                             <span style="font-size: 1.5rem;">🎯</span> Modo de Juego
                         </label>
-                        <select id="gameMode" class="game-select" @bind="_selectedMode">
+                        <select id="gameMode" class="game-select" @bind="_selectedMode" autofocus @ref="_gameModeSelect">
                             @foreach (var mode in _availableModes)
                             {
                                 <option value="@mode">
@@ -226,6 +226,7 @@
 @code {
     private GameMode _selectedMode = GameMode.Normal;
     private RoomDto? _room;
+    private ElementReference _gameModeSelect;
     private string? _errorMessage;
     private bool _isCreating;
     private bool _isStarting;
@@ -261,6 +262,21 @@
         GameMode.Spicy => "🔥",
         _ => "🎮"
     };
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                await _gameModeSelect.FocusAsync();
+            }
+            catch (InvalidOperationException)
+            {
+                // Ignore focus errors if the element is not yet available.
+            }
+        }
+    }
 
     private string GetModeGradient(GameMode mode) => mode switch
     {
