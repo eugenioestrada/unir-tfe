@@ -92,16 +92,16 @@ dotnet test src/GameTribunal.Application.Tests/ --filter "FullyQualifiedName~Roo
 ### Tecnologías
 
 - **Framework**: Playwright for .NET
-- **Test Runner**: NUnit
+- **Test Runner**: xUnit
 - **Navegadores**: Chromium, Firefox, Webkit
 - **.NET**: 10.0
 
 ### Estructura
 
-Los tests de interfaz de usuario se encuentran en `src/GameTribunal.UI.Tests/`:
+Los tests de interfaz de usuario se encuentran en `src/GameTribunal.Web.UI.Tests/`:
 
 ```
-GameTribunal.UI.Tests/
+GameTribunal.Web.UI.Tests/
 ├── AccessibilityTests.cs       # Tests WCAG AA
 ├── DesignSystemTests.cs        # Tests de sistema de diseño
 ├── ResponsiveDesignTests.cs    # Tests de diseño responsivo
@@ -166,7 +166,7 @@ Captura screenshots para comparación:
 
 ```bash
 # Instalar navegadores Playwright
-cd src/GameTribunal.UI.Tests
+cd src/GameTribunal.Web.UI.Tests
 pwsh bin/Debug/net10.0/playwright.ps1 install chromium
 ```
 
@@ -174,23 +174,23 @@ pwsh bin/Debug/net10.0/playwright.ps1 install chromium
 
 ```bash
 # Todos los tests de UI
-dotnet test src/GameTribunal.UI.Tests/
+dotnet test src/GameTribunal.Web.UI.Tests/
 
 # Tests específicos
-dotnet test src/GameTribunal.UI.Tests/ --filter "FullyQualifiedName~DesignSystemTests"
-dotnet test src/GameTribunal.UI.Tests/ --filter "FullyQualifiedName~AccessibilityTests"
-dotnet test src/GameTribunal.UI.Tests/ --filter "FullyQualifiedName~ResponsiveDesignTests"
-dotnet test src/GameTribunal.UI.Tests/ --filter "FullyQualifiedName~VisualRegressionTests"
+dotnet test src/GameTribunal.Web.UI.Tests/ --filter "FullyQualifiedName~DesignSystemTests"
+dotnet test src/GameTribunal.Web.UI.Tests/ --filter "FullyQualifiedName~AccessibilityTests"
+dotnet test src/GameTribunal.Web.UI.Tests/ --filter "FullyQualifiedName~ResponsiveDesignTests"
+dotnet test src/GameTribunal.Web.UI.Tests/ --filter "FullyQualifiedName~VisualRegressionTests"
 
 # Ver resultados detallados
-dotnet test src/GameTribunal.UI.Tests/ --logger "console;verbosity=detailed"
+dotnet test src/GameTribunal.Web.UI.Tests/ --logger "console;verbosity=detailed"
 ```
 
 ### Screenshots
 
 Los screenshots se generan automáticamente en:
 ```
-src/GameTribunal.UI.Tests/bin/Debug/net10.0/screenshots/
+src/GameTribunal.Web.UI.Tests/bin/Debug/net10.0/screenshots/
 ```
 
 ## Ejecutar Todos los Tests

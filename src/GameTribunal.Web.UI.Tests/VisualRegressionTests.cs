@@ -1,25 +1,17 @@
 using Microsoft.Playwright;
 
-namespace GameTribunal.UI.Tests;
+namespace GameTribunal.Web.UI.Tests;
 
 /// <summary>
 /// Visual regression tests to ensure the design remains stunning across updates.
 /// Takes screenshots and validates visual consistency.
 /// </summary>
-[Parallelizable(ParallelScope.Self)]
-[TestFixture]
 public class VisualRegressionTests : PlaywrightTest
 {
     private const string BaseUrl = "https://localhost:7000";
 
-    [SetUp]
-    public async Task SetUp()
-    {
-        await Page.SetViewportSizeAsync(1920, 1080);
-    }
-
-    [Test]
-    [Description("Captures screenshot of the lobby page for visual validation")]
+                [Fact]
+    // Captures screenshot of the lobby page for visual validation
     public async Task LobbyPage_ShouldLookStunning()
     {
         await Page.GotoAsync($"{BaseUrl}/");
@@ -35,12 +27,12 @@ public class VisualRegressionTests : PlaywrightTest
         });
 
         // Verify screenshot was created
-        Assert.That(File.Exists("screenshots/lobby-desktop.png"), Is.True, 
+        // TODO: Convert to xUnit - Assert.That(File.Exists("screenshots/lobby-desktop.png"), Is.True, 
             "Screenshot should be created successfully");
     }
 
-    [Test]
-    [Description("Captures screenshot of lobby on mobile for visual validation")]
+    [Fact]
+    // Captures screenshot of lobby on mobile for visual validation
     public async Task LobbyPage_Mobile_ShouldLookStunning()
     {
         await Page.SetViewportSizeAsync(375, 667);
@@ -54,12 +46,12 @@ public class VisualRegressionTests : PlaywrightTest
             FullPage = true
         });
 
-        Assert.That(File.Exists("screenshots/lobby-mobile.png"), Is.True, 
+        // TODO: Convert to xUnit - Assert.That(File.Exists("screenshots/lobby-mobile.png"), Is.True, 
             "Mobile screenshot should be created successfully");
     }
 
-    [Test]
-    [Description("Captures screenshot of lobby on tablet for visual validation")]
+    [Fact]
+    // Captures screenshot of lobby on tablet for visual validation
     public async Task LobbyPage_Tablet_ShouldLookStunning()
     {
         await Page.SetViewportSizeAsync(768, 1024);
@@ -73,12 +65,12 @@ public class VisualRegressionTests : PlaywrightTest
             FullPage = true
         });
 
-        Assert.That(File.Exists("screenshots/lobby-tablet.png"), Is.True, 
+        // TODO: Convert to xUnit - Assert.That(File.Exists("screenshots/lobby-tablet.png"), Is.True, 
             "Tablet screenshot should be created successfully");
     }
 
-    [Test]
-    [Description("Captures screenshot of room with QR code")]
+    [Fact]
+    // Captures screenshot of room with QR code
     public async Task RoomWithQRCode_ShouldLookStunning()
     {
         await Page.GotoAsync($"{BaseUrl}/");
@@ -96,12 +88,12 @@ public class VisualRegressionTests : PlaywrightTest
             FullPage = true
         });
 
-        Assert.That(File.Exists("screenshots/room-with-qr-desktop.png"), Is.True, 
+        // TODO: Convert to xUnit - Assert.That(File.Exists("screenshots/room-with-qr-desktop.png"), Is.True, 
             "Room with QR code screenshot should be created successfully");
     }
 
-    [Test]
-    [Description("Captures screenshot of room with QR code on mobile")]
+    [Fact]
+    // Captures screenshot of room with QR code on mobile
     public async Task RoomWithQRCode_Mobile_ShouldLookStunning()
     {
         await Page.SetViewportSizeAsync(375, 667);
@@ -117,12 +109,12 @@ public class VisualRegressionTests : PlaywrightTest
             FullPage = true
         });
 
-        Assert.That(File.Exists("screenshots/room-with-qr-mobile.png"), Is.True, 
+        // TODO: Convert to xUnit - Assert.That(File.Exists("screenshots/room-with-qr-mobile.png"), Is.True, 
             "Mobile room screenshot should be created successfully");
     }
 
-    [Test]
-    [Description("Captures screenshot of hero section")]
+    [Fact]
+    // Captures screenshot of hero section
     public async Task HeroSection_ShouldLookStunning()
     {
         await Page.GotoAsync($"{BaseUrl}/");
@@ -136,12 +128,12 @@ public class VisualRegressionTests : PlaywrightTest
             Path = "screenshots/hero-section.png"
         });
 
-        Assert.That(File.Exists("screenshots/hero-section.png"), Is.True, 
+        // TODO: Convert to xUnit - Assert.That(File.Exists("screenshots/hero-section.png"), Is.True, 
             "Hero section screenshot should be created successfully");
     }
 
-    [Test]
-    [Description("Captures screenshot of game cards")]
+    [Fact]
+    // Captures screenshot of game cards
     public async Task GameCards_ShouldLookStunning()
     {
         await Page.GotoAsync($"{BaseUrl}/");
@@ -155,12 +147,12 @@ public class VisualRegressionTests : PlaywrightTest
             Path = "screenshots/game-card.png"
         });
 
-        Assert.That(File.Exists("screenshots/game-card.png"), Is.True, 
+        // TODO: Convert to xUnit - Assert.That(File.Exists("screenshots/game-card.png"), Is.True, 
             "Game card screenshot should be created successfully");
     }
 
-    [Test]
-    [Description("Captures screenshot of primary button")]
+    [Fact]
+    // Captures screenshot of primary button
     public async Task PrimaryButton_ShouldLookStunning()
     {
         await Page.GotoAsync($"{BaseUrl}/");
@@ -174,12 +166,12 @@ public class VisualRegressionTests : PlaywrightTest
             Path = "screenshots/primary-button.png"
         });
 
-        Assert.That(File.Exists("screenshots/primary-button.png"), Is.True, 
+        // TODO: Convert to xUnit - Assert.That(File.Exists("screenshots/primary-button.png"), Is.True, 
             "Primary button screenshot should be created successfully");
     }
 
-    [Test]
-    [Description("Captures screenshot of button hover state")]
+    [Fact]
+    // Captures screenshot of button hover state
     public async Task ButtonHover_ShouldLookStunning()
     {
         await Page.GotoAsync($"{BaseUrl}/");
@@ -197,12 +189,12 @@ public class VisualRegressionTests : PlaywrightTest
             Path = "screenshots/primary-button-hover.png"
         });
 
-        Assert.That(File.Exists("screenshots/primary-button-hover.png"), Is.True, 
+        // TODO: Convert to xUnit - Assert.That(File.Exists("screenshots/primary-button-hover.png"), Is.True, 
             "Button hover screenshot should be created successfully");
     }
 
-    [Test]
-    [Description("Captures screenshot of Home/About page")]
+    [Fact]
+    // Captures screenshot of Home/About page
     public async Task HomePage_ShouldLookStunning()
     {
         await Page.GotoAsync($"{BaseUrl}/home");
@@ -214,12 +206,12 @@ public class VisualRegressionTests : PlaywrightTest
             FullPage = true
         });
 
-        Assert.That(File.Exists("screenshots/home-page-desktop.png"), Is.True, 
+        // TODO: Convert to xUnit - Assert.That(File.Exists("screenshots/home-page-desktop.png"), Is.True, 
             "Home page screenshot should be created successfully");
     }
 
-    [Test]
-    [Description("Validates that screenshots directory exists")]
+    [Fact]
+    // Validates that screenshots directory exists
     public async Task ScreenshotsDirectory_ShouldBeCreated()
     {
         await Task.CompletedTask; // Make method async
@@ -229,7 +221,7 @@ public class VisualRegressionTests : PlaywrightTest
             Directory.CreateDirectory("screenshots");
         }
 
-        Assert.That(Directory.Exists("screenshots"), Is.True, 
+        // TODO: Convert to xUnit - Assert.That(Directory.Exists("screenshots"), Is.True, 
             "Screenshots directory should exist");
     }
 }

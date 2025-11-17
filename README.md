@@ -174,13 +174,13 @@ El proyecto utiliza una estrategia de testing en múltiples niveles para garanti
 - **Ejecución**: `dotnet test src/GameTribunal.Application.Tests/`
 
 ### UI Tests (42 tests)
-- **Framework**: Playwright for .NET + NUnit
+- **Framework**: Playwright for .NET + xUnit
 - **Cobertura**:
   - 11 tests de accesibilidad WCAG AA
   - 10 tests de sistema de diseño
   - 10 tests de responsividad (7 viewports)
   - 11 tests de regresión visual
-- **Ejecución**: `dotnet test src/GameTribunal.UI.Tests/`
+- **Ejecución**: `dotnet test src/GameTribunal.Web.UI.Tests/`
 
 ### Ejecución Completa
 ```bash
@@ -191,7 +191,7 @@ dotnet test
 dotnet test src/GameTribunal.Application.Tests/
 
 # Solo UI tests (requiere instalación previa de Playwright)
-cd src/GameTribunal.UI.Tests
+cd src/GameTribunal.Web.UI.Tests
 pwsh bin/Debug/net10.0/playwright.ps1 install chromium
 dotnet test
 ```
