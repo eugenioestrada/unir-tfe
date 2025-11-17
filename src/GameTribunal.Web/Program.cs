@@ -2,6 +2,7 @@ using GameTribunal.Application.Contracts;
 using GameTribunal.Application.Services;
 using GameTribunal.Infrastructure.Persistence;
 using GameTribunal.Web.Components;
+using GameTribunal.Web.Hubs;
 using GameTribunal.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,9 +13,13 @@ builder.AddServiceDefaults();
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+// Add SignalR for real-time communication (RF-011, RF-012)
+builder.Services.AddSignalR();
+
 builder.Services.AddSingleton<IRoomRepository, InMemoryRoomRepository>();
 builder.Services.AddSingleton<IRoomCodeGenerator, RandomRoomCodeGenerator>();
 builder.Services.AddScoped<RoomService>();
+builder.Services.AddScoped<SignalRRoomService>(); // SignalR-aware wrapper (RF-011)
 builder.Services.AddSingleton<QrCodeService>();
 
 var app = builder.Build();
@@ -34,5 +39,8 @@ app.UseAntiforgery();
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
+
+// Map SignalR hub endpoint (RF-011, RF-012)
+app.MapHub<GameHub>("/gamehub");
 
 app.Run();
