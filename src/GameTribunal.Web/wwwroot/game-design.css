@@ -592,6 +592,20 @@ h6 {
     font-weight: var(--font-weight-normal);
 }
 
+/* Select dropdown options styling for visibility */
+.game-select option {
+    background: var(--color-dark);
+    color: var(--color-light);
+    padding: var(--space-md);
+    font-weight: var(--font-weight-medium);
+}
+
+.game-select option:hover,
+.game-select option:checked {
+    background: var(--color-primary);
+    color: var(--color-light);
+}
+
 /* ========== BADGE COMPONENTS ========== */
 .game-badge {
     display: inline-flex;
