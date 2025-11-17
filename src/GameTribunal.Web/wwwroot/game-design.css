@@ -460,7 +460,10 @@ h6 {
 }
 
 .game-btn-primary {
-    background: var(--gradient-primary);
+    background-color: var(--color-primary);
+    background-image: var(--gradient-primary);
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
     color: var(--color-light);
     border: 1px solid rgba(255, 255, 255, 0.2);
 }
@@ -587,6 +590,20 @@ h6 {
 .game-input::placeholder {
     color: rgba(255, 255, 255, 0.5);
     font-weight: var(--font-weight-normal);
+}
+
+/* Select dropdown options styling for visibility */
+.game-select option {
+    background: var(--color-dark);
+    color: var(--color-light);
+    padding: var(--space-md);
+    font-weight: var(--font-weight-medium);
+}
+
+.game-select option:hover,
+.game-select option:checked {
+    background: var(--color-primary);
+    color: var(--color-light);
 }
 
 /* ========== BADGE COMPONENTS ========== */
@@ -862,6 +879,7 @@ h6 {
 .game-grid {
     display: grid;
     gap: var(--space-md);
+    grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
 }
 
 .game-grid-2 {
@@ -1396,7 +1414,7 @@ a:focus-visible {
     }
     
     .game-title {
-        font-size: var(--font-size-3xl);
+        font-size: clamp(1.6rem, 8vw, var(--font-size-5xl));
         margin-bottom: var(--space-sm);
     }
     
@@ -1525,7 +1543,7 @@ a:focus-visible {
     }
     
     .game-grid-2 {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(2, minmax(280px, 1fr));
         gap: var(--space-md);
     }
     
@@ -1538,6 +1556,11 @@ a:focus-visible {
 @media (min-width: 1025px) {
     .game-container {
         padding: var(--space-md) var(--space-lg);
+    }
+    
+    .game-grid-2 {
+        grid-template-columns: repeat(2, minmax(320px, 1fr));
+        gap: var(--space-lg);
     }
     
     .game-qr-image img {
@@ -1639,6 +1662,339 @@ a:focus-visible {
         padding: var(--space-3xl);
         margin-bottom: var(--space-xl);
     }
+}
+
+/* ========== PARTICLE EFFECTS & ADVANCED ANIMATIONS ========== */
+/* Floating particles background effect for extra visual wow factor */
+@keyframes floatParticle {
+    0%, 100% {
+        transform: translate(0, 0) rotate(0deg);
+        opacity: 0.3;
+    }
+    25% {
+        transform: translate(10px, -10px) rotate(90deg);
+        opacity: 0.5;
+    }
+    50% {
+        transform: translate(-10px, -20px) rotate(180deg);
+        opacity: 0.7;
+    }
+    75% {
+        transform: translate(-5px, -10px) rotate(270deg);
+        opacity: 0.5;
+    }
+}
+
+.game-particle {
+    position: fixed;
+    width: 4px;
+    height: 4px;
+    background: radial-gradient(circle, rgba(255, 99, 71, 0.8), rgba(247, 37, 133, 0.4));
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+    animation: floatParticle 15s ease-in-out infinite;
+}
+
+.game-particle:nth-child(2) { animation-delay: -5s; }
+.game-particle:nth-child(3) { animation-delay: -10s; }
+
+/* Shimmering text effect for titles */
+@keyframes shimmerText {
+    0% {
+        background-position: -500px 0;
+    }
+    100% {
+        background-position: 500px 0;
+    }
+}
+
+.game-text-shimmer {
+    background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.8) 0%,
+        rgba(255, 255, 255, 1) 50%,
+        rgba(255, 255, 255, 0.8) 100%
+    );
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: shimmerText 3s linear infinite;
+}
+
+/* Neon glow effect for special elements */
+@keyframes neonPulse {
+    0%, 100% {
+        text-shadow: 
+            0 0 4px rgba(255, 99, 71, 0.5),
+            0 0 8px rgba(255, 99, 71, 0.4),
+            0 0 12px rgba(255, 99, 71, 0.3),
+            0 0 16px rgba(247, 37, 133, 0.2);
+    }
+    50% {
+        text-shadow: 
+            0 0 8px rgba(255, 99, 71, 0.8),
+            0 0 16px rgba(255, 99, 71, 0.6),
+            0 0 24px rgba(255, 99, 71, 0.4),
+            0 0 32px rgba(247, 37, 133, 0.3);
+    }
+}
+
+.game-neon-glow {
+    animation: neonPulse 2s ease-in-out infinite;
+}
+
+/* Bounce entrance animation */
+@keyframes bounceIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.3) translateY(-50px);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.05);
+    }
+    70% {
+        transform: scale(0.95);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.game-animate-bounceIn {
+    animation: bounceIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* Rotate scale animation */
+@keyframes rotateScale {
+    0% {
+        transform: rotate(0deg) scale(1);
+    }
+    50% {
+        transform: rotate(180deg) scale(1.1);
+    }
+    100% {
+        transform: rotate(360deg) scale(1);
+    }
+}
+
+.game-rotate-scale {
+    animation: rotateScale 20s linear infinite;
+}
+
+/* Rainbow border animation */
+@keyframes rainbowBorder {
+    0% {
+        border-color: #FF6347;
+        box-shadow: 0 0 20px rgba(255, 99, 71, 0.5);
+    }
+    25% {
+        border-color: #F72585;
+        box-shadow: 0 0 20px rgba(247, 37, 133, 0.5);
+    }
+    50% {
+        border-color: #7B2CBF;
+        box-shadow: 0 0 20px rgba(123, 44, 191, 0.5);
+    }
+    75% {
+        border-color: #4ECDC4;
+        box-shadow: 0 0 20px rgba(78, 205, 196, 0.5);
+    }
+    100% {
+        border-color: #FF6347;
+        box-shadow: 0 0 20px rgba(255, 99, 71, 0.5);
+    }
+}
+
+.game-rainbow-border {
+    border: 2px solid #FF6347;
+    animation: rainbowBorder 4s linear infinite;
+}
+
+/* Glitch effect for special attention */
+@keyframes glitch {
+    0%, 100% {
+        transform: translate(0);
+        filter: hue-rotate(0deg);
+    }
+    10% {
+        transform: translate(-2px, 2px);
+        filter: hue-rotate(10deg);
+    }
+    20% {
+        transform: translate(2px, -2px);
+        filter: hue-rotate(-10deg);
+    }
+    30% {
+        transform: translate(-2px, -2px);
+        filter: hue-rotate(10deg);
+    }
+    40% {
+        transform: translate(2px, 2px);
+        filter: hue-rotate(-10deg);
+    }
+    50% {
+        transform: translate(0);
+        filter: hue-rotate(0deg);
+    }
+}
+
+.game-glitch-effect {
+    animation: glitch 5s infinite;
+}
+
+/* Ripple effect on click */
+@keyframes ripple {
+    0% {
+        transform: scale(0);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
+.game-ripple::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    animation: ripple 0.6s ease-out;
+}
+
+/* Gradient animation for backgrounds */
+@keyframes gradientShift {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+.game-gradient-animate {
+    background-size: 200% 200%;
+    animation: gradientShift 10s ease infinite;
+}
+
+/* Levitate animation for floating elements */
+@keyframes levitate {
+    0%, 100% {
+        transform: translateY(0) rotate(0deg);
+    }
+    25% {
+        transform: translateY(-10px) rotate(1deg);
+    }
+    50% {
+        transform: translateY(-5px) rotate(-1deg);
+    }
+    75% {
+        transform: translateY(-15px) rotate(0.5deg);
+    }
+}
+
+.game-levitate {
+    animation: levitate 4s ease-in-out infinite;
+}
+
+/* 3D flip effect */
+@keyframes flip3D {
+    0% {
+        transform: perspective(400px) rotateY(0);
+    }
+    100% {
+        transform: perspective(400px) rotateY(360deg);
+    }
+}
+
+.game-flip-3d {
+    animation: flip3D 3s ease-in-out infinite;
+    transform-style: preserve-3d;
+}
+
+/* Enhanced button press effect */
+.game-btn:active:not(:disabled) {
+    transform: scale(0.96) translateY(2px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Spotlight effect on hover for cards */
+.game-card-spotlight {
+    position: relative;
+    overflow: hidden;
+}
+
+.game-card-spotlight::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    transform: translate(-100%, -100%);
+    transition: transform 0.5s ease;
+    pointer-events: none;
+}
+
+.game-card-spotlight:hover::before {
+    transform: translate(0, 0);
+}
+
+/* Star rating display with animation */
+@keyframes starTwinkle {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.7;
+        transform: scale(0.9);
+    }
+}
+
+.game-star {
+    display: inline-block;
+    color: #FFD60A;
+    animation: starTwinkle 1.5s ease-in-out infinite;
+}
+
+.game-star:nth-child(1) { animation-delay: 0s; }
+.game-star:nth-child(2) { animation-delay: 0.2s; }
+.game-star:nth-child(3) { animation-delay: 0.4s; }
+.game-star:nth-child(4) { animation-delay: 0.6s; }
+.game-star:nth-child(5) { animation-delay: 0.8s; }
+
+/* Confetti effect */
+@keyframes confettiFall {
+    0% {
+        transform: translateY(-100vh) rotate(0deg);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(100vh) rotate(720deg);
+        opacity: 0;
+    }
+}
+
+.game-confetti {
+    position: fixed;
+    width: 10px;
+    height: 10px;
+    background: var(--color-accent-1);
+    animation: confettiFall 4s linear infinite;
+    pointer-events: none;
 }
 
 /* ========== UTILITY CLASSES ========== */

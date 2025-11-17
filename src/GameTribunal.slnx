@@ -10,5 +10,6 @@
   <Project Path="GameTribunal.Domain/GameTribunal.Domain.csproj" />
   <Project Path="GameTribunal.Infrastructure/GameTribunal.Infrastructure.csproj" />
   <Project Path="GameTribunal.ServiceDefaults/GameTribunal.ServiceDefaults.csproj" />
+  <Project Path="GameTribunal.Web.UI.Tests/GameTribunal.Web.UI.Tests.csproj" />
   <Project Path="GameTribunal.Web/GameTribunal.Web.csproj" />
 </Solution>

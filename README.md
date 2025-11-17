@@ -159,6 +159,45 @@ La documentación del proyecto está organizada de la siguiente manera:
 - [`docs/technology.md`](docs/technology.md)  
   Stack tecnológico (.NET 10, ASP.NET Core, SignalR, Blazor, EF Core), justificación de decisiones y estrategia de validación.
 
+- [`docs/testing.md`](docs/testing.md)  
+  Estrategia completa de testing: Unit Tests (xUnit) y UI Tests (Playwright), cobertura, comandos de ejecución y best practices.
+
+---
+
+## Testing
+
+El proyecto utiliza una estrategia de testing en múltiples niveles para garantizar calidad y fiabilidad.
+
+### Unit Tests (~20 tests)
+- **Framework**: xUnit + Moq
+- **Cobertura**: Domain (Room, Player), Services (RoomService), SignalR
+- **Ejecución**: `dotnet test src/GameTribunal.Application.Tests/`
+
+### UI Tests (42 tests)
+- **Framework**: Playwright for .NET + xUnit
+- **Cobertura**:
+  - 11 tests de accesibilidad WCAG AA
+  - 10 tests de sistema de diseño
+  - 10 tests de responsividad (7 viewports)
+  - 11 tests de regresión visual
+- **Ejecución**: `dotnet test src/GameTribunal.Web.UI.Tests/`
+
+### Ejecución Completa
+```bash
+# Todos los tests
+dotnet test
+
+# Solo unit tests
+dotnet test src/GameTribunal.Application.Tests/
+
+# Solo UI tests (requiere instalación previa de Playwright)
+cd src/GameTribunal.Web.UI.Tests
+pwsh bin/Debug/net10.0/playwright.ps1 install chromium
+dotnet test
+```
+
+Para información detallada, consulta [`docs/testing.md`](docs/testing.md).
+
 ---
 
 ## Estado del proyecto
