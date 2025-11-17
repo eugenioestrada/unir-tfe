@@ -20,6 +20,10 @@ Este documento recoge los requisitos funcionales, no funcionales y los casos de 
 - RF-010: Los jugadores acceden mediante un navegador y se identifican con un alias sin autenticación adicional.
 - RF-011: El sistema debe sincronizar el estado de la sala en tiempo real entre todos los dispositivos (host y jugadores) mediante SignalR.
 - RF-012: Si un jugador pierde la conexión, debe poder reconectarse y recuperar su estado siempre que la partida siga activa.
+- RF-013: El sistema debe mostrar el estado de cada jugador como `Conectado`, `Inactivo` o `Desconectado` dentro de la sala.
+- RF-014: El estado `Inactivo` se aplicará automáticamente tras 30 segundos sin actividad y se revertirá al detectar interacción del jugador.
+- RF-015: El estado `Desconectado` se establecerá tras 5 minutos de inactividad continuada y permanecerá hasta que el jugador se reincorpore.
+- RF-016: Los cambios de estado deben propagarse en tiempo real a todos los clientes conectados mediante SignalR.
 
 ### Flujo de partida y fases
 
