@@ -35,4 +35,5 @@
 5. Update `docs/testing.md` with any new or modified tests and document relevant scenarios.
 6. Update any other impacted documentation files or `README.md` with the new behavior or decisions.
 7. Review structured logging for meaningful lifecycle events and absence of sensitive data.
-8. Perform a final check that all mandatory documentation and tests are committed alongside the implementation.
+8. Confirm the solution builds successfully and all automated tests pass locally.
+9. Perform a final check that all mandatory documentation and tests are committed alongside the implementation.
