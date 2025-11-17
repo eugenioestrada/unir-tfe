@@ -217,7 +217,7 @@ El diseño tecnológico del proyecto está orientado explícitamente a un escena
   - Navegador moderno ejecutándose en:
     - un ordenador conectado a una TV, o
     - una Smart TV con navegador integrado.
-  - El contenido se puede proyectar mediante protocolos habituales (AirPlay, Chromecast, Miracast, etc.), sin dependencia de hardware propietario.
+  - El contenido se puede proyectar mediante el protocolo de Google Cast, sin dependencia de hardware propietario.
 
 - **Dispositivos de los jugadores**  
   - Smartphones y tablets con navegador moderno (Chrome, Edge, Safari, Firefox, etc.).

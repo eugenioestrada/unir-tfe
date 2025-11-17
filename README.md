@@ -86,7 +86,7 @@ graph TB
 | **Cero hardware propietario** | No se necesitan mandos, consolas o periféricos específicos. |
 | **Escalabilidad** | Soporta 4-16 jugadores simultáneos usando sus propios dispositivos. |
 | **Tecnologías web estándar** | HTML5, CSS3, JavaScript/WebAssembly (Blazor), WebSockets (SignalR). |
-| **Pantalla compartida flexible** | Puede ser un PC conectado a TV, una Smart TV con navegador, o proyección vía Chromecast/AirPlay/Miracast. |
+| **Pantalla compartida flexible** | Puede ser un PC conectado a TV, una Smart TV con navegador, o proyección vía el protocolo de Google Cast. |
 
 ### Flujo de conexión
 
