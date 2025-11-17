@@ -1,6 +1,6 @@
 # Lógica de juego
 
-Este documento describe las reglas de juego de **Tribunal Social**: el modelo conceptual, las fases de una partida y cómo se calculan acusaciones, defensas, resultados y títulos sociales.
+Este documento describe las reglas de juego de **Pandorium**: el modelo conceptual, las fases de una partida y cómo se calculan acusaciones, defensas, resultados y títulos sociales.
 
 ---
 

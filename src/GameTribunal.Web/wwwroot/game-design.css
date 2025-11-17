@@ -1,5 +1,5 @@
 /* ================================================
-   TRIBUNAL SOCIAL - HIGH-IMPACT GAME DESIGN SYSTEM
+   Pandorium - HIGH-IMPACT GAME DESIGN SYSTEM
    Modern, vibrant, responsive party game interface
    ================================================
    
@@ -506,6 +506,43 @@ h6 {
 
 .game-btn-block {
     width: 100%;
+}
+
+/* ========== DATA TABLES ========== */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: var(--space-lg) 0;
+    background: rgba(15, 14, 23, 0.75);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+    color: var(--color-light);
+}
+
+.table thead {
+    background: rgba(255, 255, 255, 0.08);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-gray-200);
+}
+
+.table th,
+.table td {
+    padding: var(--space-md) var(--space-lg);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    text-align: left;
+}
+
+.table tbody tr:last-of-type th,
+.table tbody tr:last-of-type td {
+    border-bottom: none;
+}
+
+.table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.05);
 }
 
 /* ========== FORM COMPONENTS ========== */
@@ -1714,7 +1751,7 @@ a:focus-visible {
 .text-xl { font-size: var(--font-size-xl); }
 .text-2xl { font-size: var(--font-size-2xl); }
 
-.text-muted { color: rgba(255, 255, 255, 0.6); }
+.text-muted { color: rgba(255, 255, 255, 0.7); }
 .text-primary { color: var(--color-primary); }
 .text-secondary { color: var(--color-secondary); }
 .text-success { color: var(--color-success); }

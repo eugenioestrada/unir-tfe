@@ -1,6 +1,6 @@
 # Stack tecnológico y decisiones de diseño
 
-Este documento describe las tecnologías utilizadas en **Tribunal Social**, justificando las decisiones desde una perspectiva de ingeniería y de objetivos del proyecto.
+Este documento describe las tecnologías utilizadas en **Pandorium**, justificando las decisiones desde una perspectiva de ingeniería y de objetivos del proyecto.
 
 ---
 

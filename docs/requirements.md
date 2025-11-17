@@ -1,6 +1,6 @@
 # Requisitos y Casos de Uso
 
-Este documento recoge los requisitos funcionales, no funcionales y los casos de uso asociados al juego "Tribunal Social". Todos los requisitos funcionales se han extraído o derivado del documento `docs/game-logic.md` para cubrir exhaustivamente la casuística descrita.
+Este documento recoge los requisitos funcionales, no funcionales y los casos de uso asociados al juego "Pandorium". Todos los requisitos funcionales se han extraído o derivado del documento `docs/game-logic.md` para cubrir exhaustivamente la casuística descrita.
 
 ---
 

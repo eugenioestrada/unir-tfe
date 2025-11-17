@@ -1,6 +1,6 @@
-# Tribunal Social – Juego social web multi-dispositivo
+# Pandorium – Juego social web multi-dispositivo
 
-**Tribunal Social** es un juego social de salón pensado para grupos de **4 a 16 jugadores** que comparten una misma sala física.
+**Pandorium** es un juego social de salón pensado para grupos de **4 a 16 jugadores** que comparten una misma sala física.
 
 Cada partida se juega con:
 - una **pantalla principal** (ordenador o Smart TV con navegador), y  
