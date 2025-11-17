@@ -4,6 +4,8 @@ using GameTribunal.Infrastructure.Persistence;
 using GameTribunal.Web.Components;
 using GameTribunal.Web.Hubs;
 using GameTribunal.Web.Services;
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,7 +24,25 @@ builder.Services.AddScoped<RoomService>();
 builder.Services.AddScoped<SignalRRoomService>(); // SignalR-aware wrapper (RF-011)
 builder.Services.AddSingleton<QrCodeService>();
 
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders =
+        ForwardedHeaders.XForwardedHost |
+        ForwardedHeaders.XForwardedProto;
+});
+
 var app = builder.Build();
+
+app.UseForwardedHeaders();
+
+app.Use((HttpContext context, RequestDelegate next) =>
+{
+    var scope = context.RequestServices.CreateScope();
+    var configuration = scope.ServiceProvider.GetService<IConfiguration>();
+    var request = context.Request;
+    configuration["BaseUrl"] = $"{request.Scheme}://{request.Host}";
+    return next(context);
+});
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
