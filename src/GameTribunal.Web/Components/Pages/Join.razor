@@ -1,0 +1,216 @@
+@page "/join/{roomCode}"
+@rendermode InteractiveServer
+
+<PageTitle>Unirse a la sala</PageTitle>
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="mb-0">Unirse a la sala</h3>
+                </div>
+                <div class="card-body">
+                    @if (_room is null && !_isLoading)
+                    {
+                        <div class="alert alert-danger" role="alert">
+                            <strong>Sala no encontrada</strong>
+                            <p class="mb-0">El código de sala "@RoomCode" no existe o ya no está disponible.</p>
+                        </div>
+                    }
+                    else if (_isLoading)
+                    {
+                        <div class="text-center py-4">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Cargando...</span>
+                            </div>
+                            <p class="mt-2">Verificando sala...</p>
+                        </div>
+                    }
+                    else if (_hasJoined)
+                    {
+                        <div class="alert alert-success" role="alert">
+                            <strong>¡Bienvenido!</strong>
+                            <p class="mb-0">Te has unido a la sala con el alias <strong>@_playerAlias</strong>.</p>
+                        </div>
+                        <div class="alert alert-info" role="alert">
+                            <p class="mb-0">Jugadores en la sala: <strong>@_room!.Players.Count</strong></p>
+                            @if (!_room.CanStartGame)
+                            {
+                                <p class="mb-0 mt-2">
+                                    <small>Esperando al menos @Room.MinPlayers jugadores para iniciar (@(_room.Players.Count)/@Room.MinPlayers)</small>
+                                </p>
+                            }
+                            else
+                            {
+                                <p class="mb-0 mt-2 text-success">
+                                    <small>✓ La partida puede iniciarse</small>
+                                </p>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="mb-3">
+                            <p>Código de sala: <strong class="text-primary">@RoomCode</strong></p>
+                            <p class="text-muted">Modo: @_room!.Mode</p>
+                        </div>
+
+                        @if (_errorMessage is not null)
+                        {
+                            <div class="alert alert-danger" role="alert">
+                                @_errorMessage
+                            </div>
+                        }
+
+                        <div class="mb-3">
+                            <label for="alias" class="form-label">Tu alias</label>
+                            <input 
+                                type="text" 
+                                class="form-control" 
+                                id="alias" 
+                                @bind="_alias"
+                                @bind:event="oninput"
+                                placeholder="Escribe tu nombre (2-20 caracteres)"
+                                maxlength="20"
+                                disabled="@_isJoining" />
+                            <small class="form-text text-muted">
+                                Los alias deben ser únicos en la sala (sin distinción de mayúsculas/minúsculas).
+                            </small>
+                        </div>
+
+                        <button 
+                            class="btn btn-primary w-100" 
+                            @onclick="JoinRoomAsync" 
+                            disabled="@(_isJoining || string.IsNullOrWhiteSpace(_alias))">
+                            @(_isJoining ? "Uniéndose..." : "Unirse a la sala")
+                        </button>
+                    }
+                </div>
+            </div>
+
+            @if (_hasJoined && _room is not null)
+            {
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h5 class="mb-0">Jugadores en la sala (@_room.Players.Count/@Room.MaxPlayers)</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            @foreach (var player in _room.Players)
+                            {
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    @player.Alias
+                                    @if (player.Alias == _playerAlias)
+                                    {
+                                        <span class="badge bg-primary">Tú</span>
+                                    }
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string RoomCode { get; set; } = default!;
+
+    [Inject]
+    private RoomService RoomService { get; set; } = default!;
+
+    [Inject]
+    private IRoomRepository RoomRepository { get; set; } = default!;
+
+    private RoomDto? _room;
+    private string _alias = string.Empty;
+    private string? _errorMessage;
+    private bool _isLoading = true;
+    private bool _isJoining;
+    private bool _hasJoined;
+    private string? _playerAlias;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadRoomAsync();
+    }
+
+    private async Task LoadRoomAsync()
+    {
+        _isLoading = true;
+        _errorMessage = null;
+
+        try
+        {
+            if (GameTribunal.Domain.ValueObjects.RoomCode.TryFrom(RoomCode, out var code))
+            {
+                var room = await RoomRepository.GetByCodeAsync(code);
+                if (room is not null)
+                {
+                    _room = new RoomDto(
+                        room.Code.Value,
+                        room.Mode,
+                        room.Players.Select(p => new PlayerDto(p.Id, p.Alias)).ToList(),
+                        room.CanStartGame()
+                    );
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"Error al cargar la sala: {ex.Message}";
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task JoinRoomAsync()
+    {
+        if (_isJoining || string.IsNullOrWhiteSpace(_alias))
+        {
+            return;
+        }
+
+        _errorMessage = null;
+        _isJoining = true;
+
+        try
+        {
+            _room = await RoomService.JoinRoomAsync(RoomCode, _alias.Trim());
+            _hasJoined = true;
+            _playerAlias = _alias.Trim();
+        }
+        catch (InvalidOperationException ex)
+        {
+            if (ex.Message.Contains("already exists"))
+            {
+                _errorMessage = $"El alias '{_alias.Trim()}' ya está en uso en esta sala. Por favor, elige otro.";
+            }
+            else if (ex.Message.Contains("maximum capacity"))
+            {
+                _errorMessage = "La sala está llena. No se pueden agregar más jugadores.";
+            }
+            else
+            {
+                _errorMessage = ex.Message;
+            }
+        }
+        catch (ArgumentException ex)
+        {
+            _errorMessage = $"Alias inválido: {ex.Message}";
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"Error al unirse a la sala: {ex.Message}";
+        }
+        finally
+        {
+            _isJoining = false;
+        }
+    }
+}

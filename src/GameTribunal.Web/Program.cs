@@ -2,6 +2,7 @@ using GameTribunal.Application.Contracts;
 using GameTribunal.Application.Services;
 using GameTribunal.Infrastructure.Persistence;
 using GameTribunal.Web.Components;
+using GameTribunal.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +15,7 @@ builder.Services.AddRazorComponents()
 builder.Services.AddSingleton<IRoomRepository, InMemoryRoomRepository>();
 builder.Services.AddSingleton<IRoomCodeGenerator, RandomRoomCodeGenerator>();
 builder.Services.AddScoped<RoomService>();
+builder.Services.AddSingleton<QrCodeService>();
 
 var app = builder.Build();
 

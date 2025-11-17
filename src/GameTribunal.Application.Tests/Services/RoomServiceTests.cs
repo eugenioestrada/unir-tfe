@@ -23,6 +23,8 @@ public sealed class RoomServiceTests
 
         Assert.Equal(code.Value, result.Code);
         Assert.Equal(GameMode.Suave, result.Mode);
+        Assert.Empty(result.Players);
+        Assert.False(result.CanStartGame);
         Assert.Single(repository.StoredRooms);
         Assert.Equal(code, repository.StoredRooms[0].Code);
     }
@@ -39,6 +41,8 @@ public sealed class RoomServiceTests
         var result = await service.CreateRoomAsync(GameMode.Normal);
 
         Assert.Equal(freshCode.Value, result.Code);
+        Assert.Empty(result.Players);
+        Assert.False(result.CanStartGame);
         Assert.Contains(repository.StoredRooms, room => room.Code == freshCode);
         Assert.True(generator.GeneratedCodes.Count == 2, "RoomService should have requested a second code on collision.");
     }
@@ -53,6 +57,177 @@ public sealed class RoomServiceTests
 
         await Assert.ThrowsAsync<InvalidOperationException>(() => service.CreateRoomAsync(GameMode.Spicy));
         Assert.Empty(repository.StoredRooms);
+    }
+
+    // RF-005: Lobby phase where players join
+    [Fact]
+    public async Task JoinRoomAsync_AddsPlayerToRoom()
+    {
+        var code = RoomCode.From("ABC123");
+        var repository = new InMemoryRoomRepository();
+        var generator = new StubRoomCodeGenerator(code);
+        var service = new RoomService(repository, generator, NullLogger<RoomService>.Instance);
+
+        await service.CreateRoomAsync(GameMode.Normal);
+        var result = await service.JoinRoomAsync("ABC123", "PlayerOne");
+
+        Assert.Equal("ABC123", result.Code);
+        Assert.Single(result.Players);
+        Assert.Equal("PlayerOne", result.Players.First().Alias);
+        Assert.False(result.CanStartGame); // Only 1 player, need 4 minimum
+    }
+
+    // RF-006: Prevent duplicate aliases
+    [Fact]
+    public async Task JoinRoomAsync_ThrowsWhenAliasIsDuplicated()
+    {
+        var code = RoomCode.From("ABC123");
+        var repository = new InMemoryRoomRepository();
+        var generator = new StubRoomCodeGenerator(code);
+        var service = new RoomService(repository, generator, NullLogger<RoomService>.Instance);
+
+        await service.CreateRoomAsync(GameMode.Normal);
+        await service.JoinRoomAsync("ABC123", "PlayerOne");
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => 
+            service.JoinRoomAsync("ABC123", "PlayerOne"));
+    }
+
+    // RF-006: Prevent duplicate aliases (case-insensitive)
+    [Fact]
+    public async Task JoinRoomAsync_ThrowsWhenAliasIsDuplicatedCaseInsensitive()
+    {
+        var code = RoomCode.From("ABC123");
+        var repository = new InMemoryRoomRepository();
+        var generator = new StubRoomCodeGenerator(code);
+        var service = new RoomService(repository, generator, NullLogger<RoomService>.Instance);
+
+        await service.CreateRoomAsync(GameMode.Normal);
+        await service.JoinRoomAsync("ABC123", "PlayerOne");
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => 
+            service.JoinRoomAsync("ABC123", "playerone"));
+    }
+
+    // RF-003: Room must support 4-16 players
+    [Fact]
+    public async Task JoinRoomAsync_ThrowsWhenRoomIsFull()
+    {
+        var code = RoomCode.From("ABC123");
+        var repository = new InMemoryRoomRepository();
+        var generator = new StubRoomCodeGenerator(code);
+        var service = new RoomService(repository, generator, NullLogger<RoomService>.Instance);
+
+        await service.CreateRoomAsync(GameMode.Normal);
+        
+        // Add 16 players (max capacity)
+        for (int i = 1; i <= 16; i++)
+        {
+            await service.JoinRoomAsync("ABC123", $"Player{i}");
+        }
+
+        // Try to add 17th player
+        await Assert.ThrowsAsync<InvalidOperationException>(() => 
+            service.JoinRoomAsync("ABC123", "Player17"));
+    }
+
+    // RF-003: Cannot start with less than 4 players
+    [Fact]
+    public async Task JoinRoomAsync_CannotStartGameWithLessThan4Players()
+    {
+        var code = RoomCode.From("ABC123");
+        var repository = new InMemoryRoomRepository();
+        var generator = new StubRoomCodeGenerator(code);
+        var service = new RoomService(repository, generator, NullLogger<RoomService>.Instance);
+
+        await service.CreateRoomAsync(GameMode.Normal);
+        
+        var result1 = await service.JoinRoomAsync("ABC123", "Player1");
+        Assert.False(result1.CanStartGame);
+
+        var result2 = await service.JoinRoomAsync("ABC123", "Player2");
+        Assert.False(result2.CanStartGame);
+
+        var result3 = await service.JoinRoomAsync("ABC123", "Player3");
+        Assert.False(result3.CanStartGame);
+    }
+
+    // RF-003: Can start with 4 or more players
+    [Fact]
+    public async Task JoinRoomAsync_CanStartGameWith4OrMorePlayers()
+    {
+        var code = RoomCode.From("ABC123");
+        var repository = new InMemoryRoomRepository();
+        var generator = new StubRoomCodeGenerator(code);
+        var service = new RoomService(repository, generator, NullLogger<RoomService>.Instance);
+
+        await service.CreateRoomAsync(GameMode.Normal);
+        
+        await service.JoinRoomAsync("ABC123", "Player1");
+        await service.JoinRoomAsync("ABC123", "Player2");
+        await service.JoinRoomAsync("ABC123", "Player3");
+        var result = await service.JoinRoomAsync("ABC123", "Player4");
+
+        Assert.True(result.CanStartGame);
+        Assert.Equal(4, result.Players.Count);
+    }
+
+    [Fact]
+    public async Task JoinRoomAsync_ThrowsWhenRoomDoesNotExist()
+    {
+        var repository = new InMemoryRoomRepository();
+        var generator = new StubRoomCodeGenerator(RoomCode.From("ABC123"));
+        var service = new RoomService(repository, generator, NullLogger<RoomService>.Instance);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => 
+            service.JoinRoomAsync("XYZ999", "PlayerOne"));
+    }
+
+    [Fact]
+    public async Task JoinRoomAsync_ThrowsWhenRoomCodeIsInvalid()
+    {
+        var repository = new InMemoryRoomRepository();
+        var generator = new StubRoomCodeGenerator(RoomCode.From("ABC123"));
+        var service = new RoomService(repository, generator, NullLogger<RoomService>.Instance);
+
+        await Assert.ThrowsAsync<ArgumentException>(() => 
+            service.JoinRoomAsync("INVALID", "PlayerOne"));
+    }
+
+    // RF-004: QR code URL generation
+    [Fact]
+    public void GenerateRoomUrl_CreatesCorrectUrl()
+    {
+        var repository = new InMemoryRoomRepository();
+        var generator = new StubRoomCodeGenerator(RoomCode.From("ABC123"));
+        var service = new RoomService(repository, generator, NullLogger<RoomService>.Instance);
+
+        var url = service.GenerateRoomUrl("ABC123", "https://example.com");
+
+        Assert.Equal("https://example.com/join/ABC123", url);
+    }
+
+    [Fact]
+    public void GenerateRoomUrl_HandlesTrailingSlashInBaseUrl()
+    {
+        var repository = new InMemoryRoomRepository();
+        var generator = new StubRoomCodeGenerator(RoomCode.From("ABC123"));
+        var service = new RoomService(repository, generator, NullLogger<RoomService>.Instance);
+
+        var url = service.GenerateRoomUrl("ABC123", "https://example.com/");
+
+        Assert.Equal("https://example.com/join/ABC123", url);
+    }
+
+    [Fact]
+    public void GenerateRoomUrl_ThrowsWhenRoomCodeIsInvalid()
+    {
+        var repository = new InMemoryRoomRepository();
+        var generator = new StubRoomCodeGenerator(RoomCode.From("ABC123"));
+        var service = new RoomService(repository, generator, NullLogger<RoomService>.Instance);
+
+        Assert.Throws<ArgumentException>(() => 
+            service.GenerateRoomUrl("INVALID", "https://example.com"));
     }
 
     private sealed class StubRoomCodeGenerator : IRoomCodeGenerator
@@ -106,6 +281,17 @@ public sealed class RoomServiceTests
         {
             return Task.FromResult(_existingCodes.Contains(code));
         }
+
+        public Task<Room?> GetByCodeAsync(RoomCode code, CancellationToken cancellationToken = default)
+        {
+            var room = StoredRooms.FirstOrDefault(r => r.Code == code);
+            return Task.FromResult(room);
+        }
+
+        public Task UpdateAsync(Room room, CancellationToken cancellationToken = default)
+        {
+            return Task.CompletedTask;
+        }
     }
 
     private sealed class AlwaysConflictingRoomRepository : IRoomRepository
@@ -121,6 +307,17 @@ public sealed class RoomServiceTests
         public Task<bool> ExistsAsync(RoomCode code, CancellationToken cancellationToken = default)
         {
             return Task.FromResult(true);
+        }
+
+        public Task<Room?> GetByCodeAsync(RoomCode code, CancellationToken cancellationToken = default)
+        {
+            var room = StoredRooms.FirstOrDefault(r => r.Code == code);
+            return Task.FromResult(room);
+        }
+
+        public Task UpdateAsync(Room room, CancellationToken cancellationToken = default)
+        {
+            return Task.CompletedTask;
         }
     }
 }

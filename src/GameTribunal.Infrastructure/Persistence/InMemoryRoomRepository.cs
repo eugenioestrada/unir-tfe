@@ -28,4 +28,18 @@ public sealed class InMemoryRoomRepository : IRoomRepository
 
         return Task.CompletedTask;
     }
+
+    public Task<Room?> GetByCodeAsync(RoomCode code, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(code);
+        _rooms.TryGetValue(code, out var room);
+        return Task.FromResult(room);
+    }
+
+    public Task UpdateAsync(Room room, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(room);
+        _rooms[room.Code] = room;
+        return Task.CompletedTask;
+    }
 }

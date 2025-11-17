@@ -37,7 +37,68 @@ public sealed class RoomService
 
         _logger.LogInformation("Room {RoomCode} persisted successfully for mode {GameMode}.", room.Code.Value, mode);
 
-        return new RoomDto(room.Code.Value, room.Mode);
+        return MapToDto(room);
+    }
+
+    /// <summary>
+    /// Adds a player to a room with the specified alias.
+    /// </summary>
+    /// <param name="roomCode">The room code.</param>
+    /// <param name="alias">The player's alias.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Updated room DTO with the new player.</returns>
+    public async Task<RoomDto> JoinRoomAsync(string roomCode, string alias, CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(roomCode, nameof(roomCode));
+        ArgumentException.ThrowIfNullOrWhiteSpace(alias, nameof(alias));
+
+        if (!RoomCode.TryFrom(roomCode, out var code))
+        {
+            throw new ArgumentException("Invalid room code format.", nameof(roomCode));
+        }
+
+        _logger.LogInformation("Player attempting to join room {RoomCode} with alias {Alias}.", code.Value, alias);
+
+        var room = await _roomRepository.GetByCodeAsync(code, cancellationToken).ConfigureAwait(false);
+        if (room is null)
+        {
+            _logger.LogWarning("Room {RoomCode} not found.", code.Value);
+            throw new InvalidOperationException($"Room with code {code.Value} does not exist.");
+        }
+
+        var player = room.AddPlayer(alias);
+        _logger.LogInformation("Player {PlayerId} with alias {Alias} added to room {RoomCode}.", player.Id, player.Alias, room.Code.Value);
+
+        await _roomRepository.UpdateAsync(room, cancellationToken).ConfigureAwait(false);
+        _logger.LogInformation("Room {RoomCode} updated with new player.", room.Code.Value);
+
+        return MapToDto(room);
+    }
+
+    /// <summary>
+    /// Generates the QR code URL for a room.
+    /// </summary>
+    /// <param name="roomCode">The room code.</param>
+    /// <param name="baseUrl">The base URL of the application (e.g., "https://app.example.com").</param>
+    /// <returns>The full URL that can be encoded in a QR code.</returns>
+    public string GenerateRoomUrl(string roomCode, string baseUrl)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(roomCode, nameof(roomCode));
+        ArgumentException.ThrowIfNullOrWhiteSpace(baseUrl, nameof(baseUrl));
+
+        if (!RoomCode.TryFrom(roomCode, out _))
+        {
+            throw new ArgumentException("Invalid room code format.", nameof(roomCode));
+        }
+
+        var trimmedBaseUrl = baseUrl.TrimEnd('/');
+        return $"{trimmedBaseUrl}/join/{roomCode}";
+    }
+
+    private static RoomDto MapToDto(Room room)
+    {
+        var players = room.Players.Select(p => new PlayerDto(p.Id, p.Alias)).ToList();
+        return new RoomDto(room.Code.Value, room.Mode, players, room.CanStartGame());
     }
 
     private async Task<RoomCode> GenerateUniqueRoomCodeAsync(CancellationToken cancellationToken)
