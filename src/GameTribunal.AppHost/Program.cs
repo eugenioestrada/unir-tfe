@@ -2,6 +2,10 @@
 
 var builder = DistributedApplication.CreateBuilder(args);
 
-builder.AddProject<GameTribunal_Web>("web").WithExternalHttpEndpoints();
+var web = builder.AddProject<GameTribunal_Web>("web");
+
+builder.AddDevTunnel("tunnel")
+       .WithReference(web)
+       .WithAnonymousAccess();
 
 builder.Build().Run();
