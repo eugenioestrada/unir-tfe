@@ -4,29 +4,25 @@ Este proyecto contiene pruebas automatizadas de interfaz de usuario utilizando P
 
 ## Objetivo
 
-Validar que el diseño del juego Pandorium cumple con los más altos estándares de calidad, incluyendo:
-- ✨ Sistema de diseño impresionante y consistente
-- 📱 Diseño responsivo en múltiples dispositivos
-- ♿ Accesibilidad WCAG AA
-- 📸 Regresión visual
+Validar que la interfaz de usuario del juego Pandorium funciona correctamente en múltiples dispositivos y cumple con estándares de accesibilidad.
 
 ## Pruebas Incluidas
 
 ### DesignSystemTests (10 tests)
-Valida que el sistema de diseño sea visualmente impresionante:
-- Hero section con efectos visuales (gradientes, backdrop-filter, sombras)
-- Botones con efectos hover atractivos
-- Cards con estilo profesional y profundidad
-- Paleta de colores vibrante
-- Tipografía con jerarquía clara
-- Animaciones suaves y pulidas
-- Efectos modernos (glassmorphism, gradientes)
+Valida la consistencia del sistema de diseño:
+- Hero section con efectos visuales
+- Botones con efectos hover
+- Cards con estilo profesional
+- Paleta de colores
+- Tipografía con jerarquía
+- Animaciones
+- Efectos modernos (glassmorphism)
 - Spacing consistente
-- Estados de foco claros
-- Display de QR code visualmente impactante
+- Estados de foco
+- Display de QR code
 
 ### ResponsiveDesignTests (10 tests)
-Valida el diseño en múltiples dispositivos:
+Valida el diseño responsivo:
 - Mobile Portrait (375x667)
 - Mobile Landscape (667x375)
 - Tablet (768x1024)
@@ -56,15 +52,15 @@ Captura screenshots para validación visual:
 - Room con QR code (desktop/mobile)
 - Hero section
 - Game cards
-- Botones (normal y hover)
+- Botones
 - Home page
 
 ## Ejecutar las Pruebas
 
 ### Prerequisitos
 ```bash
-# Instalar Playwright browsers
-pwsh bin/Debug/net10.0/playwright.ps1 install --with-deps
+# Instalar navegadores Playwright
+pwsh bin/Debug/net10.0/playwright.ps1 install chromium
 ```
 
 ### Ejecutar todas las pruebas
@@ -93,27 +89,10 @@ Los screenshots se generan en:
 bin/Debug/net10.0/screenshots/
 ```
 
-## Resultados
-
-✅ **29/41 tests pasando** en la primera ejecución
-- Todos los tests de diseño visual ✓
-- Mayoría de tests de responsividad ✓
-- Todos los tests de accesibilidad ✓
-- Todos los tests de regresión visual ✓
-
-Los tests que fallan son principalmente por timing (elementos aún no visibles). Esto se puede mejorar con waits adicionales si es necesario.
-
 ## Tecnologías
 
 - **Playwright for .NET**: Framework de testing E2E
 - **NUnit**: Framework de testing
 - **.NET 10**: Runtime
-- **Chromium/Firefox/Webkit**: Navegadores para testing
+- **Chromium**: Navegador para testing
 
-## Contribuir
-
-Para añadir nuevos tests:
-1. Crear nueva clase en el namespace `GameTribunal.UI.Tests`
-2. Heredar de `PlaywrightTest`
-3. Añadir atributo `[TestFixture]`
-4. Implementar tests con `[Test]` attribute
