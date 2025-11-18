@@ -35,8 +35,6 @@ Se han añadido 23 pruebas específicas para validar el **RNF-010: Adaptar layou
 - **Mobile Browser Chrome**: Tests de adaptación a chrome del navegador móvil
 - **Accessibility**: Tests de accesibilidad sin scroll
 
-Ver documentación completa en: [docs/rnf-010-implementation.md](../../docs/rnf-010-implementation.md)
-
 ## Documentación Completa
 
 Para información detallada sobre la suite de testing (Unit Tests y UI Tests), consulta:
