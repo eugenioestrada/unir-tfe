@@ -163,6 +163,8 @@ La documentación del proyecto está organizada de la siguiente manera:
 
 - [`docs/testing.md`](docs/testing.md)  
   Estrategia completa de testing: Unit Tests (xUnit) y UI Tests (Playwright), cobertura, comandos de ejecución y best practices.
+- [`docs/ui-design-principles.md`](docs/ui-design-principles.md)  
+  Principios del sistema de diseño, componentes disponibles y patrones de UI para vistas de host y jugadores.
 
 ---
 
