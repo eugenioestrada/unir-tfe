@@ -60,6 +60,7 @@
 4. Verify structured logging covers key lifecycle events without exposing sensitive data.
 5. Confirm the solution builds and all automated tests succeed (`dotnet test`).
 6. Before delivery, double-check that code, docs, and tests (including new UI tests) land together in the same change set.
+7. Embed screenshots of the implemented features directly in the pull request description, showing the key states and user-visible outcomes.
 
 ## Quick Reference: Gameplay Essentials
 - Room lifecycle and game phases: `Lobby → CaseVoting → Defense → DefenseVoting? → Scoring → Finished` (`docs/game-logic.md`).
