@@ -883,7 +883,23 @@ h6 {
 }
 
 .game-grid-2 {
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+    .game-grid-2 {
+        grid-template-columns: repeat(2, minmax(280px, 1fr));
+        gap: var(--space-md);
+    }
+}
+
+@media (min-width: 1025px) {
+    .game-grid-2 {
+        grid-template-columns: repeat(2, minmax(320px, 1fr));
+        gap: var(--space-lg);
+    }
 }
 
 /* ========== ANIMATIONS ========== */
