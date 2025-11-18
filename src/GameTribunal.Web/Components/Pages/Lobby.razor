@@ -126,6 +126,24 @@
                             <p class="text-muted" style="font-size: 0.875rem; word-break: break-all;">
                                 @_roomUrl
                             </p>
+                            
+                            <!-- RF-007: Native share button -->
+                            <div class="mt-3">
+                                <GameButton 
+                                    Variant="outline"
+                                    Size="md"
+                                    FullWidth="true"
+                                    OnClick="ShareRoomUrlAsync">
+                                    <span style="font-size: 1.25rem;">📤</span>
+                                    <span>@_shareButtonText</span>
+                                </GameButton>
+                                @if (_shareMessage is not null)
+                                {
+                                    <small class="d-block text-center mt-2" style="color: var(--color-success);">
+                                        @_shareMessage
+                                    </small>
+                                }
+                            </div>
                         }
                     </div>
                 </Body>
@@ -241,6 +259,10 @@
     private string? _roomUrl;
     private readonly GameMode[] _availableModes = Enum.GetValues<GameMode>();
     private HubConnection? _hubConnection;
+    
+    // RF-007: Web Share API support
+    private string _shareButtonText = "Compartir Enlace";
+    private string? _shareMessage;
 
     [Inject]
     private SignalRRoomService RoomService { get; set; } = default!;
@@ -508,6 +530,68 @@
         catch (Exception)
         {
             // Silently fail if sessionStorage is not available or room restoration fails
+        }
+    }
+
+    /// <summary>
+    /// Shares the room URL using the Web Share API or falls back to copying to clipboard (RF-007).
+    /// </summary>
+    private async Task ShareRoomUrlAsync()
+    {
+        if (string.IsNullOrEmpty(_roomUrl))
+        {
+            return;
+        }
+
+        _shareMessage = null;
+
+        try
+        {
+            var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/shareUrl.js");
+            
+            // Check if Web Share API is supported
+            var isSupported = await module.InvokeAsync<bool>("isShareSupported");
+            
+            if (isSupported)
+            {
+                // Use Web Share API
+                var shareTitle = "Únete a Pandorium";
+                var shareText = $"Únete a la sala {_room?.Code} en Pandorium";
+                
+                var shared = await module.InvokeAsync<bool>("shareUrl", _roomUrl, shareTitle, shareText);
+                
+                if (shared)
+                {
+                    _shareMessage = "¡Enlace compartido!";
+                }
+            }
+            else
+            {
+                // Fallback to copying to clipboard
+                var copied = await module.InvokeAsync<bool>("copyToClipboard", _roomUrl);
+                
+                if (copied)
+                {
+                    _shareButtonText = "Copiar Enlace";
+                    _shareMessage = "¡Enlace copiado al portapapeles!";
+                }
+                else
+                {
+                    _shareMessage = "No se pudo copiar el enlace";
+                }
+            }
+            
+            await InvokeAsync(StateHasChanged);
+            
+            // Clear the message after 3 seconds
+            await Task.Delay(3000);
+            _shareMessage = null;
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (Exception ex)
+        {
+            _shareMessage = $"Error al compartir: {ex.Message}";
+            await InvokeAsync(StateHasChanged);
         }
     }
 
