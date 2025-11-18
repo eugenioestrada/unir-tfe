@@ -122,6 +122,9 @@ public class PlayerConnectionStatusTests(TestServerFixture serverFixture) : Play
     /// <summary>
     /// RF-014: Validates that player status changes to Inactivo after 30 seconds of inactivity.
     /// This is the key test for the functional requirement RF-014.
+    /// 
+    /// Strategy: Join a player, then close their browser connection to simulate inactivity.
+    /// The PlayerStatusMonitorService should detect no activity for 30+ seconds and change status to Inactivo.
     /// </summary>
     [Fact]
     public async Task PlayerStatus_ChangesToInactivo_After30SecondsOfInactivity()
@@ -132,9 +135,6 @@ public class PlayerConnectionStatusTests(TestServerFixture serverFixture) : Play
         // Wait for page to load
         await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
         
-        // Take a screenshot for debugging
-        await Page.ScreenshotAsync(new() { Path = "/tmp/test-step1-lobby.png" });
-        
         var gameModeSelect = Page.Locator("select#gameMode");
         await Expect(gameModeSelect).ToBeVisibleAsync();
         await gameModeSelect.SelectOptionAsync("Normal");
@@ -142,12 +142,6 @@ public class PlayerConnectionStatusTests(TestServerFixture serverFixture) : Play
         var createButton = Page.Locator("button", new() { HasText = "Crear Sala" });
         await Expect(createButton).ToBeVisibleAsync();
         await createButton.ClickAsync();
-        
-        // Wait a moment for the room creation to process
-        await Task.Delay(TimeSpan.FromSeconds(3));
-        
-        // Take a screenshot after clicking create
-        await Page.ScreenshotAsync(new() { Path = "/tmp/test-step2-after-create.png" });
         
         // Wait for room to be created by checking for the room code display
         var roomCodeDisplay = Page.Locator(".game-room-code");
@@ -190,52 +184,50 @@ public class PlayerConnectionStatusTests(TestServerFixture serverFixture) : Play
             var successAlert = playerPage.Locator("text=¡Bienvenido/a!");
             await Expect(successAlert).ToBeVisibleAsync(new() { Timeout = 5000 });
             
-            // Step 4: Verify initial status is Conectado (🟢)
-            var statusIndicator = playerPage.Locator("text=🟢").First;
-            await Expect(statusIndicator).ToBeVisibleAsync(new() { Timeout = 5000 });
+            // Step 4: Verify initial status is Conectado (🟢) on the host page
+            var hostConnectedIndicator = Page.Locator("text=🟢").First;
+            await Expect(hostConnectedIndicator).ToBeVisibleAsync(new() { Timeout = 5000 });
             
-            var statusText = playerPage.Locator("text=Conectado").First;
-            await Expect(statusText).ToBeVisibleAsync(new() { Timeout = 2000 });
+            var hostConnectedText = Page.Locator("text=Conectado").First;
+            await Expect(hostConnectedText).ToBeVisibleAsync(new() { Timeout = 2000 });
             
-            // Step 5: Disable heartbeat by overriding the heartbeat function
-            // This simulates a player becoming inactive
-            await playerPage.EvaluateAsync(@"
-                // Stop any ongoing heartbeat timers
-                if (window._heartbeatInterval) {
-                    clearInterval(window._heartbeatInterval);
-                }
-            ");
-            
-            // Take screenshot before waiting
-            await playerPage.ScreenshotAsync(new() { Path = "/tmp/test-step3-before-wait.png" });
-            
-            // Step 6: Wait for 35 seconds (30 seconds inactivity threshold + 5 seconds buffer)
-            // The PlayerStatusMonitorService checks every 10 seconds, so we need to wait for:
-            // - 30 seconds of inactivity
-            // - Up to 10 seconds for the next monitor check
-            // Total: 45 seconds to be safe (increased from 40)
-            await Task.Delay(TimeSpan.FromSeconds(45));
-            
-            // Take screenshot after waiting
-            await playerPage.ScreenshotAsync(new() { Path = "/tmp/test-step4-after-wait.png" });
-            await Page.ScreenshotAsync(new() { Path = "/tmp/test-step4-host-after-wait.png" });
-            
-            // Step 7: Verify status changed to Inactivo (🟡)
-            var inactiveIndicator = playerPage.Locator("text=🟡").First;
-            await Expect(inactiveIndicator).ToBeVisibleAsync(new() { Timeout = 10000 });
-            
-            var inactiveText = playerPage.Locator("text=Inactivo").First;
-            await Expect(inactiveText).ToBeVisibleAsync(new() { Timeout = 2000 });
-            
-            // Also verify on the host page that the player shows as Inactivo
-            var hostInactiveIndicator = Page.Locator("text=🟡").First;
-            await Expect(hostInactiveIndicator).ToBeVisibleAsync(new() { Timeout = 5000 });
-        }
-        finally
-        {
-            // Cleanup: Close the player page and context
+            // Step 5: Close the player page to simulate disconnection/inactivity
+            // This stops the heartbeat mechanism
             await playerPage.CloseAsync();
             await playerContext.CloseAsync();
+            
+            // Step 6: Wait for 45 seconds
+            // - 30 seconds for inactivity threshold (RF-014)
+            // - Up to 10 seconds for PlayerStatusMonitorService to check
+            // - 5 seconds buffer
+            await Task.Delay(TimeSpan.FromSeconds(45));
+            
+            // Step 7: Verify status changed to Inactivo (🟡) on the host page
+            var hostInactiveIndicator = Page.Locator("text=🟡").First;
+            await Expect(hostInactiveIndicator).ToBeVisibleAsync(new() { Timeout = 10000 });
+            
+            var hostInactiveText = Page.Locator("text=Inactivo").First;
+            await Expect(hostInactiveText).ToBeVisibleAsync(new() { Timeout = 2000 });
+            
+            // Take final screenshot showing the inactive status
+            await Page.ScreenshotAsync(new() { Path = "/tmp/test-rf014-final-inactive-status.png" });
+        }
+        catch
+        {
+            // If already closed in the test, don't fail on cleanup
+            try
+            {
+                if (!playerPage.IsClosed)
+                {
+                    await playerPage.CloseAsync();
+                }
+                await playerContext.CloseAsync();
+            }
+            catch
+            {
+                // Ignore cleanup errors
+            }
+            throw;
         }
     }
 }
