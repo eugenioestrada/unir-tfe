@@ -292,6 +292,11 @@ public sealed class RoomServiceTests
         {
             return Task.CompletedTask;
         }
+
+        public Task<IReadOnlyCollection<Room>> GetAllAsync(CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult<IReadOnlyCollection<Room>>(StoredRooms);
+        }
     }
 
     private sealed class AlwaysConflictingRoomRepository : IRoomRepository
@@ -318,6 +323,11 @@ public sealed class RoomServiceTests
         public Task UpdateAsync(Room room, CancellationToken cancellationToken = default)
         {
             return Task.CompletedTask;
+        }
+
+        public Task<IReadOnlyCollection<Room>> GetAllAsync(CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult<IReadOnlyCollection<Room>>(StoredRooms);
         }
     }
 }

@@ -97,7 +97,7 @@ public sealed class RoomService
 
     private static RoomDto MapToDto(Room room)
     {
-        var players = room.Players.Select(p => new PlayerDto(p.Id, p.Alias)).ToList();
+        var players = room.Players.Select(p => new PlayerDto(p.Id, p.Alias, p.ConnectionStatus)).ToList();
         return new RoomDto(room.Code.Value, room.Mode, players, room.CanStartGame());
     }
 

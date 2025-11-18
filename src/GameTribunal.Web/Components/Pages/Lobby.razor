@@ -1,6 +1,7 @@
 @page "/"
 @rendermode InteractiveServer
 @using GameTribunal.Web.Services
+@using GameTribunal.Domain.Enumerations
 @using Microsoft.AspNetCore.SignalR.Client
 @implements IAsyncDisposable
 
@@ -164,12 +165,16 @@
                                 playerIndex++;
                                 <li class="game-player-item">
                                     <div class="d-flex align-items-center gap-2">
+                                        <span style="font-size: 1.25rem;">@GetStatusIndicator(player.ConnectionStatus)</span>
                                         <span style="font-size: 1.5rem;">👤</span>
                                         <span class="game-player-name">@player.Alias</span>
                                     </div>
-                                    <GameBadge Variant="secondary">
-                                        #@playerIndex
-                                    </GameBadge>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <small class="text-muted">@GetStatusText(player.ConnectionStatus)</small>
+                                        <GameBadge Variant="secondary">
+                                            #@playerIndex
+                                        </GameBadge>
+                                    </div>
                                 </li>
                             }
                         </ul>
@@ -252,6 +257,28 @@
         GameMode.Suave => "Casos suaves, ideal para grupos que se están conociendo",
         GameMode.Normal => "Casos equilibrados para cualquier grupo de amigos",
         GameMode.Spicy => "Casos atrevidos solo para grupos de máxima confianza",
+        _ => ""
+    };
+
+    /// <summary>
+    /// Gets the status indicator emoji for a player (RF-013).
+    /// </summary>
+    private static string GetStatusIndicator(PlayerConnectionStatus status) => status switch
+    {
+        PlayerConnectionStatus.Conectado => "🟢",
+        PlayerConnectionStatus.Inactivo => "🟡",
+        PlayerConnectionStatus.Desconectado => "⚫",
+        _ => "⚪"
+    };
+
+    /// <summary>
+    /// Gets the status text for a player (RF-013).
+    /// </summary>
+    private static string GetStatusText(PlayerConnectionStatus status) => status switch
+    {
+        PlayerConnectionStatus.Conectado => "Conectado",
+        PlayerConnectionStatus.Inactivo => "Inactivo",
+        PlayerConnectionStatus.Desconectado => "Desconectado",
         _ => ""
     };
 

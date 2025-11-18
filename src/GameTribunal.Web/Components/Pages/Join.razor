@@ -1,5 +1,6 @@
 @page "/join/{roomCode}"
 @rendermode InteractiveServer
+@using GameTribunal.Domain.Enumerations
 @using Microsoft.AspNetCore.SignalR.Client
 @implements IAsyncDisposable
 
@@ -119,21 +120,25 @@
                         playerIndex++;
                         <li class="game-player-item @(player.Alias == _playerAlias ? "is-current-player" : "")">
                             <div class="d-flex align-items-center gap-2">
+                                <span style="font-size: 1.25rem;">@GetStatusIndicator(player.ConnectionStatus)</span>
                                 <span style="font-size: 1.5rem;">
                                     @(player.Alias == _playerAlias ? "👤" : "👥")
                                 </span>
                                 <span class="game-player-name">@player.Alias</span>
                             </div>
-                            @if (player.Alias == _playerAlias)
-                            {
-                                <GameBadge Variant="primary">Tú</GameBadge>
-                            }
-                            else
-                            {
-                                <GameBadge Variant="secondary">
-                                    #@playerIndex
-                                </GameBadge>
-                            }
+                            <div class="d-flex align-items-center gap-2">
+                                @if (player.Alias == _playerAlias)
+                                {
+                                    <GameBadge Variant="primary">Tú</GameBadge>
+                                }
+                                else
+                                {
+                                    <small class="text-muted me-1">@GetStatusText(player.ConnectionStatus)</small>
+                                    <GameBadge Variant="secondary">
+                                        #@playerIndex
+                                    </GameBadge>
+                                }
+                            </div>
                         </li>
                     }
                 </ul>
@@ -244,6 +249,8 @@
     private Guid? _playerId;
     private HubConnection? _hubConnection;
     private bool _isReconnecting;
+    private PeriodicTimer? _heartbeatTimer;
+    private CancellationTokenSource? _heartbeatCts;
 
     protected override async Task OnInitializedAsync()
     {
@@ -277,6 +284,28 @@
         _ => "linear-gradient(135deg, #FF6B35 0%, #F72585 100%)"
     };
 
+    /// <summary>
+    /// Gets the status indicator emoji for a player (RF-013).
+    /// </summary>
+    private static string GetStatusIndicator(PlayerConnectionStatus status) => status switch
+    {
+        PlayerConnectionStatus.Conectado => "🟢",
+        PlayerConnectionStatus.Inactivo => "🟡",
+        PlayerConnectionStatus.Desconectado => "⚫",
+        _ => "⚪"
+    };
+
+    /// <summary>
+    /// Gets the status text for a player (RF-013).
+    /// </summary>
+    private static string GetStatusText(PlayerConnectionStatus status) => status switch
+    {
+        PlayerConnectionStatus.Conectado => "Conectado",
+        PlayerConnectionStatus.Inactivo => "Inactivo",
+        PlayerConnectionStatus.Desconectado => "Desconectado",
+        _ => ""
+    };
+
     private async Task LoadRoomAsync()
     {
         _isLoading = true;
@@ -292,7 +321,7 @@
                     _room = new RoomDto(
                         room.Code.Value,
                         room.Mode,
-                        room.Players.Select(p => new PlayerDto(p.Id, p.Alias)).ToList(),
+                        room.Players.Select(p => new PlayerDto(p.Id, p.Alias, p.ConnectionStatus)).ToList(),
                         room.CanStartGame()
                     );
                 }
@@ -338,6 +367,9 @@
                 {
                     await _hubConnection.InvokeAsync("JoinRoom", RoomCode, _playerId);
                 }
+
+                // Start heartbeat to maintain active status (RF-014)
+                StartHeartbeat();
             }
         }
         catch (InvalidOperationException ex)
@@ -403,6 +435,9 @@
             if (_hasJoined && _playerId.HasValue)
             {
                 await _hubConnection.InvokeAsync("JoinRoom", RoomCode, _playerId.Value);
+                
+                // Restart heartbeat after reconnection
+                StartHeartbeat();
             }
             
             await InvokeAsync(StateHasChanged);
@@ -453,6 +488,9 @@
                 {
                     _hasJoined = true;
                     _playerAlias = player.Alias;
+                    
+                    // Restart heartbeat for reconnected session
+                    StartHeartbeat();
                 }
             }
         }
@@ -478,8 +516,65 @@
         return Task.FromResult<Guid?>(null);
     }
 
+    /// <summary>
+    /// Starts the heartbeat timer to send periodic activity signals (RF-014).
+    /// </summary>
+    private void StartHeartbeat()
+    {
+        // Cancel any existing heartbeat
+        StopHeartbeat();
+
+        // Create new timer that fires every 15 seconds
+        _heartbeatCts = new CancellationTokenSource();
+        _heartbeatTimer = new PeriodicTimer(TimeSpan.FromSeconds(15));
+        
+        // Start background task
+        _ = SendHeartbeatAsync(_heartbeatCts.Token);
+    }
+
+    /// <summary>
+    /// Stops the heartbeat timer.
+    /// </summary>
+    private void StopHeartbeat()
+    {
+        _heartbeatCts?.Cancel();
+        _heartbeatCts?.Dispose();
+        _heartbeatCts = null;
+        _heartbeatTimer?.Dispose();
+        _heartbeatTimer = null;
+    }
+
+    /// <summary>
+    /// Background task that sends heartbeat signals to the server (RF-014).
+    /// </summary>
+    private async Task SendHeartbeatAsync(CancellationToken cancellationToken)
+    {
+        if (_heartbeatTimer == null) return;
+
+        try
+        {
+            while (await _heartbeatTimer.WaitForNextTickAsync(cancellationToken))
+            {
+                if (_hubConnection?.State == HubConnectionState.Connected && _playerId.HasValue)
+                {
+                    await _hubConnection.InvokeAsync("RecordActivity", RoomCode, _playerId.Value, cancellationToken);
+                }
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // Normal cancellation, no action needed
+        }
+        catch (Exception)
+        {
+            // Log error if needed, but don't crash the component
+        }
+    }
+
     public async ValueTask DisposeAsync()
     {
+        StopHeartbeat();
+
         if (_hubConnection is not null)
         {
             await _hubConnection.DisposeAsync();

@@ -42,4 +42,10 @@ public sealed class InMemoryRoomRepository : IRoomRepository
         _rooms[room.Code] = room;
         return Task.CompletedTask;
     }
+
+    public Task<IReadOnlyCollection<Room>> GetAllAsync(CancellationToken cancellationToken = default)
+    {
+        var rooms = _rooms.Values.ToList();
+        return Task.FromResult<IReadOnlyCollection<Room>>(rooms);
+    }
 }
