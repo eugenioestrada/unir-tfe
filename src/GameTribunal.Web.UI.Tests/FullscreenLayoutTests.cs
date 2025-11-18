@@ -71,6 +71,43 @@ public class FullscreenLayoutTests(TestServerFixture serverFixture) : Playwright
     }
 
     [Theory]
+    [InlineData(1920, 1080, "Desktop Full HD")]
+    [InlineData(2560, 1440, "Desktop 2K")]
+    // RNF-010: Validates that content fits without vertical scrolling on desktop viewports
+    public async Task RNF010_NoVerticalScrolling_OnDesktopViewports(int width, int height, string deviceName)
+    {
+        await Page.SetViewportSizeAsync(width, height);
+        await Page.GotoAsync("/");
+        await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+
+        // Check if vertical scrollbar is present
+        var hasVerticalScroll = await Page.EvaluateAsync<bool>(
+            "document.documentElement.scrollHeight > document.documentElement.clientHeight");
+        
+        // On desktop, we should not require vertical scrolling (RNF-010 requirement)
+        Assert.False(hasVerticalScroll, 
+            $"Vertical scrolling required on {deviceName} ({width}x{height}) - content should fit viewport on desktop");
+    }
+
+    [Theory]
+    [InlineData(3840, 2160, "TV 4K")]
+    // RNF-010: Validates that content fits without vertical scrolling on TV viewports
+    public async Task RNF010_NoVerticalScrolling_OnTVViewports(int width, int height, string deviceName)
+    {
+        await Page.SetViewportSizeAsync(width, height);
+        await Page.GotoAsync("/");
+        await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+
+        // Check if vertical scrollbar is present
+        var hasVerticalScroll = await Page.EvaluateAsync<bool>(
+            "document.documentElement.scrollHeight > document.documentElement.clientHeight");
+        
+        // On TV, we should not require vertical scrolling (RNF-010 requirement)
+        Assert.False(hasVerticalScroll, 
+            $"Vertical scrolling required on {deviceName} ({width}x{height}) - content should fit viewport on TV");
+    }
+
+    [Theory]
     [InlineData(375, 667, "iPhone 8")]
     [InlineData(768, 1024, "iPad")]
     [InlineData(1920, 1080, "Desktop")]
