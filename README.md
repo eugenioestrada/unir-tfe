@@ -14,6 +14,8 @@ El juego plantea **casos o situaciones sociales** en los que los jugadores:
 El sistema asigna **títulos sociales** (insignias) a los jugadores según las decisiones del grupo.  
 Un **comentarista automático** basado en IA generativa narra lo que ocurre (acusados, resultados, títulos) sin intervenir en las reglas ni en el resultado del juego.
 
+Este proyecto ha sido desarrollado como parte del Trabajo de Fin de Estudio del Grado en Ingeniería Informática de UNIR.
+
 ---
 
 ## Características principales
@@ -215,4 +217,4 @@ Para información detallada, consulta [`docs/testing.md`](docs/testing.md).
 
 ## Licencia
 
-MIT License - Ver archivo LICENSE para más detalles (pendiente de crear).
+Este proyecto se publica bajo la licencia MIT. Consulta el archivo [LICENSE](license.md) para más detalles.
