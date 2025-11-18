@@ -63,7 +63,7 @@ Los degradados hero y los halos (`--shadow-glow`, `--shadow-neon`) se reservan p
 ### 3.1 Host Lobby (RF-001 a RF-007)
 
 - **Layout sin desplazamiento:** El escenario se compone de una retícula fija 2x2 dentro de un contenedor 16:9 escalado (letterboxing/pillarboxing según corresponda). Todos los módulos ajustan tipografía y padding mediante tokens `--scale-stage-*` para permanecer visibles sin scroll.
-- **Zona hero:** `game-hero` se ubica en la celda superior izquierda y puede expandirse horizontalmente en ≥1920 px manteniendo relación 3:2 sin exceder el viewport.
+- **Zona hero:** `game-hero game-hero-lobby` ocupa la celda superior izquierda, mantiene proporción 3:2 y restringe su altura a `clamp(18rem, 32vh, 26rem)` en viewports ≥1024 px para liberar el resto de la retícula; nunca supera el 40% de la altura visible.
 - **Información crítica:** QR, código y timeline residen en la mitad inferior distribuida en subpaneles que compactan listas con densidad `compact` cuando hay más de 8 jugadores, evitando barras de desplazamiento.
 - **Indicadores de estado:** Los avatares usan un mosaico `game-grid-roster` que prioriza ajuste de columnas (máx. 4 columnas) y reduce avatar a 72 px manteniendo etiquetas visibles.
 - **CTA en contexto:** `Iniciar partida` permanece en una barra fija `game-footer-host` dentro del mismo viewport; los tooltips persistentes se integran como subtítulos para evitar popups flotantes.
