@@ -9,42 +9,42 @@
 
 <PageTitle>Pandorium - Lobby</PageTitle>
 
-<div class="game-container game-animate-fadeIn">
-    <!-- Hero Section -->
-    <div class="game-hero">
-        <div class="game-hero-content">
-            <h1 class="game-title">⚖️ Pandorium</h1>
-            <p class="game-subtitle">
-                El juego social definitivo para 4-16 jugadores.<br/>
-                Acusa, defiende y decide quién recibe cada título en tu grupo.
-            </p>
-        </div>
-    </div>
-
+<div class="game-container lobby-container game-animate-fadeIn">
     @if (_room is null)
     {
-        <!-- Pre-Game Setup Card -->
+        <!-- Pre-Game: Compact hero + form -->
+        <div class="game-hero game-hero-lobby-compact">
+            <div class="game-hero-content">
+                <h1 class="game-title">⚖️ Pandorium</h1>
+                <p class="game-subtitle">
+                    El juego social definitivo para 4-16 jugadores.<br/>
+                    Acusa, defiende y decide quién recibe cada título en tu grupo.
+                </p>
+            </div>
+        </div>
+
+        <!-- Compact configuration form -->
         <GameCard class="game-animate-slideIn">
             <Header>
                 <h2 class="game-card-title">🎮 Configurar Partida</h2>
             </Header>
             <Body>
-                <GameStack Direction="vertical" Gap="3">
+                <GameStack Direction="vertical" Gap="2">
                     <div class="game-form-group">
                         <label class="game-label" for="gameMode">
-                            <span style="font-size: 1.5rem;">🎯</span> Modo de Juego
+                            <span style="font-size: 1.25rem;">🎯</span> Modo de Juego
                         </label>
                         <select id="gameMode" class="game-select" @bind="_selectedMode" autofocus @ref="_gameModeSelect">
                             @foreach (var mode in _availableModes)
                             {
                                 <option value="@mode">
-                                    @(mode == GameMode.Suave ? "😊 Suave - Para conocerse" :
-                                      mode == GameMode.Normal ? "😎 Normal - Equilibrado" :
-                                      "🔥 Spicy - Solo para valientes")
+                                    @(mode == GameMode.Suave ? "😊 Suave" :
+                                      mode == GameMode.Normal ? "😎 Normal" :
+                                      "🔥 Spicy")
                                 </option>
                             }
                         </select>
-                        <small class="text-muted mt-1" style="display: block; font-size: 0.875rem;">
+                        <small class="text-muted mt-1" style="display: block; font-size: 0.75rem;">
                             @GetModeDescription(_selectedMode)
                         </small>
                     </div>
@@ -55,7 +55,7 @@
                         FullWidth="true" 
                         IsLoading="@_isCreating"
                         OnClick="CreateRoomAsync">
-                        <span style="font-size: 1.5rem;">🚀</span>
+                        <span style="font-size: 1.25rem;">🚀</span>
                         <span>Crear Sala</span>
                     </GameButton>
 
@@ -98,22 +98,42 @@
     }
     else
     {
-        <!-- Room Created - Display QR and Room Info -->
+        <!-- After room creation: NO HERO, only essential elements visible without scroll -->
+        
+        <!-- Compact header with mode badge -->
+        <div style="text-align: center; margin-bottom: var(--space-md);">
+            <h2 style="font-size: var(--font-size-xl); font-weight: var(--font-weight-bold); color: var(--color-light); margin-bottom: var(--space-sm);">
+                ⚖️ Pandorium
+            </h2>
+            <span style="background: @GetModeGradient(_room.Mode); display: inline-flex; align-items: center; padding: var(--space-xs) var(--space-md); font-size: var(--font-size-sm); font-weight: var(--font-weight-semibold); border-radius: var(--radius-full); color: var(--color-light); box-shadow: var(--shadow-md);">
+                @GetModeEmoji(_room.Mode) @_room.Mode
+            </span>
+        </div>
+
+        <!-- RNF-011 Section 3.1: Compact timeline for lobby preparation progress -->
+        <div class="game-timeline game-timeline-compact">
+            <div class="game-timeline-step completed">
+                <div class="game-timeline-icon">✓</div>
+                <div class="game-timeline-label">Sala Creada</div>
+            </div>
+            <div class="game-timeline-step @(_room.Players.Count > 0 ? "completed" : "active")">
+                <div class="game-timeline-icon">@(_room.Players.Count > 0 ? "✓" : "👥")</div>
+                <div class="game-timeline-label">Jugadores</div>
+            </div>
+            <div class="game-timeline-step @(_room.CanStartGame ? "active" : "")">
+                <div class="game-timeline-icon">🎮</div>
+                <div class="game-timeline-label">Iniciar</div>
+            </div>
+        </div>
+
+        <!-- RNF-011 Section 3.1: Compact split layout - QR card (left) and roster card (right) -->
         <div class="game-grid game-grid-2">
-            <!-- QR Code and Room Code Card -->
-            <GameCard class="game-animate-fadeIn">
+            <!-- Left: Compact QR card -->
+            <GameCard class="game-card-spotlight game-card-compact game-animate-fadeIn">
                 <Body>
-                    <div class="game-qr-container">
-                        <h2 class="game-qr-title">📲 Escanea para Unirte</h2>
-                        
-                        <div class="game-room-code">
+                    <div class="game-qr-container game-qr-container-compact">
+                        <div class="game-room-code game-room-code-compact">
                             @_room.Code
-                        </div>
-                        
-                        <div class="d-flex align-items-center justify-content-center gap-2 mb-3">
-                            <span style="background: @GetModeGradient(_room.Mode); display: inline-flex; align-items: center; padding: var(--space-xs) var(--space-lg); font-size: var(--font-size-base); font-weight: var(--font-weight-semibold); border-radius: var(--radius-full); white-space: nowrap; color: var(--color-light);">
-                                @GetModeEmoji(_room.Mode) @_room.Mode
-                            </span>
                         </div>
 
                         @if (_qrCodeBase64 is not null)
@@ -121,80 +141,63 @@
                             <div class="game-qr-image">
                                 <img src="data:image/png;base64,@_qrCodeBase64" 
                                      alt="Código QR para unirse" 
-                                     style="max-width: 350px; width: 100%;" />
+                                     style="max-width: 200px; width: 100%;" />
                             </div>
-                            <p class="text-muted" style="font-size: 0.875rem; word-break: break-all;">
-                                @_roomUrl
-                            </p>
                             
-                            <!-- RF-007: Native share button -->
-                            <div class="mt-3">
-                                <GameButton 
-                                    Variant="outline"
-                                    Size="md"
-                                    FullWidth="true"
-                                    OnClick="ShareRoomUrlAsync">
-                                    <span style="font-size: 1.25rem;">📤</span>
-                                    <span>@_shareButtonText</span>
-                                </GameButton>
-                                @if (_shareMessage is not null)
-                                {
-                                    <small class="d-block text-center mt-2" style="color: var(--color-success);">
-                                        @_shareMessage
-                                    </small>
-                                }
-                            </div>
+                            <!-- RF-007: Compact share button -->
+                            <GameButton 
+                                Variant="outline"
+                                Size="sm"
+                                FullWidth="true"
+                                OnClick="ShareRoomUrlAsync">
+                                <span style="font-size: 1rem;">📤</span>
+                                <span style="font-size: 0.875rem;">@_shareButtonText</span>
+                            </GameButton>
                         }
                     </div>
                 </Body>
             </GameCard>
 
-            <!-- Players List and Game Start Card -->
-            <GameCard class="game-animate-slideIn">
+            <!-- Right: Compact roster card -->
+            <GameCard class="game-card-roster game-card-compact game-animate-slideIn">
                 <Header>
-                    <h2 class="game-card-title">
+                    <h3 class="game-card-title" style="font-size: var(--font-size-lg);">
                         👥 Jugadores
-                        <GameBadge Variant="primary" Size="lg" class="ms-2">
-                            @_room.Players.Count / @Room.MaxPlayers
+                        <GameBadge Variant="primary" Size="md" class="ms-2">
+                            @_room.Players.Count/@Room.MaxPlayers
                         </GameBadge>
-                    </h2>
-                    @if (_hubConnection?.State == HubConnectionState.Connected)
-                    {
-                        <GameBadge Variant="success">
-                            ● En vivo
-                        </GameBadge>
-                    }
+                    </h3>
                 </Header>
                 <Body>
                     @if (_room.Players.Count == 0)
                     {
-                        <GameLoadingSpinner Size="lg" Text="Esperando jugadores..." Centered="true">
-                        </GameLoadingSpinner>
-                        <p class="text-muted text-center mt-2">
-                            Los jugadores pueden unirse escaneando el código QR
+                        <p class="text-muted text-center" style="font-size: 0.875rem; padding: var(--space-md) 0;">
+                            Esperando jugadores...
                         </p>
                     }
                     else
                     {
-                        <ul class="game-player-list">
+                        <ul class="game-player-list game-player-list-compact">
                             @{
                                 var playerIndex = 0;
                             }
-                            @foreach (var player in _room.Players)
+                            @foreach (var player in _room.Players.Take(6))
                             {
                                 playerIndex++;
-                                <li class="game-player-item">
-                                    <div class="d-flex align-items-center gap-2">
-                                        <span style="font-size: 1.25rem;">@GetStatusIndicator(player.ConnectionStatus)</span>
-                                        <span style="font-size: 1.5rem;">👤</span>
-                                        <span class="game-player-name">@player.Alias</span>
+                                <li class="game-player-item game-player-item-compact">
+                                    <div class="d-flex align-items-center gap-1">
+                                        <span style="font-size: 1.125rem;">👤</span>
+                                        <span class="game-player-name" style="font-size: var(--font-size-sm);">@player.Alias</span>
                                     </div>
-                                    <div class="d-flex align-items-center gap-2">
-                                        <small class="text-muted">@GetStatusText(player.ConnectionStatus)</small>
-                                        <GameBadge Variant="secondary">
-                                            #@playerIndex
-                                        </GameBadge>
-                                    </div>
+                                    <span class="game-chip-status game-chip-status-@GetStatusClass(player.ConnectionStatus)" style="font-size: 0.625rem; padding: 2px 6px;">
+                                        @GetStatusText(player.ConnectionStatus)
+                                    </span>
+                                </li>
+                            }
+                            @if (_room.Players.Count > 6)
+                            {
+                                <li class="text-muted text-center" style="font-size: 0.75rem; padding: var(--space-xs);">
+                                    +@(_room.Players.Count - 6) más
                                 </li>
                             }
                         </ul>
@@ -202,47 +205,40 @@
 
                     @if (!_room.CanStartGame)
                     {
-                        <div class="mt-3">
-                            <GameAlert Variant="warning" Icon="⏳">
-                                <Title>Se necesitan más jugadores</Title>
-                                <Message>
-                                    Mínimo @Room.MinPlayers jugadores para iniciar 
-                                    (@_room.Players.Count/@Room.MinPlayers)
-                                </Message>
-                            </GameAlert>
+                        <div class="mt-2">
+                            <small class="text-warning d-block text-center" style="font-size: 0.75rem;">
+                                ⏳ Mínimo @Room.MinPlayers jugadores (@_room.Players.Count/@Room.MinPlayers)
+                            </small>
                         </div>
                     }
                     else
                     {
-                        <GameStack Direction="vertical" Gap="2" class="mt-3">
-                            <GameAlert Variant="success">
-                                <Title>¡Listo para empezar!</Title>
-                                <Message>Ya tenéis @_room.Players.Count jugadores conectados</Message>
-                            </GameAlert>
-                            
+                        <div class="mt-2">
+                            <!-- RNF-011 Section 3.1: Compact CTA -->
                             <GameButton 
                                 Variant="secondary" 
-                                Size="lg" 
+                                Size="md" 
                                 FullWidth="true"
                                 IsLoading="@_isStarting"
                                 OnClick="StartGameAsync">
-                                <span style="font-size: 1.5rem;">🎯</span>
-                                <span>Iniciar Partida</span>
+                                <span style="font-size: 1.125rem;">🎯</span>
+                                <span style="font-size: 0.875rem;">Iniciar Partida</span>
                             </GameButton>
-                        </GameStack>
+                        </div>
                     }
                 </Body>
             </GameCard>
         </div>
 
-        <!-- Action Buttons -->
-        <div class="mt-4 d-flex justify-content-center">
+        <!-- Compact "Create New Room" button -->
+        <div class="mt-2 d-flex justify-content-center">
             <GameButton 
                 Variant="outline"
+                Size="sm"
                 Disabled="@_isCreating"
                 OnClick="CreateAnotherRoomAsync">
-                <span style="font-size: 1.5rem;">🔄</span>
-                <span>Crear Nueva Sala</span>
+                <span style="font-size: 1rem;">🔄</span>
+                <span style="font-size: 0.875rem;">Crear Nueva Sala</span>
             </GameButton>
         </div>
     }
@@ -285,14 +281,14 @@
     };
 
     /// <summary>
-    /// Gets the status indicator emoji for a player (RF-013).
+    /// Gets the CSS class for status chip based on connection status (RNF-011 Section 3.1).
     /// </summary>
-    private static string GetStatusIndicator(PlayerConnectionStatus status) => status switch
+    private static string GetStatusClass(PlayerConnectionStatus status) => status switch
     {
-        PlayerConnectionStatus.Conectado => "🟢",
-        PlayerConnectionStatus.Inactivo => "🟡",
-        PlayerConnectionStatus.Desconectado => "⚫",
-        _ => "⚪"
+        PlayerConnectionStatus.Conectado => "connected",
+        PlayerConnectionStatus.Inactivo => "inactive",
+        PlayerConnectionStatus.Desconectado => "disconnected",
+        _ => "disconnected"
     };
 
     /// <summary>

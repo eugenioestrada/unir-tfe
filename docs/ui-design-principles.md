@@ -11,6 +11,7 @@ Este documento describe el lenguaje visual definitivo de Pandorium y establece l
 - **Consistencia total:** Cada componente reutiliza tokens e interacciones documentadas. Cualquier nueva funcionalidad debe declarar su correspondencia con estos principios (RNF-011).
 - **Accesibilidad celebrada:** Las animaciones, colores y microcopys respetan WCAG 2.2 AA, navegación con teclado y usuarios sensibles a movimiento (RNF-001, RNF-004).
 - **Determinismo visual:** Los cambios de fase y resultados expresan el orden del motor con patrones de transición previsibles; no se esconde información bajo efectos ni se añade aleatoriedad visual.
+- **Visibilidad continua:** Cada vista debe mostrar la totalidad de elementos funcionales sin desplazamientos ni capas modales que oculten información, ajustando escala y jerarquía para cumplir RNF-010 en cualquier resolución.
 
 ---
 
@@ -61,42 +62,35 @@ Los degradados hero y los halos (`--shadow-glow`, `--shadow-neon`) se reservan p
 
 ### 3.1 Host Lobby (RF-001 a RF-007)
 
-- **Layout en capas:**
-  - `game-hero` ocupa 60% superior con degradado hero, título impactante y resumen del modo.
-  - Zona inferior split en dos cards: izquierda `game-card game-card-spotlight` (QR + código + compartir) y derecha `game-card game-card-roster` (lista de jugadores).
-- **Narrativa temporal:** Ilustrar progreso de preparación con `game-timeline` (puntos: Crear sala, Jugadores listos, Iniciar). Cada punto cambia de color al cumplirse.
-- **Indicadores de estado:** Los avatares muestran halos y barras de latencia. Utilizar chips `game-chip-status` para `Conectado`, `Inactivo`, `Desconectado`.
-- **Reglas de CTA:** `Iniciar partida` se habilita cuando contador de jugadores ≥4; mostrar tooltip persistente con reglas RF-003.
+- **Layout sin desplazamiento:** El escenario se compone de una retícula fija 2x2 dentro de un contenedor 16:9 escalado (letterboxing/pillarboxing según corresponda). Todos los módulos ajustan tipografía y padding mediante tokens `--scale-stage-*` para permanecer visibles sin scroll.
+- **Zona hero:** `game-hero game-hero-lobby` ocupa la celda superior izquierda, mantiene proporción 3:2 y restringe su altura a `clamp(18rem, 32vh, 26rem)` en viewports ≥1024 px para liberar el resto de la retícula; nunca supera el 40% de la altura visible.
+- **Información crítica:** QR, código y timeline residen en la mitad inferior distribuida en subpaneles que compactan listas con densidad `compact` cuando hay más de 8 jugadores, evitando barras de desplazamiento.
+- **Indicadores de estado:** Los avatares usan un mosaico `game-grid-roster` que prioriza ajuste de columnas (máx. 4 columnas) y reduce avatar a 72 px manteniendo etiquetas visibles.
+- **CTA en contexto:** `Iniciar partida` permanece en una barra fija `game-footer-host` dentro del mismo viewport; los tooltips persistentes se integran como subtítulos para evitar popups flotantes.
 
 ### 3.2 Host Partida (RF-020 a RF-052)
 
-- **Estructura tri-panel:**
-  - Panel izquierdo `game-panel-case`: caso actual con ilustración vectorial, nivel de picante y texto principal.
-  - Panel central `game-panel-flow`: fase activa con barra de progreso vertical, tarjetas de acusación, defensa o puntuaciones según fase.
-  - Panel derecho `game-panel-commentary`: comentario IA, log de eventos y fallback humorístico.
-- **HUD superior:** Banda translúcida muestra ronda actual, temporizador y estado del service AI.
-- **HUD inferior:** Carrusel de jugadores con badges para acusaciones recibidas, votos emitidos y títulos. Se mueve automáticamente pero permite exploración manual con foco accesible.
-- **Transiciones de fase:** Animar panel central con `slide-axis` (CaseVoting ←→ Defense ←→ DefenseVoting). Mantener overlay de countdown sincronizado con SignalR.
+- **Escenario matricial:** Sustituye el tri-panel apilado por una retícula 12 columnas que se agrupa en tres paneles simultáneos (`case`, `flow`, `commentary`) con anchos 4-4-4 en ≥1600 px y 5-4-3 en ≤1366 px, manteniendo siempre los tres módulos completos visibles.
+- **Gestión de densidad:** La lista de acusaciones/defensas se presenta en tarjetas condensadas con altura fija y scroll interno deshabilitado; cuando superan la capacidad, se activa compresión tipográfica y paginación automática visible (píldoras enumeradas) que muestra todas las entradas simultáneamente en miniatura.
+- **HUDs integrados:** Banda superior e indicadores de fase se integran en el margen superior de la retícula con altura máxima de 96 px; ningún HUD flota fuera del canvas ni provoca solapamientos.
+- **Panel de jugadores:** Reemplaza el carrusel por `game-grid-players` (matriz 3xN) con indicadores miniatura. En resoluciones menores, el grid reduce a 2 filas mediante escala uniforme, nunca oculta elementos detrás de controles de navegación.
 
 ### 3.3 Host Scoring & Finished (RF-040 a RF-074)
 
-- **Scoreboard cinemático:** Presentar ranking en `game-table-score` con columnas: Jugador, Puntos ronda, Puntos totales, Títulos.
-- **Módulo de highlights:** Cards destacadas para MVP de acusaciones, defensa heroica y predicción perfecta.
-- **Clausura:** Botón `Compartir resumen` y `Nueva partida` lado a lado; animación de confeti vectorial sobria.
+- **Scoreboard compacto:** `game-table-score` adopta tipografía condensa y columnas de ancho fijo. Si la lista supera 12 jugadores, se habilita modo doble columna dentro del mismo lienzo, replicando encabezados para evitar scroll.
+- **Highlights visibles:** Los módulos de MVP y defensas heroicas se alinean en la misma retícula, con tarjetas de 320 px de alto máximo y texto autoajustado para caber en la vista final.
+- **Acciones finales:** Botones `Compartir resumen` y `Nueva partida` se integran en una barra inferior fija dentro del canvas principal sin superponer el ranking.
 
 ### 3.4 Player Flow
 
-- **Barra contextual fija:** Cabezal con nombre del jugador, avatar dinámico y fase actual; color de fondo cambia según fase para orientación rápida.
-- **Wizard determinista:** Cada fase se expresa como pantalla dedica con CTA primaria en footer `game-footer-cta` para asegurar ergonomía en móviles.
-- **Feedback háptico virtual:** Añadir clases `game-btn-haptic` para simular vibración visual (resplandor pulsante) cuando se requiere acción inmediata.
-- **Defensa y votación:** Modales a pantalla completa con narrativa breve, opciones en formato segmentado y accesos directos para confirmación.
-- **Resumen personal:** Al finalizar ronda, mostrar card de puntos, decisiones acertadas y comentario personalizado.
+- **Layout fijo:** Cada fase se representa en panel central `game-stage-player` con altura máxima igual al viewport. El contenido se divide en bloques colapsables automáticos (`accordion-inline`) que permanecen expandidos por defecto para mostrar toda la información sin desplazamiento.
+- **CTA sin modales:** Las acciones se alojan en la barra `game-footer-cta` anclada al mismo lienzo. Se eliminan modales a pantalla completa; en su lugar, se utilizan paneles laterales plegables que conviven con el resto del contenido.
+- **Visibilidad de decisiones:** Opciones de votación y defensa se muestran en matriz 2 columnas que degrada a 1 columna compactando tipografía antes de provocar scroll; se asegura que el botón de confirmación permanezca simultáneamente visible.
 
 ### 3.5 Patrones compartidos
 
-- `game-toast-stack` arriba a la derecha en host y arriba centrado en player; auto-dismiss 4 s salvo errores críticos.
-- Skeletons `game-skeleton-grid` replican proporciones exactas de cards para evitar saltos de layout.
-- Always-on `game-connection-indicator` (esfera verde/ámbar/roja) sincronizada con RF-013 y RNF-004.
+- `game-toast-stack` se limita a mensajes inline dentro del canvas; su altura máxima garantiza que no oculte controles permanentes ni genere desplazamiento.
+- `game-connection-indicator` y skeletons se integran en slots reservados de la retícula para evitar saltos de layout y mantener la visibilidad constante de todos los elementos.
 
 ---
 

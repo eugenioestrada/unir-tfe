@@ -253,6 +253,19 @@ h6 {
     flex-direction: column;
 }
 
+/* Reduced padding for lobby to ensure no-scroll layout */
+.game-container.lobby-container {
+    padding: var(--space-md) var(--space-lg);
+    gap: var(--space-md);
+}
+
+@media (max-width: 640px) {
+    .game-container.lobby-container {
+        padding: var(--space-sm) var(--space-md);
+        gap: var(--space-sm);
+    }
+}
+
 .game-hero {
     text-align: center;
     padding: var(--space-3xl) var(--space-2xl);
@@ -264,6 +277,49 @@ h6 {
     position: relative;
     overflow: hidden;
     border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* RNF-011 Section 3.1: Lobby hero with height constraints for no-scroll layout */
+.game-hero-lobby {
+    /* Never exceed 40% of viewport height, with responsive clamping */
+    max-height: 40vh;
+    height: clamp(18rem, 32vh, 26rem);
+    padding: var(--space-xl) var(--space-lg);
+    margin-bottom: var(--space-lg);
+}
+
+/* Compact hero for initial lobby (before room creation) */
+.game-hero-lobby-compact {
+    max-height: 30vh;
+    height: auto;
+    padding: var(--space-md) var(--space-lg);
+    margin-bottom: var(--space-md);
+}
+
+.game-hero-lobby-compact .game-title {
+    font-size: var(--font-size-3xl);
+    margin-bottom: var(--space-sm);
+}
+
+.game-hero-lobby-compact .game-subtitle {
+    font-size: var(--font-size-sm);
+    line-height: 1.4;
+}
+
+@media (max-width: 1023px) {
+    .game-hero-lobby {
+        /* On smaller screens, allow more flexibility but still prevent overflow */
+        height: auto;
+        max-height: 35vh;
+        padding: var(--space-lg) var(--space-md);
+    }
+}
+
+@media (max-width: 640px) {
+    .game-hero-lobby {
+        max-height: 30vh;
+        padding: var(--space-md) var(--space-sm);
+    }
 }
 
 .game-hero::before {
@@ -2249,6 +2305,264 @@ a:focus-visible {
     .game-select:focus-visible {
         outline-width: 4px;
     }
+}
+
+/* ========== LOBBY-SPECIFIC COMPONENTS (RNF-011 Section 3.1) ========== */
+
+/* Timeline for lobby preparation progress */
+.game-timeline {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-lg) 0;
+    margin: var(--space-lg) 0;
+}
+
+/* Compact timeline for after room creation */
+.game-timeline-compact {
+    padding: var(--space-sm) 0;
+    margin: var(--space-sm) 0;
+}
+
+.game-timeline-compact .game-timeline-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 1rem;
+}
+
+.game-timeline-compact .game-timeline-label {
+    font-size: var(--font-size-xs);
+}
+
+.game-timeline-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-sm);
+    flex: 1;
+    position: relative;
+}
+
+.game-timeline-step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    width: 100%;
+    height: 3px;
+    background: var(--color-gray-700);
+    z-index: -1;
+}
+
+.game-timeline-step.completed:not(:last-child)::after {
+    background: var(--gradient-primary);
+}
+
+.game-timeline-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    background: var(--color-gray-700);
+    border: 3px solid var(--color-gray-700);
+    transition: all var(--transition-base);
+}
+
+.game-timeline-step.completed .game-timeline-icon {
+    background: var(--gradient-primary);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 20px rgba(255, 99, 71, 0.5);
+}
+
+.game-timeline-step.active .game-timeline-icon {
+    background: var(--gradient-primary);
+    border-color: var(--color-primary);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.game-timeline-label {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-gray-500);
+    text-align: center;
+    transition: color var(--transition-base);
+}
+
+.game-timeline-step.completed .game-timeline-label,
+.game-timeline-step.active .game-timeline-label {
+    color: var(--color-light);
+}
+
+/* Status chips for player connection states */
+.game-chip-status {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    transition: all var(--transition-base);
+}
+
+.game-chip-status-connected {
+    background: rgba(0, 201, 167, 0.2);
+    color: var(--color-success);
+    border: 1px solid var(--color-success);
+}
+
+.game-chip-status-inactive {
+    background: rgba(255, 182, 39, 0.2);
+    color: var(--color-warning);
+    border: 1px solid var(--color-warning);
+}
+
+.game-chip-status-disconnected {
+    background: rgba(255, 90, 95, 0.2);
+    color: var(--color-danger);
+    border: 1px solid var(--color-danger);
+}
+
+.game-chip-status::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+/* Roster card for player list */
+.game-card-roster {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.game-card-roster .game-card-body {
+    flex: 1;
+    overflow-y: auto;
+    max-height: 500px;
+}
+
+/* Player list styling */
+.game-player-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+/* Compact player list for after room creation */
+.game-player-list-compact {
+    gap: var(--space-xs);
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.game-player-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-md);
+    background: var(--color-elevation-1, var(--color-gray-800));
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all var(--transition-base);
+    animation: game-animate-slideIn var(--transition-slow) ease-out;
+}
+
+/* Compact player item */
+.game-player-item-compact {
+    padding: var(--space-xs) var(--space-sm);
+}
+
+.game-player-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateX(4px);
+}
+
+.game-player-name {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-light);
+}
+
+/* Compact cards */
+.game-card-compact {
+    padding: var(--space-sm);
+}
+
+.game-card-compact .game-card-body {
+    padding: var(--space-sm);
+}
+
+.game-card-compact .game-card-header {
+    padding: var(--space-sm);
+}
+
+/* QR container styling */
+.game-qr-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-lg);
+    padding: var(--space-lg);
+}
+
+/* Compact QR container for after room creation */
+.game-qr-container-compact {
+    gap: var(--space-sm);
+    padding: var(--space-md);
+}
+
+.game-qr-title {
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
+    text-align: center;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 0;
+}
+
+.game-qr-image {
+    padding: var(--space-lg);
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-xl);
+}
+
+.game-qr-container-compact .game-qr-image {
+    padding: var(--space-md);
+}
+
+.game-room-code {
+    font-size: var(--font-size-4xl);
+    font-weight: var(--font-weight-bold);
+    font-family: var(--font-display);
+    letter-spacing: 0.2em;
+    color: var(--color-light);
+    padding: var(--space-md) var(--space-xl);
+    background: var(--gradient-primary);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-glow);
+    text-align: center;
+}
+
+/* Compact room code */
+.game-room-code-compact {
+    font-size: var(--font-size-2xl);
+    padding: var(--space-sm) var(--space-lg);
+    letter-spacing: 0.15em;
 }
 
 /* Reduced motion support */
