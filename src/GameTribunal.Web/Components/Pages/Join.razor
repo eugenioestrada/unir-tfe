@@ -2,7 +2,9 @@
 @rendermode InteractiveServer
 @using GameTribunal.Domain.Enumerations
 @using Microsoft.AspNetCore.SignalR.Client
+@using Microsoft.JSInterop
 @implements IAsyncDisposable
+@inject IJSRuntime JS
 
 <PageTitle>Unirse - Pandorium</PageTitle>
 
@@ -497,23 +499,46 @@
     }
 
     /// <summary>
-    /// Stores player ID in browser session storage for reconnection.
+    /// Stores player ID in browser session storage for reconnection (RF-017).
     /// </summary>
-    private Task StorePlayerIdAsync()
+    private async Task StorePlayerIdAsync()
     {
-        // In a real implementation, use JSInterop to store in sessionStorage
-        // For now, we rely on in-memory state
-        return Task.CompletedTask;
+        if (_playerId.HasValue)
+        {
+            try
+            {
+                var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/sessionStorage.js");
+                await module.InvokeVoidAsync("setItem", $"player_{RoomCode}", _playerId.Value.ToString());
+                await module.InvokeVoidAsync("setItem", $"player_{RoomCode}_alias", _playerAlias);
+            }
+            catch (Exception)
+            {
+                // Silently fail if sessionStorage is not available
+            }
+        }
     }
 
     /// <summary>
-    /// Retrieves stored player ID from browser session storage.
+    /// Retrieves stored player ID from browser session storage (RF-017).
     /// </summary>
-    private Task<Guid?> GetStoredPlayerIdAsync()
+    private async Task<Guid?> GetStoredPlayerIdAsync()
     {
-        // In a real implementation, use JSInterop to retrieve from sessionStorage
-        // For now, return null
-        return Task.FromResult<Guid?>(null);
+        try
+        {
+            var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/sessionStorage.js");
+            var playerIdStr = await module.InvokeAsync<string?>("getItem", $"player_{RoomCode}");
+            
+            if (!string.IsNullOrEmpty(playerIdStr) && Guid.TryParse(playerIdStr, out var playerId))
+            {
+                return playerId;
+            }
+        }
+        catch (Exception)
+        {
+            // Silently fail if sessionStorage is not available
+        }
+        
+        return null;
     }
 
     /// <summary>
