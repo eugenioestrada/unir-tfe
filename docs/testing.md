@@ -102,12 +102,13 @@ Los tests de interfaz de usuario se encuentran en `src/GameTribunal.Web.UI.Tests
 
 ```
 GameTribunal.Web.UI.Tests/
-├── AccessibilityTests.cs       # Tests WCAG AA
-├── DesignSystemTests.cs        # Tests de sistema de diseño
-├── ResponsiveDesignTests.cs    # Tests de diseño responsivo
-├── VisualRegressionTests.cs    # Tests de regresión visual
-├── PlaywrightTest.cs          # Clase base con configuración
-└── README.md                   # Documentación específica
+├── AccessibilityTests.cs           # Tests WCAG AA
+├── DesignSystemTests.cs            # Tests de sistema de diseño
+├── ResponsiveDesignTests.cs        # Tests de diseño responsivo
+├── VisualRegressionTests.cs        # Tests de regresión visual
+├── PlayerConnectionStatusTests.cs  # Tests de estado de conexión de jugadores (RF-013, RF-014, RF-015, RF-016)
+├── PlaywrightTest.cs              # Clase base con configuración
+└── README.md                       # Documentación específica
 ```
 
 ### Cobertura de Tests
@@ -161,6 +162,16 @@ Captura screenshots para comparación:
 - Botones (normal y hover)
 - Home page
 - Componentes individuales
+
+#### PlayerConnectionStatusTests (9 tests)
+Valida gestión de estado de conexión de jugadores:
+- **RF-013**: Visualización de estados (Conectado, Inactivo, Desconectado)
+- **RF-014**: Cambio a Inactivo después de 30 segundos de inactividad
+- **RF-015**: Cambio a Desconectado después de 5 minutos de inactividad
+- **RF-016**: Propagación en tiempo real de cambios de estado via SignalR
+- Estructura de página de lobby
+- Estructura de página de unirse a sala
+- Formularios de configuración de juego
 
 ### Prerequisitos UI Tests
 
@@ -252,10 +263,10 @@ Los tests se ejecutan automáticamente en el pipeline de CI/CD definido en `.git
 - **Velocidad**: < 5 segundos
 
 ### UI Tests
-- **Total**: 42 tests
+- **Total**: 51 tests (42 existing + 9 PlayerConnectionStatusTests)
 - **Viewports**: 7 diferentes
 - **Navegadores**: Chromium (principal)
-- **Screenshots**: 10+ automáticos
+- **Screenshots**: 15+ automáticos
 
 ## Roadmap
 
