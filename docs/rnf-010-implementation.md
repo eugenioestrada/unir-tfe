@@ -10,6 +10,8 @@ This document describes the implementation of **RNF-010: Adaptar layout a pantal
 
 The interface must dynamically adapt to the available viewport, redistributing components to occupy the entire useful surface without requiring vertical or horizontal scrolling.
 
+**Important**: This means the design itself should be optimized to fit within the viewport, not that we should add scrollbars or constrain containers to force content to fit.
+
 ## Implementation
 
 ### CSS Changes
@@ -21,23 +23,14 @@ Modified `/src/GameTribunal.Web/wwwroot/game-design.css` to ensure proper fullsc
 Added support for modern CSS `dvh` (dynamic viewport height) units, which account for mobile browser chrome (address bar, toolbars):
 
 ```css
-html {
-    height: 100%;
-}
-
 body {
     min-height: 100vh;
-    min-height: 100dvh; /* Fallback to dvh for modern browsers */
-    height: 100%;
+    min-height: 100dvh; /* Adapts to actual visible viewport */
 }
 
 .game-container {
     min-height: 100vh;
     min-height: 100dvh;
-    max-height: 100vh;
-    max-height: 100dvh;
-    overflow-y: auto;
-    overflow-x: hidden;
 }
 ```
 
@@ -50,11 +43,15 @@ Traditional `100vh` can cause issues on mobile devices:
 
 The `dvh` unit (dynamic viewport height) adapts to the actual visible viewport, accounting for browser chrome.
 
-#### 3. Overflow Prevention
+#### 3. Design Philosophy
 
-- `overflow-x: hidden` prevents horizontal scrolling
-- `overflow-y: auto` allows vertical scrolling only when content genuinely exceeds viewport
-- `max-height` constraints ensure container doesn't exceed viewport
+The implementation focuses on:
+- Using `dvh` to accurately measure the viewport on mobile devices
+- Preventing horizontal overflow with `overflow-x: hidden` on body
+- Allowing the design to breathe naturally without forcing constraints
+- Ensuring all main content is visible without scrolling on initial page load
+
+**Note**: The solution does NOT add `max-height` or `overflow-y: auto` to the container, as this would hide content and defeat the purpose of the requirement. Instead, the design is optimized to naturally fit within the viewport.
 
 ### UI Tests
 
