@@ -16,6 +16,7 @@ Este documento recoge los requisitos funcionales, no funcionales y los casos de 
 | RF-004 | Mostrar QR de acceso. | El host debe ver y compartir un código QR que incluya la URL y el código de sala para facilitar la incorporación de jugadores. | Completado |
 | RF-005 | Gestionar fase de lobby. | Debe existir una fase de lobby donde los jugadores introduzcan su alias y se unan antes de iniciar la partida. | Completado |
 | RF-006 | Evitar alias duplicados. | El sistema debe impedir alias duplicados dentro de una misma sala. | Completado |
+| RF-007 | Compartir enlace nativo. | El host debe poder compartir la URL de la sala mediante los mecanismos nativos del navegador (por ejemplo, la Web Share API) como alternativa al escaneo del código QR. | Pendiente |
 
 ### Gestión de jugadores y conexiones
 
