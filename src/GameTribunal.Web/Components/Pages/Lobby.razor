@@ -10,14 +10,22 @@
 <PageTitle>Pandorium - Lobby</PageTitle>
 
 <div class="game-container game-animate-fadeIn">
-    <!-- Hero Section -->
-    <div class="game-hero">
+    <!-- Hero Section - Following RNF-011 Section 3.1: 60% upper area with degraded hero -->
+    <div class="game-hero" style="min-height: 60vh; display: flex; flex-direction: column; justify-content: center;">
         <div class="game-hero-content">
             <h1 class="game-title">⚖️ Pandorium</h1>
             <p class="game-subtitle">
                 El juego social definitivo para 4-16 jugadores.<br/>
                 Acusa, defiende y decide quién recibe cada título en tu grupo.
             </p>
+            @if (_room is not null)
+            {
+                <div style="margin-top: var(--space-lg);">
+                    <span style="background: @GetModeGradient(_room.Mode); display: inline-flex; align-items: center; padding: var(--space-sm) var(--space-xl); font-size: var(--font-size-xl); font-weight: var(--font-weight-bold); border-radius: var(--radius-full); white-space: nowrap; color: var(--color-light); box-shadow: var(--shadow-lg);">
+                        @GetModeEmoji(_room.Mode) @_room.Mode
+                    </span>
+                </div>
+            }
         </div>
     </div>
 
@@ -98,22 +106,32 @@
     }
     else
     {
-        <!-- Room Created - Display QR and Room Info -->
+        <!-- RNF-011 Section 3.1: Timeline for lobby preparation progress -->
+        <div class="game-timeline">
+            <div class="game-timeline-step completed">
+                <div class="game-timeline-icon">✓</div>
+                <div class="game-timeline-label">Sala Creada</div>
+            </div>
+            <div class="game-timeline-step @(_room.Players.Count > 0 ? "completed" : "active")">
+                <div class="game-timeline-icon">@(_room.Players.Count > 0 ? "✓" : "👥")</div>
+                <div class="game-timeline-label">Jugadores Listos</div>
+            </div>
+            <div class="game-timeline-step @(_room.CanStartGame ? "active" : "")">
+                <div class="game-timeline-icon">🎮</div>
+                <div class="game-timeline-label">Iniciar Partida</div>
+            </div>
+        </div>
+
+        <!-- RNF-011 Section 3.1: Split lower zone - QR card (left) and roster card (right) -->
         <div class="game-grid game-grid-2">
-            <!-- QR Code and Room Code Card -->
-            <GameCard class="game-animate-fadeIn">
+            <!-- Left: game-card-spotlight for QR and sharing -->
+            <GameCard class="game-card-spotlight game-animate-fadeIn">
                 <Body>
                     <div class="game-qr-container">
                         <h2 class="game-qr-title">📲 Escanea para Unirte</h2>
                         
                         <div class="game-room-code">
                             @_room.Code
-                        </div>
-                        
-                        <div class="d-flex align-items-center justify-content-center gap-2 mb-3">
-                            <span style="background: @GetModeGradient(_room.Mode); display: inline-flex; align-items: center; padding: var(--space-xs) var(--space-lg); font-size: var(--font-size-base); font-weight: var(--font-weight-semibold); border-radius: var(--radius-full); white-space: nowrap; color: var(--color-light);">
-                                @GetModeEmoji(_room.Mode) @_room.Mode
-                            </span>
                         </div>
 
                         @if (_qrCodeBase64 is not null)
@@ -149,8 +167,8 @@
                 </Body>
             </GameCard>
 
-            <!-- Players List and Game Start Card -->
-            <GameCard class="game-animate-slideIn">
+            <!-- Right: game-card-roster for players list -->
+            <GameCard class="game-card-roster game-animate-slideIn">
                 <Header>
                     <h2 class="game-card-title">
                         👥 Jugadores
@@ -185,12 +203,14 @@
                                 playerIndex++;
                                 <li class="game-player-item">
                                     <div class="d-flex align-items-center gap-2">
-                                        <span style="font-size: 1.25rem;">@GetStatusIndicator(player.ConnectionStatus)</span>
                                         <span style="font-size: 1.5rem;">👤</span>
                                         <span class="game-player-name">@player.Alias</span>
                                     </div>
                                     <div class="d-flex align-items-center gap-2">
-                                        <small class="text-muted">@GetStatusText(player.ConnectionStatus)</small>
+                                        <!-- RNF-011 Section 3.1: Use game-chip-status for connection states -->
+                                        <span class="game-chip-status game-chip-status-@GetStatusClass(player.ConnectionStatus)">
+                                            @GetStatusText(player.ConnectionStatus)
+                                        </span>
                                         <GameBadge Variant="secondary">
                                             #@playerIndex
                                         </GameBadge>
@@ -220,6 +240,7 @@
                                 <Message>Ya tenéis @_room.Players.Count jugadores conectados</Message>
                             </GameAlert>
                             
+                            <!-- RNF-011 Section 3.1: CTA enabled when player count >= minimum (RF-003) -->
                             <GameButton 
                                 Variant="secondary" 
                                 Size="lg" 
@@ -285,14 +306,14 @@
     };
 
     /// <summary>
-    /// Gets the status indicator emoji for a player (RF-013).
+    /// Gets the CSS class for status chip based on connection status (RNF-011 Section 3.1).
     /// </summary>
-    private static string GetStatusIndicator(PlayerConnectionStatus status) => status switch
+    private static string GetStatusClass(PlayerConnectionStatus status) => status switch
     {
-        PlayerConnectionStatus.Conectado => "🟢",
-        PlayerConnectionStatus.Inactivo => "🟡",
-        PlayerConnectionStatus.Desconectado => "⚫",
-        _ => "⚪"
+        PlayerConnectionStatus.Conectado => "connected",
+        PlayerConnectionStatus.Inactivo => "inactive",
+        PlayerConnectionStatus.Desconectado => "disconnected",
+        _ => "disconnected"
     };
 
     /// <summary>
