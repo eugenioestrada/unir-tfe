@@ -118,4 +118,116 @@ public class PlayerConnectionStatusTests(TestServerFixture serverFixture) : Play
         var gameModeLabel = Page.Locator("label", new() { HasText = "Modo de Juego" });
         await Expect(gameModeLabel).ToBeVisibleAsync();
     }
+
+    /// <summary>
+    /// RF-014: Validates that player status changes to Inactivo after 30 seconds of inactivity.
+    /// This is the key test for the functional requirement RF-014.
+    /// 
+    /// Strategy: Join a player, then close their browser connection to simulate inactivity.
+    /// The PlayerStatusMonitorService should detect no activity for 30+ seconds and change status to Inactivo.
+    /// </summary>
+    [Fact]
+    public async Task PlayerStatus_ChangesToInactivo_After30SecondsOfInactivity()
+    {
+        // Step 1: Create a room in the host page
+        await Page.GotoAsync("/");
+        
+        // Wait for page to load
+        await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+        
+        var gameModeSelect = Page.Locator("select#gameMode");
+        await Expect(gameModeSelect).ToBeVisibleAsync();
+        await gameModeSelect.SelectOptionAsync("Normal");
+        
+        var createButton = Page.Locator("button", new() { HasText = "Crear Sala" });
+        await Expect(createButton).ToBeVisibleAsync();
+        await createButton.ClickAsync();
+        
+        // Wait for room to be created by checking for the room code display
+        var roomCodeDisplay = Page.Locator(".game-room-code");
+        await Expect(roomCodeDisplay).ToBeVisibleAsync(new() { Timeout = 15000 });
+        
+        // Extract the room code from the display
+        var roomCode = await roomCodeDisplay.InnerTextAsync();
+        roomCode = roomCode.Trim();
+        
+        Assert.False(string.IsNullOrEmpty(roomCode), "Room code should be extracted from display");
+        
+        // Step 2: Open a new page/context to join as a player
+        var playerContext = await Browser.NewContextAsync(new BrowserNewContextOptions
+        {
+            IgnoreHTTPSErrors = true,
+            BaseURL = BaseUrl,
+            ViewportSize = new ViewportSize { Width = 375, Height = 667 } // Mobile viewport
+        });
+        var playerPage = await playerContext.NewPageAsync();
+        
+        try
+        {
+            // Step 3: Join the room as a player
+            await playerPage.GotoAsync($"/join/{roomCode}");
+            
+            // Wait for the page to load
+            await playerPage.WaitForLoadStateAsync(LoadState.NetworkIdle);
+            
+            // Fill in alias and join
+            var aliasInput = playerPage.Locator("input#alias");
+            await Expect(aliasInput).ToBeVisibleAsync();
+            await aliasInput.FillAsync("TestPlayer");
+            
+            // Wait for button to become enabled (it's disabled when alias is empty)
+            var joinButton = playerPage.Locator("button", new() { HasText = "Unirse a la Sala" });
+            await Expect(joinButton).ToBeEnabledAsync(new() { Timeout = 5000 });
+            await joinButton.ClickAsync();
+            
+            // Wait for join to complete - look for the success message
+            var successAlert = playerPage.Locator("text=¡Bienvenido/a!");
+            await Expect(successAlert).ToBeVisibleAsync(new() { Timeout = 5000 });
+            
+            // Step 4: Verify initial status is Conectado (🟢) on the host page
+            var hostConnectedIndicator = Page.Locator("text=🟢").First;
+            await Expect(hostConnectedIndicator).ToBeVisibleAsync(new() { Timeout = 5000 });
+            
+            var hostConnectedText = Page.Locator("text=Conectado").First;
+            await Expect(hostConnectedText).ToBeVisibleAsync(new() { Timeout = 2000 });
+            
+            // Step 5: Close the player page to simulate disconnection/inactivity
+            // This stops the heartbeat mechanism
+            await playerPage.CloseAsync();
+            await playerContext.CloseAsync();
+            
+            // Step 6: Wait for 45 seconds
+            // - 30 seconds for inactivity threshold (RF-014)
+            // - Up to 10 seconds for PlayerStatusMonitorService to check
+            // - 5 seconds buffer
+            await Task.Delay(TimeSpan.FromSeconds(45));
+            
+            // Step 7: Verify status changed to Inactivo (🟡) on the host page
+            var hostInactiveIndicator = Page.Locator("text=🟡").First;
+            await Expect(hostInactiveIndicator).ToBeVisibleAsync(new() { Timeout = 10000 });
+            
+            var hostInactiveText = Page.Locator("text=Inactivo").First;
+            await Expect(hostInactiveText).ToBeVisibleAsync(new() { Timeout = 2000 });
+            
+            // Take final screenshot showing the inactive status
+            await Page.ScreenshotAsync(new() { Path = "/tmp/test-rf014-final-inactive-status.png" });
+        }
+        catch
+        {
+            // If already closed in the test, don't fail on cleanup
+            try
+            {
+                if (!playerPage.IsClosed)
+                {
+                    await playerPage.CloseAsync();
+                }
+                await playerContext.CloseAsync();
+            }
+            catch
+            {
+                // Ignore cleanup errors
+            }
+            throw;
+        }
+    }
 }
