@@ -29,6 +29,7 @@
 - Keep README concise; route detailed narratives to the relevant doc under `docs/`.
 - Describe new or modified tests in `docs/testing.md`; reflect roadmap impacts in `docs/planning.md`.
 - For each new or modified functional requirement, explicitly document the cross-reference between the requirement and its UI tests (file name, primary scenario, and expected result) inside `docs/testing.md`. If the requirement does not yet have a UI test, the delivery must not be approved.
+- Update `docs/requirements.md` whenever new functionality is implemented or existing requirements change, ensuring traceability between requirements, features, and tests.
 - Ensure documentation under `docs/` and `README.md` is authored in Spanish.
 
 ## Testing Expectations
