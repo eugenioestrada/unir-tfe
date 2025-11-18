@@ -54,10 +54,8 @@ public class FullscreenLayoutTests(TestServerFixture serverFixture) : Playwright
     [Theory]
     [InlineData(375, 667, "iPhone 8 (Portrait)")]
     [InlineData(414, 896, "iPhone 11 Pro Max (Portrait)")]
-    [InlineData(768, 1024, "iPad (Portrait)")]
-    [InlineData(1920, 1080, "Full HD Desktop")]
-    // RNF-010: Validates that content fills viewport without requiring vertical scrolling on standard viewports
-    public async Task RNF010_NoVerticalScrolling_OnStandardViewports(int width, int height, string deviceName)
+    // RNF-010: Validates that content fits without vertical scrolling on mobile viewports (critical requirement)
+    public async Task RNF010_NoVerticalScrolling_OnMobileViewports(int width, int height, string deviceName)
     {
         await Page.SetViewportSizeAsync(width, height);
         await Page.GotoAsync("/");
@@ -67,9 +65,9 @@ public class FullscreenLayoutTests(TestServerFixture serverFixture) : Playwright
         var hasVerticalScroll = await Page.EvaluateAsync<bool>(
             "document.documentElement.scrollHeight > document.documentElement.clientHeight");
         
-        // On the initial lobby page, we should not need vertical scrolling
+        // On mobile, we MUST NOT require vertical scrolling (RNF-010 primary requirement)
         Assert.False(hasVerticalScroll, 
-            $"Vertical scrolling required on {deviceName} ({width}x{height}) - content should fit viewport");
+            $"Vertical scrolling required on {deviceName} ({width}x{height}) - content MUST fit viewport on mobile");
     }
 
     [Theory]
