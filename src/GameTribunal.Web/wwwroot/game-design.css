@@ -288,6 +288,24 @@ h6 {
     margin-bottom: var(--space-lg);
 }
 
+/* Compact hero for initial lobby (before room creation) */
+.game-hero-lobby-compact {
+    max-height: 30vh;
+    height: auto;
+    padding: var(--space-md) var(--space-lg);
+    margin-bottom: var(--space-md);
+}
+
+.game-hero-lobby-compact .game-title {
+    font-size: var(--font-size-3xl);
+    margin-bottom: var(--space-sm);
+}
+
+.game-hero-lobby-compact .game-subtitle {
+    font-size: var(--font-size-sm);
+    line-height: 1.4;
+}
+
 @media (max-width: 1023px) {
     .game-hero-lobby {
         /* On smaller screens, allow more flexibility but still prevent overflow */
@@ -2300,6 +2318,22 @@ a:focus-visible {
     margin: var(--space-lg) 0;
 }
 
+/* Compact timeline for after room creation */
+.game-timeline-compact {
+    padding: var(--space-sm) 0;
+    margin: var(--space-sm) 0;
+}
+
+.game-timeline-compact .game-timeline-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 1rem;
+}
+
+.game-timeline-compact .game-timeline-label {
+    font-size: var(--font-size-xs);
+}
+
 .game-timeline-step {
     display: flex;
     flex-direction: column;
@@ -2425,6 +2459,13 @@ a:focus-visible {
     gap: var(--space-sm);
 }
 
+/* Compact player list for after room creation */
+.game-player-list-compact {
+    gap: var(--space-xs);
+    max-height: 200px;
+    overflow-y: auto;
+}
+
 .game-player-item {
     display: flex;
     align-items: center;
@@ -2435,6 +2476,11 @@ a:focus-visible {
     border: 1px solid rgba(255, 255, 255, 0.1);
     transition: all var(--transition-base);
     animation: game-animate-slideIn var(--transition-slow) ease-out;
+}
+
+/* Compact player item */
+.game-player-item-compact {
+    padding: var(--space-xs) var(--space-sm);
 }
 
 .game-player-item:hover {
@@ -2449,6 +2495,19 @@ a:focus-visible {
     color: var(--color-light);
 }
 
+/* Compact cards */
+.game-card-compact {
+    padding: var(--space-sm);
+}
+
+.game-card-compact .game-card-body {
+    padding: var(--space-sm);
+}
+
+.game-card-compact .game-card-header {
+    padding: var(--space-sm);
+}
+
 /* QR container styling */
 .game-qr-container {
     display: flex;
@@ -2456,6 +2515,12 @@ a:focus-visible {
     align-items: center;
     gap: var(--space-lg);
     padding: var(--space-lg);
+}
+
+/* Compact QR container for after room creation */
+.game-qr-container-compact {
+    gap: var(--space-sm);
+    padding: var(--space-md);
 }
 
 .game-qr-title {
@@ -2476,6 +2541,10 @@ a:focus-visible {
     box-shadow: var(--shadow-xl);
 }
 
+.game-qr-container-compact .game-qr-image {
+    padding: var(--space-md);
+}
+
 .game-room-code {
     font-size: var(--font-size-4xl);
     font-weight: var(--font-weight-bold);
@@ -2487,6 +2556,13 @@ a:focus-visible {
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-glow);
     text-align: center;
+}
+
+/* Compact room code */
+.game-room-code-compact {
+    font-size: var(--font-size-2xl);
+    padding: var(--space-sm) var(--space-lg);
+    letter-spacing: 0.15em;
 }
 
 /* Reduced motion support */
