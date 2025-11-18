@@ -95,6 +95,17 @@ public sealed class RoomService
         return $"{trimmedBaseUrl}/join/{roomCode}";
     }
 
+    /// <summary>
+    /// Gets a room by its code. Returns null if not found (RF-017).
+    /// </summary>
+    public async Task<RoomDto?> GetRoomByCodeAsync(RoomCode roomCode, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(roomCode);
+
+        var room = await _roomRepository.GetByCodeAsync(roomCode, cancellationToken).ConfigureAwait(false);
+        return room is null ? null : MapToDto(room);
+    }
+
     private static RoomDto MapToDto(Room room)
     {
         var players = room.Players.Select(p => new PlayerDto(p.Id, p.Alias, p.ConnectionStatus)).ToList();

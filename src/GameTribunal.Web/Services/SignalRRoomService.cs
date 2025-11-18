@@ -56,4 +56,12 @@ public sealed class SignalRRoomService
     {
         return _roomService.GenerateRoomUrl(roomCode, baseUrl);
     }
+
+    /// <summary>
+    /// Gets a room by its code. Returns null if not found (RF-017).
+    /// </summary>
+    public Task<RoomDto?> GetRoomByCodeAsync(GameTribunal.Domain.ValueObjects.RoomCode roomCode, CancellationToken cancellationToken = default)
+    {
+        return _roomService.GetRoomByCodeAsync(roomCode, cancellationToken);
+    }
 }

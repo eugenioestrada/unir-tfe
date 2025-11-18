@@ -3,7 +3,9 @@
 @using GameTribunal.Web.Services
 @using GameTribunal.Domain.Enumerations
 @using Microsoft.AspNetCore.SignalR.Client
+@using Microsoft.JSInterop
 @implements IAsyncDisposable
+@inject IJSRuntime JS
 
 <PageTitle>Pandorium - Lobby</PageTitle>
 
@@ -294,13 +296,20 @@
     {
         if (firstRender)
         {
-            try
+            // Check if there's an existing host session (RF-017)
+            await RestoreHostSessionAsync();
+            
+            // Only try to focus if there's no room (avoid error when room is restored)
+            if (_room is null)
             {
-                await _gameModeSelect.FocusAsync();
-            }
-            catch (InvalidOperationException)
-            {
-                // Ignore focus errors if the element is not yet available.
+                try
+                {
+                    await _gameModeSelect.FocusAsync();
+                }
+                catch (Exception)
+                {
+                    // Ignore focus errors if the element is not yet available.
+                }
             }
         }
     }
@@ -331,6 +340,9 @@
             var baseUrl = Configuration["BaseUrl"] ?? "https://localhost:7000";
             _roomUrl = RoomService.GenerateRoomUrl(_room.Code, baseUrl);
             _qrCodeBase64 = QrCodeService.GenerateQrCodeBase64(_roomUrl);
+
+            // Save host session (RF-017)
+            await SaveHostSessionAsync();
 
             // Initialize SignalR connection for real-time updates (RF-011)
             await InitializeSignalRConnectionAsync();
@@ -429,6 +441,73 @@
         catch (Exception ex)
         {
             _errorMessage = $"No se pudo conectar al hub: {ex.Message}";
+        }
+    }
+
+    /// <summary>
+    /// Saves the current host session to browser sessionStorage (RF-017).
+    /// </summary>
+    private async Task SaveHostSessionAsync()
+    {
+        if (_room is not null)
+        {
+            try
+            {
+                var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/sessionStorage.js");
+                await module.InvokeVoidAsync("setItem", "host_room_code", _room.Code);
+                await module.InvokeVoidAsync("setItem", "host_is_host", "true");
+            }
+            catch (Exception)
+            {
+                // Silently fail if sessionStorage is not available
+            }
+        }
+    }
+
+    /// <summary>
+    /// Restores the host session from browser sessionStorage (RF-017).
+    /// </summary>
+    private async Task RestoreHostSessionAsync()
+    {
+        try
+        {
+            var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/sessionStorage.js");
+            var roomCode = await module.InvokeAsync<string?>("getItem", "host_room_code");
+            var isHost = await module.InvokeAsync<string?>("getItem", "host_is_host");
+            
+            if (!string.IsNullOrEmpty(roomCode) && isHost == "true" && _room is null)
+            {
+                // Try to restore the room
+                if (GameTribunal.Domain.ValueObjects.RoomCode.TryFrom(roomCode, out var code))
+                {
+                    var room = await RoomService.GetRoomByCodeAsync(code);
+                    if (room is not null)
+                    {
+                        _room = room;
+                        
+                        // Generate QR code URL
+                        var baseUrl = Configuration["BaseUrl"] ?? "https://localhost:7000";
+                        _roomUrl = RoomService.GenerateRoomUrl(_room.Code, baseUrl);
+                        _qrCodeBase64 = QrCodeService.GenerateQrCodeBase64(_roomUrl);
+                        
+                        // Initialize SignalR connection
+                        await InitializeSignalRConnectionAsync();
+                        
+                        // Force UI update
+                        await InvokeAsync(StateHasChanged);
+                    }
+                    else
+                    {
+                        // Room no longer exists, clear storage
+                        await module.InvokeVoidAsync("removeItem", "host_room_code");
+                        await module.InvokeVoidAsync("removeItem", "host_is_host");
+                    }
+                }
+            }
+        }
+        catch (Exception)
+        {
+            // Silently fail if sessionStorage is not available or room restoration fails
         }
     }
 

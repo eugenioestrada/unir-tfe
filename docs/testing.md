@@ -107,6 +107,7 @@ GameTribunal.Web.UI.Tests/
 ├── ResponsiveDesignTests.cs        # Tests de diseño responsivo
 ├── VisualRegressionTests.cs        # Tests de regresión visual
 ├── PlayerConnectionStatusTests.cs  # Tests de estado de conexión de jugadores (RF-013, RF-014, RF-015, RF-016)
+├── PageRefreshRecoveryTests.cs     # Tests de recuperación tras refrescar página (RF-017)
 ├── PlaywrightTest.cs              # Clase base con configuración
 └── README.md                       # Documentación específica
 ```
@@ -172,6 +173,15 @@ Valida gestión de estado de conexión de jugadores:
 - Estructura de página de lobby
 - Estructura de página de unirse a sala
 - Formularios de configuración de juego
+
+#### PageRefreshRecoveryTests (5 tests)
+Valida recuperación de sesión tras refrescar página:
+- **RF-017**: Recuperación automática de vista tras refrescar página
+- Jugador refresca página y mantiene estado de unido
+- Host refresca página y mantiene estado de sala creada
+- Host y jugador refrescan independientemente
+- Manejo correcto de página sin sesión previa
+- Persistencia en sessionStorage del navegador
 
 ### Prerequisitos UI Tests
 
@@ -258,12 +268,12 @@ Los tests se ejecutan automáticamente en el pipeline de CI/CD definido en `.git
 ## Métricas
 
 ### Unit Tests
-- **Total**: ~15-20 tests
+- **Total**: 54 tests
 - **Cobertura**: Domain y Application layers
-- **Velocidad**: < 5 segundos
+- **Velocidad**: < 1 segundo
 
 ### UI Tests
-- **Total**: 51 tests (42 existing + 9 PlayerConnectionStatusTests)
+- **Total**: 56 tests (42 existing + 9 PlayerConnectionStatusTests + 5 PageRefreshRecoveryTests)
 - **Viewports**: 7 diferentes
 - **Navegadores**: Chromium (principal)
 - **Screenshots**: 15+ automáticos
