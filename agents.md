@@ -37,7 +37,7 @@
 - Maintain SignalR hub tests/integration tests as described in `docs/testing.md`.
 - For UI changes, extend Playwright suites in `src/GameTribunal.Web.UI.Tests/` (accessibility, responsive, visual regression) and refresh screenshots if assertions depend on them.
 - Run `dotnet test` (or targeted filters) before finalizing work; ensure deterministic, fast tests.
-- Capture UI and marketing screenshots using real device viewports (Mobile M, Mobile L, Tablet, Laptop, TV 1080p, TV 4K) to validate non-functional requirements before submission.
+- Capture UI and marketing screenshots using real device viewports (Mobile M, Mobile L, Tablet, Laptop, TV 1080p, TV 4K) to validate non-functional requirements before submission; do not capture full screen screenshots.
 - For each implemented or modified functional requirement, create or update at least one UI test (Playwright) that validates:
   - The primary flow of the requirement (happy path).
   - At least one boundary condition or relevant variant (if applicable).
