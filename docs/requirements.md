@@ -99,7 +99,7 @@ Este documento recoge los requisitos funcionales, no funcionales y los casos de 
 | RNF-007 | Disponer de logging básico. | Deben existir mecanismos básicos de logging y monitorización para diagnosticar incidencias. | En progreso |
 | RNF-008 | Interfaz responsive. | La interfaz debe ser responsiva y usable en dispositivos móviles (pantalla vertical) y en pantallas de gran formato. | Completado |
 | RNF-009 | Preservar contexto tras recarga. | La experiencia debe preservar el contexto de los usuarios ante recargas de página, restableciendo la sesión y el estado visible sin intervención manual mientras la partida siga activa. | Pendiente |
-| RNF-010 | Adaptar layout a pantalla completa. | La interfaz debe ajustarse dinámicamente al viewport disponible, redistribuyendo componentes para ocupar toda la superficie útil sin requerir desplazamiento vertical u horizontal. | Completado |
+| RNF-010 | Adaptar layout a pantalla completa. | El layout debe estar diseñado para que todo el contenido principal quede contenido en un único viewport, sin necesidad de scroll vertical ni horizontal. | Completado |
 
 ---
 
