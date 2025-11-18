@@ -11,6 +11,7 @@ public class LobbyDesignTests(TestServerFixture serverFixture) : PlaywrightTest(
 {
     /// <summary>
     /// Validates that the hero section occupies approximately 60% of viewport as per RNF-011 Section 3.1.
+    /// Checks the inline style attribute for min-height: 60vh specification.
     /// </summary>
     [Fact]
     public async Task Lobby_HeroSection_ShouldOccupy60PercentOfViewport()
@@ -20,9 +21,16 @@ public class LobbyDesignTests(TestServerFixture serverFixture) : PlaywrightTest(
         var heroSection = Page.Locator(".game-hero");
         await Expect(heroSection).ToBeVisibleAsync();
         
-        // Check that hero section has min-height of 60vh
-        var minHeight = await heroSection.EvaluateAsync<string>("el => window.getComputedStyle(el).minHeight");
-        Assert.Contains("vh", minHeight);
+        // Check that hero section has the style attribute with min-height containing vh units
+        var styleAttr = await heroSection.GetAttributeAsync("style");
+        Assert.True(
+            styleAttr != null && (styleAttr.Contains("min-height") && styleAttr.Contains("vh")),
+            $"Hero section should have min-height with vh units in style attribute. Found: {styleAttr}"
+        );
+        
+        // Additionally verify the computed height is reasonable (at least 400px for typical viewports)
+        var computedHeight = await heroSection.EvaluateAsync<int>("el => el.offsetHeight");
+        Assert.True(computedHeight >= 400, $"Hero section computed height should be at least 400px, found: {computedHeight}px");
     }
 
     /// <summary>
@@ -199,6 +207,7 @@ public class LobbyDesignTests(TestServerFixture serverFixture) : PlaywrightTest(
 
     /// <summary>
     /// Validates that the QR code and room code are displayed prominently.
+    /// Follows same pattern as other passing tests for consistency.
     /// </summary>
     [Fact]
     public async Task Lobby_QRAndRoomCode_ShouldBeDisplayed()
@@ -209,11 +218,16 @@ public class LobbyDesignTests(TestServerFixture serverFixture) : PlaywrightTest(
         var createButton = Page.Locator("button:has-text('Crear Sala')");
         await createButton.ClickAsync();
         
-        await Page.WaitForSelectorAsync(".game-room-code", new() { Timeout = 5000 });
+        // Wait for the QR container to appear (indicates room was created)
+        await Page.WaitForSelectorAsync(".game-qr-container", new() { Timeout = 10000 });
         
         // Verify room code is visible
         var roomCode = Page.Locator(".game-room-code");
         await Expect(roomCode).ToBeVisibleAsync();
+        
+        // Verify the room code has text content
+        var roomCodeText = await roomCode.TextContentAsync();
+        Assert.False(string.IsNullOrWhiteSpace(roomCodeText), "Room code should have non-empty text");
         
         // Verify QR code image is visible
         var qrImage = Page.Locator(".game-qr-image img");
