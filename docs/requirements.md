@@ -28,7 +28,7 @@ Este documento recoge los requisitos funcionales, no funcionales y los casos de 
 | RF-014 | Marcar inactividad a 30s. | El estado `Inactivo` se aplicará automáticamente tras 30 segundos sin actividad y se revertirá al detectar interacción del jugador. | Completado |
 | RF-015 | Marcar desconexión a 5min. | El estado `Desconectado` se establecerá tras 5 minutos de inactividad continuada y permanecerá hasta que el jugador se reincorpore. | Completado |
 | RF-016 | Propagar cambios de estado. | Los cambios de estado deben propagarse en tiempo real a todos los clientes conectados mediante SignalR. | Completado |
-| RF-017 | Restaurar vista tras refresco. | Tras refrescar la página, el host y los jugadores deben recuperar automáticamente su vista correspondiente (lobby, jugador o fase activa) siempre que la partida no haya finalizado. | Pendiente |
+| RF-017 | Restaurar vista tras refresco. | Tras refrescar la página, el host y los jugadores deben recuperar automáticamente su vista correspondiente (lobby, jugador o fase activa) siempre que la partida no haya finalizado. | Completado |
 
 ### Flujo de partida y fases
 
