@@ -165,6 +165,8 @@ html {
     font-size: 16px;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* Ensure html fills viewport for proper height calculations */
+    height: 100%;
 }
 
 body {
@@ -173,9 +175,13 @@ body {
     line-height: 1.6;
     color: var(--color-light);
     background: linear-gradient(180deg, #0F0E17 0%, #1A1A2E 50%, #16213E 100%);
+    /* Use dynamic viewport height to account for mobile browser chrome */
     min-height: 100vh;
+    min-height: 100dvh; /* Fallback to dvh for modern browsers */
     overflow-x: hidden;
     position: relative;
+    /* Ensure body fills viewport without exceeding it */
+    height: 100%;
 }
 
 /* Subtle background pattern for depth - enhanced */
@@ -248,9 +254,16 @@ h6 {
     max-width: 1400px;
     margin: 0 auto;
     padding: var(--space-lg) var(--space-xl);
+    /* Use dynamic viewport height to account for mobile browser chrome */
     min-height: 100vh;
+    min-height: 100dvh; /* Fallback to dvh for modern browsers */
     display: flex;
     flex-direction: column;
+    /* Ensure container doesn't exceed viewport */
+    max-height: 100vh;
+    max-height: 100dvh;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .game-hero {
@@ -1421,6 +1434,9 @@ a:focus-visible {
     .game-container {
         padding: var(--space-sm) var(--space-md);
         min-height: 100vh;
+        min-height: 100dvh;
+        max-height: 100vh;
+        max-height: 100dvh;
     }
     
     .game-hero {
