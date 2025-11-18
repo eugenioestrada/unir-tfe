@@ -24,6 +24,9 @@ builder.Services.AddScoped<RoomService>();
 builder.Services.AddScoped<SignalRRoomService>(); // SignalR-aware wrapper (RF-011)
 builder.Services.AddSingleton<QrCodeService>();
 
+// Background service to monitor player statuses (RF-013, RF-014, RF-015)
+builder.Services.AddHostedService<PlayerStatusMonitorService>();
+
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
     options.ForwardedHeaders =

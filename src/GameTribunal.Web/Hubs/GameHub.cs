@@ -80,7 +80,7 @@ public sealed class GameHub : Hub
         var roomDto = new RoomDto(
             room.Code.Value,
             room.Mode,
-            room.Players.Select(p => new PlayerDto(p.Id, p.Alias)).ToList(),
+            room.Players.Select(p => new PlayerDto(p.Id, p.Alias, p.ConnectionStatus)).ToList(),
             room.CanStartGame()
         );
 
@@ -144,5 +144,45 @@ public sealed class GameHub : Hub
         }
 
         return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// Records player activity to update their status (RF-014).
+    /// This method should be called periodically by connected clients.
+    /// </summary>
+    /// <param name="roomCode">The room code.</param>
+    /// <param name="playerId">The player's unique ID.</param>
+    public async Task RecordActivity(string roomCode, Guid playerId)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(roomCode, nameof(roomCode));
+
+        if (!RoomCode.TryFrom(roomCode, out var code))
+        {
+            _logger.LogWarning("Invalid room code format: {RoomCode}.", roomCode);
+            return;
+        }
+
+        var room = await _roomRepository.GetByCodeAsync(code);
+        if (room == null)
+        {
+            _logger.LogWarning("Room {RoomCode} not found when recording activity.", roomCode);
+            return;
+        }
+
+        var player = room.Players.FirstOrDefault(p => p.Id == playerId);
+        if (player == null)
+        {
+            _logger.LogWarning("Player {PlayerId} not found in room {RoomCode}.", playerId, roomCode);
+            return;
+        }
+
+        // Update player activity
+        player.RecordActivity();
+        await _roomRepository.UpdateAsync(room);
+
+        _logger.LogInformation("Activity recorded for player {PlayerId} in room {RoomCode}.", playerId, roomCode);
+
+        // Broadcast updated room state (RF-016)
+        await BroadcastRoomState(roomCode);
     }
 }

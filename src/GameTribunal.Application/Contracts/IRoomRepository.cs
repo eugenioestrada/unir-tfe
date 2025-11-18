@@ -15,4 +15,9 @@ public interface IRoomRepository
     Task<Room?> GetByCodeAsync(RoomCode code, CancellationToken cancellationToken = default);
 
     Task UpdateAsync(Room room, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets all rooms. Used by background services to monitor player statuses (RF-013).
+    /// </summary>
+    Task<IReadOnlyCollection<Room>> GetAllAsync(CancellationToken cancellationToken = default);
 }
