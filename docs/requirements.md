@@ -100,6 +100,7 @@ Este documento recoge los requisitos funcionales, no funcionales y los casos de 
 | RNF-008 | Interfaz responsive. | La interfaz debe ser responsiva y usable en dispositivos móviles (pantalla vertical) y en pantallas de gran formato. | Completado |
 | RNF-009 | Preservar contexto tras recarga. | La experiencia debe preservar el contexto de los usuarios ante recargas de página, restableciendo la sesión y el estado visible sin intervención manual mientras la partida siga activa. | Pendiente |
 | RNF-010 | Adaptar layout a pantalla completa. | La interfaz debe ajustarse dinámicamente al viewport disponible, redistribuyendo componentes para ocupar toda la superficie útil sin requerir desplazamiento vertical u horizontal. | Pendiente |
+| RNF-011 | Alinear con principios de diseño. | Toda funcionalidad y componente de UI debe alinearse con los lineamientos vigentes en `docs/ui-design-principles.md`; cualquier desviación requiere actualizar la guía antes de su implementación. | Pendiente |
 
 ---
 
