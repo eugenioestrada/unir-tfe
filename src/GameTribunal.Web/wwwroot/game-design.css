@@ -253,6 +253,19 @@ h6 {
     flex-direction: column;
 }
 
+/* Reduced padding for lobby to ensure no-scroll layout */
+.game-container.lobby-container {
+    padding: var(--space-md) var(--space-lg);
+    gap: var(--space-md);
+}
+
+@media (max-width: 640px) {
+    .game-container.lobby-container {
+        padding: var(--space-sm) var(--space-md);
+        gap: var(--space-sm);
+    }
+}
+
 .game-hero {
     text-align: center;
     padding: var(--space-3xl) var(--space-2xl);
@@ -264,6 +277,31 @@ h6 {
     position: relative;
     overflow: hidden;
     border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* RNF-011 Section 3.1: Lobby hero with height constraints for no-scroll layout */
+.game-hero-lobby {
+    /* Never exceed 40% of viewport height, with responsive clamping */
+    max-height: 40vh;
+    height: clamp(18rem, 32vh, 26rem);
+    padding: var(--space-xl) var(--space-lg);
+    margin-bottom: var(--space-lg);
+}
+
+@media (max-width: 1023px) {
+    .game-hero-lobby {
+        /* On smaller screens, allow more flexibility but still prevent overflow */
+        height: auto;
+        max-height: 35vh;
+        padding: var(--space-lg) var(--space-md);
+    }
+}
+
+@media (max-width: 640px) {
+    .game-hero-lobby {
+        max-height: 30vh;
+        padding: var(--space-md) var(--space-sm);
+    }
 }
 
 .game-hero::before {

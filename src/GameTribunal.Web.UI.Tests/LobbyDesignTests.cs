@@ -10,27 +10,31 @@ namespace GameTribunal.Web.UI.Tests;
 public class LobbyDesignTests(TestServerFixture serverFixture) : PlaywrightTest(serverFixture)
 {
     /// <summary>
-    /// Validates that the hero section occupies approximately 60% of viewport as per RNF-011 Section 3.1.
-    /// Checks the inline style attribute for min-height: 60vh specification.
+    /// Validates that the hero section follows RNF-011 Section 3.1 height constraints.
+    /// Hero should never exceed 40% of viewport and should fit within viewport without scrolling.
     /// </summary>
     [Fact]
-    public async Task Lobby_HeroSection_ShouldOccupy60PercentOfViewport()
+    public async Task Lobby_HeroSection_ShouldRespectHeightConstraints()
     {
         await Page.GotoAsync("/");
         
         var heroSection = Page.Locator(".game-hero");
         await Expect(heroSection).ToBeVisibleAsync();
         
-        // Check that hero section has the style attribute with min-height containing vh units
-        var styleAttr = await heroSection.GetAttributeAsync("style");
-        Assert.True(
-            styleAttr != null && (styleAttr.Contains("min-height") && styleAttr.Contains("vh")),
-            $"Hero section should have min-height with vh units in style attribute. Found: {styleAttr}"
-        );
+        // Verify hero has lobby-specific class
+        var hasLobbyClass = await heroSection.EvaluateAsync<bool>("el => el.classList.contains('game-hero-lobby')");
+        Assert.True(hasLobbyClass, "Hero section should have game-hero-lobby class for proper height constraints");
         
-        // Additionally verify the computed height is reasonable (at least 400px for typical viewports)
-        var computedHeight = await heroSection.EvaluateAsync<int>("el => el.offsetHeight");
-        Assert.True(computedHeight >= 400, $"Hero section computed height should be at least 400px, found: {computedHeight}px");
+        // Verify the computed height doesn't exceed 40% of viewport
+        var viewportHeight = await Page.EvaluateAsync<int>("() => window.innerHeight");
+        var heroHeight = await heroSection.EvaluateAsync<int>("el => el.offsetHeight");
+        var maxAllowedHeight = viewportHeight * 0.40;
+        
+        Assert.True(heroHeight <= maxAllowedHeight, 
+            $"Hero section height ({heroHeight}px) should not exceed 40% of viewport ({maxAllowedHeight}px)");
+        
+        // Verify it's still substantial enough to be visible
+        Assert.True(heroHeight >= 200, $"Hero section should be at least 200px high, found: {heroHeight}px");
     }
 
     /// <summary>
