@@ -299,13 +299,17 @@
             // Check if there's an existing host session (RF-017)
             await RestoreHostSessionAsync();
             
-            try
+            // Only try to focus if there's no room (avoid error when room is restored)
+            if (_room is null)
             {
-                await _gameModeSelect.FocusAsync();
-            }
-            catch (InvalidOperationException)
-            {
-                // Ignore focus errors if the element is not yet available.
+                try
+                {
+                    await _gameModeSelect.FocusAsync();
+                }
+                catch (Exception)
+                {
+                    // Ignore focus errors if the element is not yet available.
+                }
             }
         }
     }
