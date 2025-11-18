@@ -44,15 +44,22 @@
   No functionality may merge without its minimum UI coverage and without tests passing locally and in CI.
 
 ## Workflow Checklist (must-do)
+**Pre-implementation steps (before coding):**
+1. Understand the task context in full, revisiting functional and non-functional constraints defined in `docs/requirements.md` and related design materials.
+2. Map the affected layers, contracts, and test artefacts to confirm acceptance criteria prior to implementation.
+
+**Coding steps (during implementation):**
 1. Draft or update unit/UI tests that capture the intended behavior before or during implementation.
 2. For each functional requirement (new, extended, or corrected), add or update its corresponding UI test before requesting review (minimum one primary scenario per requirement).
 3. Implement features within the prescribed architecture, honoring DI patterns and async guidelines.
-4. Refresh `docs/planning.md` with status and implications of delivered work.
-5. Ensure all relevant unit tests and UI tests exist, are updated, and pass locally.
-6. Capture test adjustments in `docs/testing.md` plus any other affected documentation or `README.md`, including the requirement-to-UI-test matrix.
-7. Verify structured logging covers key lifecycle events without exposing sensitive data.
-8. Confirm the solution builds and all automated tests succeed (`dotnet test`).
-9. Before delivery, double-check that code, docs, and tests (including new UI tests) land together in the same change set.
+
+**Post-implementation steps (after coding):**
+1. Refresh `docs/planning.md` with status and implications of delivered work.
+2. Ensure all relevant unit tests and UI tests exist, are updated, and pass locally.
+3. Capture test adjustments in `docs/testing.md` plus any other affected documentation or `README.md`, including the requirement-to-UI-test matrix.
+4. Verify structured logging covers key lifecycle events without exposing sensitive data.
+5. Confirm the solution builds and all automated tests succeed (`dotnet test`).
+6. Before delivery, double-check that code, docs, and tests (including new UI tests) land together in the same change set.
 
 ## Quick Reference: Gameplay Essentials
 - Room lifecycle and game phases: `Lobby → CaseVoting → Defense → DefenseVoting? → Scoring → Finished` (`docs/game-logic.md`).
