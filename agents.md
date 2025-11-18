@@ -7,14 +7,14 @@
 - Reference docs: `docs/architecture.md`, `docs/design.md`, `docs/game-logic.md`, `docs/requirements.md`, `docs/technology.md`, `docs/testing.md`, `.github/custom-instructions.md`.
 
 ## Architecture Guardrails
-- Respect the layered flow Domain → Application → Infrastructure → Web (`docs/architecture.md`). Domain remains pure and deterministic; Application orchestrates domain + abstractions; Infrastructure supplies EF Core repositories and external services; Web handles presentation via Blazor/SignalR.
+- Respect the layered flow Domain → Application → Infrastructure → Web (`docs/architecture.md`). Domain remains pure and deterministic; Application orchestrates domain + abstractions; Infrastruc[...]
 - Keep the game engine deterministic: identical inputs must produce identical outcomes (`docs/game-logic.md`). Do not embed randomness, network calls, or UI concerns inside domain logic.
 - SignalR hubs are the real-time entry point. Hubs delegate to Application services and return DTOs only; never surface domain entities directly.
 - Any new infrastructure implementation must hang off an Application-layer interface. Configure wiring through dependency injection in `Program.cs` only.
 - Infra may use EF Core and HttpClient, but must avoid leaking technology-specific types across boundaries.
 
 ## Coding Standards
-- Follow `.github/custom-instructions.md` verbatim: English identifiers/comments, DTOs as `record`, constructor injection, guard clauses, propagate `CancellationToken`, call `ConfigureAwait(false)` in libraries, prefer structured logging with named placeholders.
+- Follow `.github/custom-instructions.md` verbatim: English identifiers/comments, DTOs as `record`, constructor injection, guard clauses, propagate `CancellationToken`, call `ConfigureAwait(false)` in[...]
 - Favor minimal, meaningful comments—use XML documentation on public members and add context only where the intent is non-obvious.
 - Preserve asynchronous flows; avoid synchronously blocking asynchronous calls.
 - When adding services, enforce null checks, validate parameters, and keep business logic inside domain or dedicated services (never in DTOs or controllers/components).
@@ -28,22 +28,29 @@
 - Converge behavior and documentation: update `docs/planning.md`, `docs/testing.md`, and any impacted architectural or design docs whenever functionality, strategy, or test coverage changes.
 - Keep README concise; route detailed narratives to the relevant doc under `docs/`.
 - Describe new or modified tests in `docs/testing.md`; reflect roadmap impacts in `docs/planning.md`.
+- Para cada requisito funcional nuevo o modificado, documenta explícitamente la referencia cruzada entre el requisito y sus pruebas de UI (nombre del archivo, escenario principal y resultado esperado) dentro de `docs/testing.md`. Si el requisito no tiene todavía prueba de UI, no se debe aprobar la entrega.
 
 ## Testing Expectations
 - Expand xUnit coverage within `src/GameTribunal.Application.Tests/` for domain and application logic; mock infrastructure via interfaces.
 - Maintain SignalR hub tests/integration tests as described in `docs/testing.md`.
 - For UI changes, extend Playwright suites in `src/GameTribunal.Web.UI.Tests/` (accessibility, responsive, visual regression) and refresh screenshots if assertions depend on them.
 - Run `dotnet test` (or targeted filters) before finalizing work; ensure deterministic, fast tests.
+- Por cada requisito funcional implementado o modificado se debe crear o actualizar al menos una prueba de UI (Playwright) que valide:
+  - El flujo principal del requisito (happy path).
+  - Al menos una condición límite o variante relevante (si aplica).
+  - El resultado observable desde la perspectiva del usuario (elementos visibles, estados, navegación, mensajes).
+  Ninguna funcionalidad se fusionará sin su cobertura mínima de UI y sin que las pruebas pasen localmente y en CI.
 
 ## Workflow Checklist (must-do)
 1. Draft or update unit/UI tests that capture the intended behavior before or during implementation.
-2. Implement features within the prescribed architecture, honoring DI patterns and async guidelines.
-3. Refresh `docs/planning.md` with status and implications of delivered work.
-4. Ensure all relevant unit tests and UI tests exist, are updated, and pass locally.
-5. Capture test adjustments in `docs/testing.md` plus any other affected documentation or `README.md`.
-6. Verify structured logging covers key lifecycle events without exposing sensitive data.
-7. Confirm the solution builds and all automated tests succeed (`dotnet test`).
-8. Before delivery, double-check that code, docs, and tests land together in the same change set.
+2. Para cada requisito funcional (nuevo, extendido o corregido), asegúrate de añadir o actualizar su prueba de UI correspondiente antes de solicitar revisión (mínimo un escenario principal por requisito).
+3. Implement features within the prescribed architecture, honoring DI patterns and async guidelines.
+4. Refresh `docs/planning.md` with status and implications of delivered work.
+5. Ensure all relevant unit tests and UI tests exist, are updated, and pass locally.
+6. Capture test adjustments in `docs/testing.md` plus any other affected documentation or `README.md`, incluyendo la matriz requisito → pruebas de UI.
+7. Verify structured logging covers key lifecycle events without exposing sensitive data.
+8. Confirm the solution builds and all automated tests succeed (`dotnet test`).
+9. Before delivery, double-check that code, docs, and tests (incluyendo nuevas pruebas de UI) land together in the same change set.
 
 ## Quick Reference: Gameplay Essentials
 - Room lifecycle and game phases: `Lobby → CaseVoting → Defense → DefenseVoting? → Scoring → Finished` (`docs/game-logic.md`).
