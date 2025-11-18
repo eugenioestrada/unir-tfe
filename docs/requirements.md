@@ -24,6 +24,7 @@ Este documento recoge los requisitos funcionales, no funcionales y los casos de 
 - RF-014: El estado `Inactivo` se aplicará automáticamente tras 30 segundos sin actividad y se revertirá al detectar interacción del jugador.
 - RF-015: El estado `Desconectado` se establecerá tras 5 minutos de inactividad continuada y permanecerá hasta que el jugador se reincorpore.
 - RF-016: Los cambios de estado deben propagarse en tiempo real a todos los clientes conectados mediante SignalR.
+- RF-017: Tras refrescar la página, el host y los jugadores deben recuperar automáticamente su vista correspondiente (lobby, jugador o fase activa) siempre que la partida no haya finalizado.
 
 ### Flujo de partida y fases
 
@@ -39,6 +40,7 @@ Este documento recoge los requisitos funcionales, no funcionales y los casos de 
 - RF-029: El acusado final debe determinarse en función del resultado de la votación de defensa: si la mayoría acepta, el acusado alternativo pasa a ser el acusado final; en caso contrario o empate, se mantiene el acusado inicial.
 - RF-030: Si la defensa no es de desvío (`Admitir` o `Negar`), la fase de votación de defensa debe omitirse y el acusado final será el acusado inicial.
 - RF-031: El sistema debe permitir configurar el número total de rondas o casos que se jugarán antes de finalizar la partida.
+- RF-032: El host debe poder finalizar la partida de forma anticipada, cerrando la sala y mostrando el resumen correspondiente.
 
 ### Puntuación y títulos
 
@@ -79,6 +81,7 @@ Este documento recoge los requisitos funcionales, no funcionales y los casos de 
 - RNF-006: La persistencia debe garantizar integridad referencial y transaccional en operaciones que afecten al estado de la partida.
 - RNF-007: Deben existir mecanismos básicos de logging y monitorización para diagnosticar incidencias.
 - RNF-008: La interfaz debe ser responsiva y usable en dispositivos móviles (pantalla vertical) y en pantallas de gran formato.
+- RNF-009: La experiencia debe preservar el contexto de los usuarios ante recargas de página, restableciendo la sesión y el estado visible sin intervención manual mientras la partida siga activa.
 
 ---
 
