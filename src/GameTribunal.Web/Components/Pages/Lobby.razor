@@ -100,14 +100,26 @@
     {
         <!-- After room creation: NO HERO, only essential elements visible without scroll -->
         
-        <!-- Compact header with mode badge -->
-        <div style="text-align: center; margin-bottom: var(--space-md);">
-            <h2 style="font-size: var(--font-size-xl); font-weight: var(--font-weight-bold); color: var(--color-light); margin-bottom: var(--space-sm);">
-                ⚖️ Pandorium
-            </h2>
-            <span style="background: @GetModeGradient(_room.Mode); display: inline-flex; align-items: center; padding: var(--space-xs) var(--space-md); font-size: var(--font-size-sm); font-weight: var(--font-weight-semibold); border-radius: var(--radius-full); color: var(--color-light); box-shadow: var(--shadow-md);">
-                @GetModeEmoji(_room.Mode) @_room.Mode
-            </span>
+        <!-- Compact header with mode badge and "Create New Room" button at top right -->
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-md);">
+            <div style="text-align: center; flex: 1;">
+                <h2 style="font-size: var(--font-size-xl); font-weight: var(--font-weight-bold); color: var(--color-light); margin-bottom: var(--space-sm);">
+                    ⚖️ Pandorium
+                </h2>
+                <span style="background: @GetModeGradient(_room.Mode); display: inline-flex; align-items: center; padding: var(--space-xs) var(--space-md); font-size: var(--font-size-sm); font-weight: var(--font-weight-semibold); border-radius: var(--radius-full); color: var(--color-light); box-shadow: var(--shadow-md);">
+                    @GetModeEmoji(_room.Mode) @_room.Mode
+                </span>
+            </div>
+            <div>
+                <GameButton 
+                    Variant="outline"
+                    Size="sm"
+                    Disabled="@_isCreating"
+                    OnClick="CreateAnotherRoomAsync">
+                    <span style="font-size: 1rem;">🔄</span>
+                    <span style="font-size: 0.875rem;">Crear Nueva Sala</span>
+                </GameButton>
+            </div>
         </div>
 
         <!-- RNF-011 Section 3.1: Compact timeline for lobby preparation progress -->
@@ -141,7 +153,7 @@
                             <div class="game-qr-image">
                                 <img src="data:image/png;base64,@_qrCodeBase64" 
                                      alt="Código QR para unirse" 
-                                     style="max-width: 200px; width: 100%;" />
+                                     style="max-width: 150px; width: 100%;" />
                             </div>
                             
                             <!-- RF-007: Compact share button -->
@@ -228,18 +240,6 @@
                     }
                 </Body>
             </GameCard>
-        </div>
-
-        <!-- Compact "Create New Room" button -->
-        <div class="mt-2 d-flex justify-content-center">
-            <GameButton 
-                Variant="outline"
-                Size="sm"
-                Disabled="@_isCreating"
-                OnClick="CreateAnotherRoomAsync">
-                <span style="font-size: 1rem;">🔄</span>
-                <span style="font-size: 0.875rem;">Crear Nueva Sala</span>
-            </GameButton>
         </div>
     }
 </div>
