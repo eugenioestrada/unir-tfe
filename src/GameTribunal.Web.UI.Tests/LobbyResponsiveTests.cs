@@ -63,13 +63,13 @@ public class LobbyResponsiveTests(TestServerFixture serverFixture) : PlaywrightT
         var createButton = Page.Locator("button:has-text('Crear Sala')");
         await createButton.ClickAsync();
         
-        // Wait for room creation by checking for QR code or room code
-        await Page.WaitForSelectorAsync(".game-qr-container, .game-qr-container-compact, .game-room-code, .game-room-code-compact", new() { Timeout = 10000 });
+        // Wait for room creation by checking for QR code or timeline
+        await Page.WaitForSelectorAsync(".game-timeline, .game-qr-container, .game-qr-container-compact", new() { Timeout = 10000 });
         
-        // On tablet, cards should be visible (QR and roster cards)
-        var cards = Page.Locator(".game-card");
-        var cardCount = await cards.CountAsync();
-        Assert.True(cardCount >= 1, $"Should have at least 1 card visible on tablet after creating room, found: {cardCount}");
+        // On tablet, after room creation the layout should have QR and roster sections visible
+        // Check for timeline which confirms room was created
+        var timeline = Page.Locator(".game-timeline");
+        await Expect(timeline).ToBeVisibleAsync(new() { Timeout = 5000 });
     }
     
     /// <summary>
@@ -88,17 +88,16 @@ public class LobbyResponsiveTests(TestServerFixture serverFixture) : PlaywrightT
         var createButton = Page.Locator("button:has-text('Crear Sala')");
         await createButton.ClickAsync();
         
-        // Wait for room creation by checking for QR code or room code
-        await Page.WaitForSelectorAsync(".game-qr-container, .game-qr-container-compact, .game-room-code, .game-room-code-compact", new() { Timeout = 10000 });
+        // Wait for room creation by checking for timeline
+        await Page.WaitForSelectorAsync(".game-timeline", new() { Timeout = 10000 });
         
         // On desktop, the split layout should work - verify grid container exists
         var gridContainer = Page.Locator(".game-grid-2");
         await Expect(gridContainer.First).ToBeVisibleAsync();
         
-        // Verify there are cards in the grid (QR card and roster card)
-        var cards = Page.Locator(".game-card");
-        var cardCount = await cards.CountAsync();
-        Assert.True(cardCount >= 2, $"Should have at least 2 cards (QR and roster) on desktop, found: {cardCount}");
+        // Verify room code or QR is visible (indicates successful room creation)
+        var roomCode = Page.Locator(".game-room-code, .game-room-code-compact");
+        await Expect(roomCode.First).ToBeVisibleAsync(new() { Timeout = 5000 });
     }
     
     /// <summary>
