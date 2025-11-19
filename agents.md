@@ -46,8 +46,9 @@
 
 ## Workflow Checklist (must-do)
 **Pre-implementation steps (before coding):**
-1. Understand the task context in full, revisiting functional and non-functional constraints defined in `docs/requirements.md` and related design materials.
-2. Map the affected layers, contracts, and test artefacts to confirm acceptance criteria prior to implementation.
+1. Before executing any action, analyze all available context, outline the steps required to complete the task, and report this plan to the user prior to proceeding.
+2. Understand the task context in full, revisiting functional and non-functional constraints defined in `docs/requirements.md` and related design materials.
+3. Map the affected layers, contracts, and test artefacts to confirm acceptance criteria prior to implementation.
 
 **Coding steps (during implementation):**
 1. Draft or update unit/UI tests that capture the intended behavior before or during implementation.
