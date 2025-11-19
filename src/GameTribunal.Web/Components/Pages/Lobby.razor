@@ -101,8 +101,8 @@
         <!-- After room creation: NO HERO, only essential elements visible without scroll -->
         
         <!-- Compact header with mode badge and "Create New Room" button at top right -->
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-md);">
-            <div style="text-align: center; flex: 1;">
+        <div class="lobby-header">
+            <div class="lobby-header-title">
                 <h2 style="font-size: var(--font-size-xl); font-weight: var(--font-weight-bold); color: var(--color-light); margin-bottom: var(--space-sm);">
                     ⚖️ Pandorium
                 </h2>
@@ -110,7 +110,7 @@
                     @GetModeEmoji(_room.Mode) @_room.Mode
                 </span>
             </div>
-            <div>
+            <div class="lobby-header-actions">
                 <GameButton 
                     Variant="outline"
                     Size="sm"
