@@ -56,6 +56,23 @@ Los degradados hero y los halos (`--shadow-glow`, `--shadow-neon`) se reservan p
 - Interacciones críticas (CTA, votación) deben confirmar con microfeedback `game-animate-press` (scale 0.96 → 1.02 → 1) durante 180 ms.
 - Respetar `prefers-reduced-motion`; en ese modo, sustituir animaciones por cambios instantáneos con sombra intensificada.
 
+### 2.5 Breakpoints obligatorios
+
+| Alias | Ancho mínimo | Orientación | Escenario objetivo |
+|-------|--------------|-------------|--------------------|
+| `xs`  | 320 px       | Portrait    | Móvil ultra compacto |
+| `sm`  | 375 px       | Portrait    | Móvil compacto |
+| `md`  | 414 px       | Portrait    | Móvil amplio |
+| `lg`  | 768 px       | Portrait    | Tablet vertical |
+| `xl`  | 1024 px      | Landscape   | Tablet horizontal / Laptop pequeño |
+| `2xl` | 1280 px      | Landscape   | Laptop estándar |
+| `3xl` | 1440 px      | Landscape   | Laptop grande / Monitor 2K reducido |
+| `4xl` | 1920 px      | Landscape   | Desktop 1080p (TV 1080p incluido) |
+| `5xl` | 2560 px      | Landscape   | Monitor 2.5K / TV 4K reescalado |
+| `6xl` | 3840 px      | Landscape   | TV 4K nativo |
+
+Los componentes deben mantener visibilidad completa y tipografía legible en cada breakpoint, usando escalado progresivo sin introducir barras de desplazamiento horizontales.
+
 ---
 
 ## 3. Arquitectura de vistas
