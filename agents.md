@@ -72,3 +72,48 @@
 - Before altering shared contracts (DTOs, interfaces, enums), scan dependent projects (`GameTribunal.Application`, `.Web`, `.Infrastructure`) and update all consumers in one sweep.
 - When introducing new cases, titles, or configuration knobs, centralize defaults in configuration or seed data rather than scattering literals.
 - Keep the repo friendly for demonstrations: avoid breaking Aspire orchestration, ensure migrations/tests do not require unpublished secrets, and maintain quick start parity with `README.md`.
+
+## Local Execution & Testing
+
+### Run the solution
+1. Restore tools/dependencies:
+   ```powershell
+   dotnet restore src/GameTribunal.slnx
+   ```
+2. Build once:
+   ```powershell
+   dotnet build src/GameTribunal.slnx
+   ```
+3. Launch the Blazor Server host:
+   ```powershell
+   dotnet run --project src/GameTribunal.Web/GameTribunal.Web.csproj --launch-profile https
+   ```
+
+### Capture deterministic screenshots with Playwright
+1. Ensure browsers are installed (after a build Playwright assets live beside the UI tests):
+   ```powershell
+   pwsh ./src/GameTribunal.Web.UI.Tests/bin/Debug/net10.0/playwright.ps1 install
+   ```
+2. Keep the host running locally, then execute the screenshot suite per required viewport:
+   ```powershell
+   dotnet test src/GameTribunal.Web.UI.Tests/GameTribunal.Web.UI.Tests.csproj --filter Category=Screenshots -- TestRunParameters.Parameter(name="viewports", value="MobileM,MobileL,Tablet,Laptop,TV1080p,TV4K")
+   ```
+3. Collect images from `artifacts/screenshots/<viewport>/`. Every capture is generated with predefined device viewports; never enable full-page screenshots to comply with the “no full screen” rule.
+
+### Execute automated tests
+- Application layer:
+  ```powershell
+  dotnet test src/GameTribunal.Application.Tests/GameTribunal.Application.Tests.csproj
+  ```
+- Domain or additional unit suites as added:
+  ```powershell
+  dotnet test src/GameTribunal.Domain.Tests/GameTribunal.Domain.Tests.csproj
+  ```
+- UI + Playwright regression (excluding screenshots when not required):
+  ```powershell
+  dotnet test src/GameTribunal.Web.UI.Tests/GameTribunal.Web.UI.Tests.csproj --filter Category!=Screenshots
+  ```
+- To run everything before delivery:
+  ```powershell
+  dotnet test
+  ```
