@@ -239,7 +239,8 @@ public class LobbyDesignTests(TestServerFixture serverFixture) : PlaywrightTest(
     }
 
     /// <summary>
-    /// Validates that the game mode badge is shown in the hero section after room creation.
+    /// Validates that the game mode badge is shown in the header after room creation.
+    /// After room creation, there is no hero section - the badge is in the lobby header.
     /// </summary>
     [Fact]
     public async Task Lobby_GameModeBadge_ShouldBeDisplayedInHero()
@@ -252,11 +253,10 @@ public class LobbyDesignTests(TestServerFixture serverFixture) : PlaywrightTest(
         
         await Task.Delay(1000); // Wait for room creation
         
-        // Verify mode badge is in hero section
-        var hero = Page.Locator(".game-hero");
-        var modeBadge = hero.Locator("span").Filter(new() { HasText = "Normal" }).Or(
-            hero.Locator("span").Filter(new() { HasText = "Suave" })).Or(
-            hero.Locator("span").Filter(new() { HasText = "Spicy" }));
+        // Verify mode badge is displayed (it's in the lobby header, not a hero section)
+        var modeBadge = Page.Locator("span").Filter(new() { HasText = "Normal" }).Or(
+            Page.Locator("span").Filter(new() { HasText = "Suave" })).Or(
+            Page.Locator("span").Filter(new() { HasText = "Spicy" }));
         
         await Expect(modeBadge).ToBeVisibleAsync();
     }

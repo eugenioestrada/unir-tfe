@@ -130,11 +130,11 @@
             </div>
             <div class="game-timeline-step @(_room.Players.Count > 0 ? "completed" : "active")">
                 <div class="game-timeline-icon">@(_room.Players.Count > 0 ? "✓" : "👥")</div>
-                <div class="game-timeline-label">Jugadores</div>
+                <div class="game-timeline-label">Jugadores Listos</div>
             </div>
             <div class="game-timeline-step @(_room.CanStartGame ? "active" : "")">
                 <div class="game-timeline-icon">🎮</div>
-                <div class="game-timeline-label">Iniciar</div>
+                <div class="game-timeline-label">Iniciar Partida</div>
             </div>
         </div>
 
