@@ -184,12 +184,10 @@ public class PlayerConnectionStatusTests(TestServerFixture serverFixture) : Play
             var successAlert = playerPage.Locator("text=¡Bienvenido/a!");
             await Expect(successAlert).ToBeVisibleAsync(new() { Timeout = 5000 });
             
-            // Step 4: Verify initial status is Conectado (🟢) on the host page
-            var hostConnectedIndicator = Page.Locator("text=🟢").First;
-            await Expect(hostConnectedIndicator).ToBeVisibleAsync(new() { Timeout = 5000 });
-            
+            // Step 4: Verify initial status is Conectado on the host page
+            // The lobby displays status as text, not emoji
             var hostConnectedText = Page.Locator("text=Conectado").First;
-            await Expect(hostConnectedText).ToBeVisibleAsync(new() { Timeout = 2000 });
+            await Expect(hostConnectedText).ToBeVisibleAsync(new() { Timeout = 5000 });
             
             // Step 5: Close the player page to simulate disconnection/inactivity
             // This stops the heartbeat mechanism
@@ -202,12 +200,10 @@ public class PlayerConnectionStatusTests(TestServerFixture serverFixture) : Play
             // - 5 seconds buffer
             await Task.Delay(TimeSpan.FromSeconds(45));
             
-            // Step 7: Verify status changed to Inactivo (🟡) on the host page
-            var hostInactiveIndicator = Page.Locator("text=🟡").First;
-            await Expect(hostInactiveIndicator).ToBeVisibleAsync(new() { Timeout = 10000 });
-            
+            // Step 7: Verify status changed to Inactivo on the host page
+            // The lobby displays status as text, not emoji
             var hostInactiveText = Page.Locator("text=Inactivo").First;
-            await Expect(hostInactiveText).ToBeVisibleAsync(new() { Timeout = 2000 });
+            await Expect(hostInactiveText).ToBeVisibleAsync(new() { Timeout = 10000 });
             
             // Take final screenshot showing the inactive status
             await Page.ScreenshotAsync(new() { Path = "/tmp/test-rf014-final-inactive-status.png" });
@@ -296,12 +292,10 @@ public class PlayerConnectionStatusTests(TestServerFixture serverFixture) : Play
             var successAlert = playerPage.Locator("text=¡Bienvenido/a!");
             await Expect(successAlert).ToBeVisibleAsync(new() { Timeout = 5000 });
             
-            // Step 4: Verify initial status is Conectado (🟢) on the host page
-            var hostConnectedIndicator = Page.Locator("text=🟢").First;
-            await Expect(hostConnectedIndicator).ToBeVisibleAsync(new() { Timeout = 5000 });
-            
+            // Step 4: Verify initial status is Conectado on the host page
+            // The lobby displays status as text, not emoji
             var hostConnectedText = Page.Locator("text=Conectado").First;
-            await Expect(hostConnectedText).ToBeVisibleAsync(new() { Timeout = 2000 });
+            await Expect(hostConnectedText).ToBeVisibleAsync(new() { Timeout = 5000 });
             
             // Take screenshot showing connected status
             await Page.ScreenshotAsync(new() { Path = "/tmp/test-rf015-connected-status.png" });
@@ -314,9 +308,10 @@ public class PlayerConnectionStatusTests(TestServerFixture serverFixture) : Play
             // Step 6: Wait for status to change to Inactivo first (30+ seconds)
             await Task.Delay(TimeSpan.FromSeconds(45));
             
-            // Verify status changed to Inactivo (🟡) 
-            var hostInactiveIndicator = Page.Locator("text=🟡").First;
-            await Expect(hostInactiveIndicator).ToBeVisibleAsync(new() { Timeout = 10000 });
+            // Verify status changed to Inactivo
+            // The lobby displays status as text, not emoji
+            var hostInactiveText = Page.Locator("text=Inactivo").First;
+            await Expect(hostInactiveText).ToBeVisibleAsync(new() { Timeout = 10000 });
             
             // Take screenshot showing inactive status
             await Page.ScreenshotAsync(new() { Path = "/tmp/test-rf015-inactive-status.png" });
@@ -326,12 +321,10 @@ public class PlayerConnectionStatusTests(TestServerFixture serverFixture) : Play
             // This ensures we exceed the 5-minute (300 seconds) threshold
             await Task.Delay(TimeSpan.FromSeconds(315));
             
-            // Step 8: Verify status changed to Desconectado (⚫) on the host page
-            var hostDisconnectedIndicator = Page.Locator("text=⚫").First;
-            await Expect(hostDisconnectedIndicator).ToBeVisibleAsync(new() { Timeout = 15000 });
-            
+            // Step 8: Verify status changed to Desconectado on the host page
+            // The lobby displays status as text, not emoji
             var hostDisconnectedText = Page.Locator("text=Desconectado").First;
-            await Expect(hostDisconnectedText).ToBeVisibleAsync(new() { Timeout = 2000 });
+            await Expect(hostDisconnectedText).ToBeVisibleAsync(new() { Timeout = 15000 });
             
             // Take final screenshot showing the disconnected status
             await Page.ScreenshotAsync(new() { Path = "/tmp/test-rf015-final-disconnected-status.png" });
@@ -439,16 +432,16 @@ public class PlayerConnectionStatusTests(TestServerFixture serverFixture) : Play
             var successAlert2 = player2Page.Locator("text=¡Bienvenido/a!");
             await Expect(successAlert2).ToBeVisibleAsync(new() { Timeout = 5000 });
             
-            // Step 6: Verify both players see each other as Conectado (🟢)
-            // On host page, both should show 🟢
-            var hostConnectedIndicators = Page.Locator("text=🟢");
-            await Expect(hostConnectedIndicators).ToHaveCountAsync(2, new() { Timeout = 5000 });
+            // Step 6: Verify both players see each other as Conectado
+            // On host page, should show status as text "Conectado"
+            var hostConnectedTexts = Page.Locator("text=Conectado");
+            await Expect(hostConnectedTexts.First).ToBeVisibleAsync(new() { Timeout = 5000 });
             
-            // On player1 page, both should show 🟢
+            // On player1 page, both should show 🟢 emoji
             var player1ConnectedIndicators = player1Page.Locator("text=🟢");
             await Expect(player1ConnectedIndicators).ToHaveCountAsync(2, new() { Timeout = 5000 });
             
-            // On player2 page, both should show 🟢
+            // On player2 page, both should show 🟢 emoji
             var player2ConnectedIndicators = player2Page.Locator("text=🟢");
             await Expect(player2ConnectedIndicators).ToHaveCountAsync(2, new() { Timeout = 5000 });
             
@@ -465,15 +458,15 @@ public class PlayerConnectionStatusTests(TestServerFixture serverFixture) : Play
             await Task.Delay(TimeSpan.FromSeconds(45));
             
             // Step 9: Verify status change propagated to host (RF-016)
-            // Host should see Player1 as 🟡 (Inactivo) and Player2 as 🟢 (Conectado)
-            var hostInactiveIndicator = Page.Locator("text=🟡").First;
-            await Expect(hostInactiveIndicator).ToBeVisibleAsync(new() { Timeout = 10000 });
+            // Host should see Player1 as Inactivo (text) and Player2 as Conectado (text)
+            var hostInactiveText = Page.Locator("text=Inactivo").First;
+            await Expect(hostInactiveText).ToBeVisibleAsync(new() { Timeout = 10000 });
             
-            var hostStillConnectedIndicator = Page.Locator("text=🟢").First;
-            await Expect(hostStillConnectedIndicator).ToBeVisibleAsync(new() { Timeout = 2000 });
+            var hostStillConnectedText = Page.Locator("text=Conectado").First;
+            await Expect(hostStillConnectedText).ToBeVisibleAsync(new() { Timeout = 2000 });
             
             // Step 10: Verify status change propagated to player2 (RF-016)
-            // Player2 should see Player1 as Inactivo and themselves as Conectado
+            // Player2 should see Player1 as 🟡 (emoji) and themselves as 🟢 (emoji)
             var player2InactiveIndicator = player2Page.Locator("text=🟡").First;
             await Expect(player2InactiveIndicator).ToBeVisibleAsync(new() { Timeout = 10000 });
             

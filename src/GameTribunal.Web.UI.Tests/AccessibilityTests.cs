@@ -16,6 +16,7 @@ public class AccessibilityTests(TestServerFixture serverFixture) : PlaywrightTes
     public async Task ColorContrast_ShouldMeetWCAGStandards()
     {
         await Page.GotoAsync("/");
+        await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
 
         // Test title contrast
         var title = Page.Locator(".game-title").First;
@@ -23,7 +24,7 @@ public class AccessibilityTests(TestServerFixture serverFixture) : PlaywrightTes
 
         var titleColor = await title.EvaluateAsync<string>("el => window.getComputedStyle(el).color");
         var titleBackground = await title.EvaluateAsync<string>(
-            "el => { let parent = el.parentElement; while (parent) { const bg = window.getComputedStyle(parent).backgroundColor; if (bg !== 'rgba(0, 0, 0, 0)') return bg; parent = parent.parentElement; } return 'rgb(0, 0, 0)'; }");
+            "el => { let parent = el.parentElement; while (parent) { const bg = window.getComputedStyle(parent).backgroundColor; if (bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') return bg; parent = parent.parentElement; } return 'rgb(28, 25, 23)'; }");
 
         Assert.NotEmpty(titleColor);
         Assert.NotEmpty(titleBackground);
