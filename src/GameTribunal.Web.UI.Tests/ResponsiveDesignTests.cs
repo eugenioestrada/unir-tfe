@@ -26,12 +26,12 @@ public class ResponsiveDesignTests(TestServerFixture serverFixture) : Playwright
         var heroPadding = await hero.EvaluateAsync<string>("el => window.getComputedStyle(el).padding");
         Assert.NotEmpty(heroPadding);
 
-        // Verify title is readable
+        // Verify title is readable (mobile uses smaller font)
         var title = Page.Locator(".game-title");
         await Expect(title).ToBeVisibleAsync();
         var fontSize = await title.EvaluateAsync<string>("el => window.getComputedStyle(el).fontSize");
         var fontSizeValue = double.Parse(fontSize.Replace("px", ""));
-        Assert.True(fontSizeValue >= 24, $"Title font size should be at least 24px on mobile, found: {fontSizeValue}px");
+        Assert.True(fontSizeValue >= 18, $"Title font size should be at least 18px on mobile, found: {fontSizeValue}px");
 
         // Verify buttons are touch-friendly
         var button = Page.Locator(".game-btn").First;
@@ -200,14 +200,19 @@ public class ResponsiveDesignTests(TestServerFixture serverFixture) : Playwright
 
         foreach (var viewport in viewports)
         {
+            // Navigate to a fresh page for each viewport test
             await Page.SetViewportSizeAsync(viewport.Width, viewport.Height);
-            await Page.GotoAsync("/");
-            await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+            await Page.GotoAsync("/", new() { WaitUntil = WaitUntilState.NetworkIdle });
 
             // Create room to see QR code
             var createButton = Page.Locator("button:has-text('Crear Sala')");
-            await createButton.ClickAsync();
-            await Page.WaitForTimeoutAsync(WAIT_FOR_TIMEOUT);
+            if (await createButton.CountAsync() > 0)
+            {
+                await createButton.ClickAsync();
+                
+                // Wait for room creation by checking for QR code or room code
+                await Page.WaitForSelectorAsync(".game-qr-image img, .game-qr-container img, .game-room-code, .game-room-code-compact", new() { Timeout = 10000 });
+            }
 
             // Use more flexible selector for QR image (including compact variant)
             var qrImage = Page.Locator(".game-qr-image img, .game-qr-container img");

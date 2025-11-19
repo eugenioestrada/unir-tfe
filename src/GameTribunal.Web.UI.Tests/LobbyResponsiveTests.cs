@@ -62,7 +62,9 @@ public class LobbyResponsiveTests(TestServerFixture serverFixture) : PlaywrightT
         
         var createButton = Page.Locator("button:has-text('Crear Sala')");
         await createButton.ClickAsync();
-        await Page.WaitForTimeoutAsync(2000);
+        
+        // Wait for room creation by checking for QR code or room code
+        await Page.WaitForSelectorAsync(".game-qr-container, .game-qr-container-compact, .game-room-code, .game-room-code-compact", new() { Timeout = 10000 });
         
         // On tablet, cards should be visible (QR and roster cards)
         var cards = Page.Locator(".game-card");
@@ -85,7 +87,9 @@ public class LobbyResponsiveTests(TestServerFixture serverFixture) : PlaywrightT
         
         var createButton = Page.Locator("button:has-text('Crear Sala')");
         await createButton.ClickAsync();
-        await Page.WaitForTimeoutAsync(2000);
+        
+        // Wait for room creation by checking for QR code or room code
+        await Page.WaitForSelectorAsync(".game-qr-container, .game-qr-container-compact, .game-room-code, .game-room-code-compact", new() { Timeout = 10000 });
         
         // On desktop, the split layout should work - verify grid container exists
         var gridContainer = Page.Locator(".game-grid-2");
