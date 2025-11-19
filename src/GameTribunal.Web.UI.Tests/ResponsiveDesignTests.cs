@@ -28,9 +28,10 @@ public class ResponsiveDesignTests(TestServerFixture serverFixture) : Playwright
 
         // Verify title is readable
         var title = Page.Locator(".game-title");
+        await Expect(title).ToBeVisibleAsync();
         var fontSize = await title.EvaluateAsync<string>("el => window.getComputedStyle(el).fontSize");
         var fontSizeValue = double.Parse(fontSize.Replace("px", ""));
-        Assert.True(fontSizeValue >= 24);
+        Assert.True(fontSizeValue >= 24, $"Title font size should be at least 24px on mobile, found: {fontSizeValue}px");
 
         // Verify buttons are touch-friendly
         var button = Page.Locator(".game-btn").First;
