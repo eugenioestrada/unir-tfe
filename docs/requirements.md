@@ -78,7 +78,7 @@ Este documento recoge los requisitos funcionales, no funcionales y los casos de 
 
 | ID | Título | Descripción | Estado |
 |----|--------|-------------|--------|
-| RF-070 | Garantizar motor determinista. | El motor de juego debe ser determinista y reproducible, de forma que dados los mismos inputs se obtenga el mismo resultado. | Pendiente |
+| RF-070 | Garantizar motor determinista. | El motor de juego debe ser determinista y reproducible, de forma que dados los mismos inputs se obtenga el mismo resultado. La generación de jugadores en lobby ahora usa servicios deterministas (`IGuidGenerator`, `IClock`), quedando pendiente extender el patrón al motor de rondas. | En progreso |
 | RF-071 | Impedir acciones fuera de fase. | El sistema debe impedir acciones fuera de fase (por ejemplo, enviar acusaciones durante `Defense`). | Pendiente |
 | RF-072 | Validar entradas de jugadores. | Deben validarse las entradas de los jugadores (alias, acusaciones, predicciones, defensas) para garantizar que cumplen las reglas (longitud, jugador válido, fase correcta). | Pendiente |
 | RF-073 | Gestionar fin de partida. | El sistema debe gestionar de forma clara el final de partida, mostrando ranking, títulos acumulados y un resumen final. | Pendiente |

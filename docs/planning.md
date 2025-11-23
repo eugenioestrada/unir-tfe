@@ -23,8 +23,10 @@ Este documento recoge la planificación temporal, hitos principales, riesgos y e
 | Ajustes finales y documentación | 1 semana | Pendiente | Planificados tras pruebas de usuario. |
 
 **Últimos avances relevantes:**
-- RoomService y RandomRoomCodeGenerator implementados con lógica de generación única y registro de jugadores.
-- GameHub y SignalRRoomService coordinan sincronización y reconexión básica entre host y jugadores.
+- RoomService ahora injerta servicios deterministas (`IGuidGenerator`, `IClock`) para garantizar IDs y marcas de tiempo reproducibles al registrar jugadores.
+- La entidad `Player` valida identificadores y timestamps UTC, eliminando dependencias directas de `Guid.NewGuid()` y `DateTime.UtcNow` dentro del dominio.
+- GameHub y PlayerStatusMonitorService emplean el reloj compartido para sincronizar actualizaciones de actividad y estados de conexión sin discrepancias entre nodos.
+- Suite de pruebas actualizada (`PlayerTests`, `RoomTests`, `RoomServiceTests`, `SignalRIntegrationTests`) cubre los nuevos contratos deterministas y evita reflección o esperas activas.
 - Interfaz Blazor para lobby y unirse a sala enlazada con SignalR, códigos QR y validaciones de alias.
 - Repositorio in-memory e integración QR disponibles para iteración rápida en entorno local.
 

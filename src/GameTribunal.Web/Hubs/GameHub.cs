@@ -13,15 +13,17 @@ public sealed class GameHub : Hub
 {
     private readonly IRoomRepository _roomRepository;
     private readonly ILogger<GameHub> _logger;
+    private readonly IClock _clock;
     
     // Static dictionary to track player sessions: playerId -> (roomCode, connectionId)
     private static readonly Dictionary<Guid, (string RoomCode, string ConnectionId)> _playerSessions = new();
     private static readonly object _sessionLock = new();
 
-    public GameHub(IRoomRepository roomRepository, ILogger<GameHub> logger)
+    public GameHub(IRoomRepository roomRepository, ILogger<GameHub> logger, IClock clock)
     {
         _roomRepository = roomRepository ?? throw new ArgumentNullException(nameof(roomRepository));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _clock = clock ?? throw new ArgumentNullException(nameof(clock));
     }
 
     /// <summary>
@@ -177,7 +179,7 @@ public sealed class GameHub : Hub
         }
 
         // Update player activity
-        player.RecordActivity();
+        player.RecordActivity(_clock.UtcNow);
         await _roomRepository.UpdateAsync(room);
 
         _logger.LogInformation("Activity recorded for player {PlayerId} in room {RoomCode}.", playerId, roomCode);

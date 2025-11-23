@@ -1,6 +1,7 @@
 using GameTribunal.Application.Contracts;
 using GameTribunal.Application.Services;
 using GameTribunal.Infrastructure.Persistence;
+using GameTribunal.Infrastructure.Services;
 using GameTribunal.Web.Components;
 using GameTribunal.Web.Hubs;
 using GameTribunal.Web.Services;
@@ -20,6 +21,8 @@ builder.Services.AddSignalR();
 
 builder.Services.AddSingleton<IRoomRepository, InMemoryRoomRepository>();
 builder.Services.AddSingleton<IRoomCodeGenerator, RandomRoomCodeGenerator>();
+builder.Services.AddSingleton<IGuidGenerator, GuidGenerator>();
+builder.Services.AddSingleton<IClock, SystemClock>();
 builder.Services.AddScoped<RoomService>();
 builder.Services.AddScoped<SignalRRoomService>(); // SignalR-aware wrapper (RF-011)
 builder.Services.AddSingleton<QrCodeService>();

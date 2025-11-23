@@ -17,12 +17,27 @@ public sealed class RoomService
     private readonly IRoomRepository _roomRepository;
     private readonly IRoomCodeGenerator _roomCodeGenerator;
     private readonly ILogger<RoomService> _logger;
+    private readonly IGuidGenerator _guidGenerator;
+    private readonly IClock _clock;
 
-    public RoomService(IRoomRepository roomRepository, IRoomCodeGenerator roomCodeGenerator, ILogger<RoomService> logger)
+    public RoomService(
+        IRoomRepository roomRepository,
+        IRoomCodeGenerator roomCodeGenerator,
+        ILogger<RoomService> logger,
+        IGuidGenerator guidGenerator,
+        IClock clock)
     {
-        _roomRepository = roomRepository ?? throw new ArgumentNullException(nameof(roomRepository));
-        _roomCodeGenerator = roomCodeGenerator ?? throw new ArgumentNullException(nameof(roomCodeGenerator));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        ArgumentNullException.ThrowIfNull(roomRepository);
+        ArgumentNullException.ThrowIfNull(roomCodeGenerator);
+        ArgumentNullException.ThrowIfNull(logger);
+        ArgumentNullException.ThrowIfNull(guidGenerator);
+        ArgumentNullException.ThrowIfNull(clock);
+
+        _roomRepository = roomRepository;
+        _roomCodeGenerator = roomCodeGenerator;
+        _logger = logger;
+        _guidGenerator = guidGenerator;
+        _clock = clock;
     }
 
     public async Task<RoomDto> CreateRoomAsync(GameMode mode, CancellationToken cancellationToken = default)
@@ -66,8 +81,15 @@ public sealed class RoomService
             throw new InvalidOperationException($"Room with code {code.Value} does not exist.");
         }
 
-        var player = room.AddPlayer(alias);
-        _logger.LogInformation("Player {PlayerId} with alias {Alias} added to room {RoomCode}.", player.Id, player.Alias, room.Code.Value);
+        var playerId = _guidGenerator.Create();
+        var joinedAt = _clock.UtcNow;
+        var player = room.AddPlayer(alias, playerId, joinedAt);
+        _logger.LogInformation(
+            "Player {PlayerId} with alias {Alias} added to room {RoomCode} at {JoinedAtUtc}.",
+            player.Id,
+            player.Alias,
+            room.Code.Value,
+            joinedAt);
 
         await _roomRepository.UpdateAsync(room, cancellationToken).ConfigureAwait(false);
         _logger.LogInformation("Room {RoomCode} updated with new player.", room.Code.Value);

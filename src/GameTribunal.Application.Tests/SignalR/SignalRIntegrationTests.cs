@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using GameTribunal.Application.Contracts;
 using GameTribunal.Application.DTOs;
 using GameTribunal.Domain.Entities;
@@ -14,6 +16,8 @@ namespace GameTribunal.Application.Tests.SignalR;
 /// </summary>
 public class SignalRIntegrationTests
 {
+    private static readonly DateTime BaseTimestamp = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
     /// <summary>
     /// Verifies that when a player joins a room, other players receive the updated room state.
     /// This tests RF-011 (real-time synchronization).
@@ -24,7 +28,7 @@ public class SignalRIntegrationTests
         // Arrange
         var roomCode = RoomCode.From("ABC123");
         var room = Room.Create(roomCode, GameMode.Normal);
-        room.AddPlayer("Player1");
+        AddPlayer(room, "Player1");
 
         var mockRepository = new Mock<IRoomRepository>();
         mockRepository
@@ -37,10 +41,15 @@ public class SignalRIntegrationTests
         var mockCodeGenerator = new Mock<IRoomCodeGenerator>();
         var mockLogger = new Mock<ILogger<Application.Services.RoomService>>();
 
+        var guidGenerator = new DeterministicGuidGenerator();
+        var clock = new DeterministicClock(new[] { BaseTimestamp, BaseTimestamp.AddSeconds(1) });
+
         var roomService = new Application.Services.RoomService(
             mockRepository.Object,
             mockCodeGenerator.Object,
-            mockLogger.Object
+            mockLogger.Object,
+            guidGenerator,
+            clock
         );
 
         // Act
@@ -69,7 +78,7 @@ public class SignalRIntegrationTests
         // Arrange
         var roomCode = RoomCode.From("ABC123");
         var room = Room.Create(roomCode, GameMode.Normal);
-        room.AddPlayer("Player1");
+        AddPlayer(room, "Player1");
 
         var mockRepository = new Mock<IRoomRepository>();
         mockRepository
@@ -79,10 +88,15 @@ public class SignalRIntegrationTests
         var mockCodeGenerator = new Mock<IRoomCodeGenerator>();
         var mockLogger = new Mock<ILogger<Application.Services.RoomService>>();
 
+        var guidGenerator = new DeterministicGuidGenerator();
+        var clock = new DeterministicClock(new[] { BaseTimestamp });
+
         var roomService = new Application.Services.RoomService(
             mockRepository.Object,
             mockCodeGenerator.Object,
-            mockLogger.Object
+            mockLogger.Object,
+            guidGenerator,
+            clock
         );
 
         // Act & Assert
@@ -117,10 +131,15 @@ public class SignalRIntegrationTests
 
         var mockLogger = new Mock<ILogger<Application.Services.RoomService>>();
 
+        var guidGenerator = new DeterministicGuidGenerator();
+        var clock = new DeterministicClock(new[] { BaseTimestamp });
+
         var roomService = new Application.Services.RoomService(
             mockRepository.Object,
             mockCodeGenerator.Object,
-            mockLogger.Object
+            mockLogger.Object,
+            guidGenerator,
+            clock
         );
 
         // Act
@@ -144,9 +163,9 @@ public class SignalRIntegrationTests
         // Arrange
         var roomCode = RoomCode.From("ABC123");
         var room = Room.Create(roomCode, GameMode.Normal);
-        room.AddPlayer("Player1");
-        room.AddPlayer("Player2");
-        room.AddPlayer("Player3");
+        AddPlayer(room, "Player1");
+        AddPlayer(room, "Player2");
+        AddPlayer(room, "Player3");
 
         var mockRepository = new Mock<IRoomRepository>();
         mockRepository
@@ -159,10 +178,15 @@ public class SignalRIntegrationTests
         var mockCodeGenerator = new Mock<IRoomCodeGenerator>();
         var mockLogger = new Mock<ILogger<Application.Services.RoomService>>();
 
+        var guidGenerator = new DeterministicGuidGenerator();
+        var clock = new DeterministicClock(new[] { BaseTimestamp });
+
         var roomService = new Application.Services.RoomService(
             mockRepository.Object,
             mockCodeGenerator.Object,
-            mockLogger.Object
+            mockLogger.Object,
+            guidGenerator,
+            clock
         );
 
         // Act
@@ -195,10 +219,23 @@ public class SignalRIntegrationTests
         var mockCodeGenerator = new Mock<IRoomCodeGenerator>();
         var mockLogger = new Mock<ILogger<Application.Services.RoomService>>();
 
+        var guidGenerator = new DeterministicGuidGenerator(new[]
+        {
+            Guid.Parse("00000000-0000-0000-0000-000000000001"),
+            Guid.Parse("00000000-0000-0000-0000-000000000002")
+        });
+        var clock = new DeterministicClock(new[]
+        {
+            BaseTimestamp,
+            BaseTimestamp.AddSeconds(1)
+        });
+
         var roomService = new Application.Services.RoomService(
             mockRepository.Object,
             mockCodeGenerator.Object,
-            mockLogger.Object
+            mockLogger.Object,
+            guidGenerator,
+            clock
         );
 
         // Act
@@ -214,5 +251,77 @@ public class SignalRIntegrationTests
         Assert.NotEqual(player1.Id, player2.Id);
         Assert.NotEqual(Guid.Empty, player1.Id);
         Assert.NotEqual(Guid.Empty, player2.Id);
+    }
+
+    private static void AddPlayer(Room room, string alias)
+    {
+        room.AddPlayer(alias, Guid.NewGuid(), BaseTimestamp);
+    }
+
+    private sealed class DeterministicGuidGenerator : IGuidGenerator
+    {
+        private readonly Queue<Guid> _predefinedIds;
+
+        public DeterministicGuidGenerator(IEnumerable<Guid>? identifiers = null)
+        {
+            _predefinedIds = identifiers is null
+                ? new Queue<Guid>()
+                : new Queue<Guid>(identifiers);
+        }
+
+        public Guid Create()
+        {
+            if (_predefinedIds.Count > 0)
+            {
+                return _predefinedIds.Dequeue();
+            }
+
+            return Guid.NewGuid();
+        }
+    }
+
+    private sealed class DeterministicClock : IClock
+    {
+        private readonly Queue<DateTime> _timestamps;
+
+        public DeterministicClock(IEnumerable<DateTime>? timestamps = null)
+        {
+            _timestamps = timestamps is null
+                ? new Queue<DateTime>()
+                : new Queue<DateTime>(Normalize(timestamps));
+        }
+
+        public DateTime UtcNow
+        {
+            get
+            {
+                if (_timestamps.Count > 0)
+                {
+                    return _timestamps.Dequeue();
+                }
+
+                return DateTime.UtcNow;
+            }
+        }
+
+        public void Enqueue(DateTime timestamp)
+        {
+            _timestamps.Enqueue(ToUtc(timestamp));
+        }
+
+        private static IEnumerable<DateTime> Normalize(IEnumerable<DateTime> timestamps)
+        {
+            foreach (var timestamp in timestamps)
+            {
+                yield return ToUtc(timestamp);
+            }
+        }
+
+        private static DateTime ToUtc(DateTime timestamp)
+        {
+            return timestamp.Kind == DateTimeKind.Utc
+                ? timestamp
+                : DateTime.SpecifyKind(timestamp, DateTimeKind.Utc);
+        }
     }
 }

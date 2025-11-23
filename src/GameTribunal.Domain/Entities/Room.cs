@@ -31,9 +31,11 @@ public sealed class Room
     /// Adds a player to the room with the specified alias.
     /// </summary>
     /// <param name="alias">The player's alias.</param>
+    /// <param name="playerId">The player's identifier.</param>
+    /// <param name="joinedAtUtc">The join timestamp expressed in UTC.</param>
     /// <returns>The created Player.</returns>
     /// <exception cref="InvalidOperationException">Thrown when the room is full or alias is duplicated.</exception>
-    public Player AddPlayer(string alias)
+    public Player AddPlayer(string alias, Guid playerId, DateTime joinedAtUtc)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(alias, nameof(alias));
 
@@ -48,7 +50,7 @@ public sealed class Room
             throw new InvalidOperationException($"A player with alias '{trimmedAlias}' already exists in this room.");
         }
 
-        var player = Player.Create(trimmedAlias);
+        var player = Player.Create(trimmedAlias, playerId, joinedAtUtc);
         _players.Add(player);
         return player;
     }

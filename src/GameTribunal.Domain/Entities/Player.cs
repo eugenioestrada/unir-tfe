@@ -10,12 +10,12 @@ public sealed class Player
     private const int MinAliasLength = 2;
     private const int MaxAliasLength = 20;
 
-    private Player(string alias)
+    private Player(Guid id, string alias, DateTime lastActivityAtUtc)
     {
+        Id = id;
         Alias = alias;
-        Id = Guid.NewGuid();
+        LastActivityAt = lastActivityAtUtc;
         ConnectionStatus = PlayerConnectionStatus.Conectado;
-        LastActivityAt = DateTime.UtcNow;
     }
 
     public Guid Id { get; }
@@ -32,10 +32,16 @@ public sealed class Player
     /// </summary>
     public DateTime LastActivityAt { get; private set; }
 
-    public static Player Create(string alias)
+    public static Player Create(string alias, Guid id, DateTime createdAtUtc)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(alias, nameof(alias));
-        
+        if (id == Guid.Empty)
+        {
+            throw new ArgumentException("Player identifier cannot be empty.", nameof(id));
+        }
+
+        EnsureUtc(createdAtUtc, nameof(createdAtUtc));
+
         var trimmedAlias = alias.Trim();
         if (trimmedAlias.Length < MinAliasLength)
         {
@@ -47,24 +53,27 @@ public sealed class Player
             throw new ArgumentException($"Alias cannot exceed {MaxAliasLength} characters.", nameof(alias));
         }
 
-        return new Player(trimmedAlias);
+        return new Player(id, trimmedAlias, createdAtUtc);
     }
 
     /// <summary>
     /// Updates the last activity timestamp and sets status to Conectado (RF-014).
     /// </summary>
-    public void RecordActivity()
+    public void RecordActivity(DateTime utcNow)
     {
-        LastActivityAt = DateTime.UtcNow;
+        EnsureUtc(utcNow, nameof(utcNow));
+        LastActivityAt = utcNow;
         ConnectionStatus = PlayerConnectionStatus.Conectado;
     }
 
     /// <summary>
     /// Updates the connection status based on elapsed time since last activity (RF-014, RF-015).
     /// </summary>
-    public void UpdateConnectionStatus()
+    public void UpdateConnectionStatus(DateTime utcNow)
     {
-        var timeSinceLastActivity = DateTime.UtcNow - LastActivityAt;
+        EnsureUtc(utcNow, nameof(utcNow));
+
+        var timeSinceLastActivity = utcNow - LastActivityAt;
 
         // RF-015: 5 minutes (300 seconds) -> Desconectado
         if (timeSinceLastActivity.TotalSeconds >= 300)
@@ -89,5 +98,13 @@ public sealed class Player
     public void MarkAsDisconnected()
     {
         ConnectionStatus = PlayerConnectionStatus.Desconectado;
+    }
+
+    private static void EnsureUtc(DateTime value, string parameterName)
+    {
+        if (value.Kind != DateTimeKind.Utc)
+        {
+            throw new ArgumentException("Timestamp must be expressed in UTC", parameterName);
+        }
     }
 }

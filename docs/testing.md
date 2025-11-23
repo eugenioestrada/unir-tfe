@@ -39,14 +39,15 @@ GameTribunal.Application.Tests/
 - **RoomTests**: Valida la creación y gestión de salas
   - Creación de salas con parámetros válidos
   - Validación de parámetros requeridos
-  - Añadir/eliminar jugadores
+  - Alta de jugadores con identificador y timestamp inyectados
   - Validación de límites (min/max jugadores)
   - Estado de la sala (puede iniciar juego)
 
 - **PlayerTests**: Valida la entidad jugador
-  - Creación de jugadores
-  - Validación de alias
-  - Identificadores únicos
+  - Creación de jugadores con entradas deterministas (`Guid`, `DateTime` UTC)
+  - Validación de alias (longitud, espacios, nulos)
+  - Rechazo de identificadores vacíos y timestamps no UTC
+  - Reglas de estado de conexión (RF-013, RF-014, RF-015)
 
 #### Service Tests
 - **RoomServiceTests**: Valida la lógica de negocio de salas
@@ -54,6 +55,7 @@ GameTribunal.Application.Tests/
   - Persistencia en repositorio
   - Gestión de modos de juego
   - Validación de reglas de negocio
+  - Uso de `IGuidGenerator` y `IClock` deterministas al unir jugadores (RF-011, RF-012)
 
 #### SignalR Tests
 - **SignalRIntegrationTests**: Valida la comunicación en tiempo real
@@ -61,6 +63,7 @@ GameTribunal.Application.Tests/
   - Envío y recepción de mensajes
   - Gestión de grupos (salas)
   - Sincronización de estado
+  - Verificación de IDs reproducibles y marcas de tiempo compartidas
 
 ### Ejecutar Unit Tests
 
@@ -265,10 +268,10 @@ Los tests se ejecutan automáticamente en el pipeline de CI/CD definido en `.git
 - ✅ Tests independientes y parallelizables
 - ✅ Configuración compartida en clase base
 
-## Métricas
+### Métricas
 
 ### Unit Tests
-- **Total**: 54 tests
+- **Total**: 58 tests
 - **Cobertura**: Domain y Application layers
 - **Velocidad**: < 1 segundo
 

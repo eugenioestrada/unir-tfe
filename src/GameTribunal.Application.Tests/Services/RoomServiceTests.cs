@@ -1,10 +1,12 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using GameTribunal.Application.Contracts;
 using GameTribunal.Application.Services;
 using GameTribunal.Domain.Entities;
 using GameTribunal.Domain.Enumerations;
 using GameTribunal.Domain.ValueObjects;
 using Microsoft.Extensions.Logging.Abstractions;
-using System.Linq;
 using Xunit;
 
 namespace GameTribunal.Application.Tests.Services;
@@ -17,7 +19,7 @@ public sealed class RoomServiceTests
         var code = RoomCode.From("ABC123");
         var repository = new InMemoryRoomRepository();
         var generator = new StubRoomCodeGenerator(code);
-        var service = new RoomService(repository, generator, NullLogger<RoomService>.Instance);
+        var service = CreateRoomService(repository, generator);
 
         var result = await service.CreateRoomAsync(GameMode.Suave);
 
@@ -36,7 +38,7 @@ public sealed class RoomServiceTests
         var freshCode = RoomCode.From("XYZ789");
         var repository = new InMemoryRoomRepository(existingCode);
         var generator = new StubRoomCodeGenerator(existingCode, freshCode);
-        var service = new RoomService(repository, generator, NullLogger<RoomService>.Instance);
+        var service = CreateRoomService(repository, generator);
 
         var result = await service.CreateRoomAsync(GameMode.Normal);
 
@@ -53,7 +55,7 @@ public sealed class RoomServiceTests
         var conflictingCode = RoomCode.From("ABC123");
         var repository = new AlwaysConflictingRoomRepository();
         var generator = new StubRoomCodeGenerator(Enumerable.Repeat(conflictingCode, 20).ToArray());
-        var service = new RoomService(repository, generator, NullLogger<RoomService>.Instance);
+        var service = CreateRoomService(repository, generator);
 
         await Assert.ThrowsAsync<InvalidOperationException>(() => service.CreateRoomAsync(GameMode.Spicy));
         Assert.Empty(repository.StoredRooms);
@@ -66,7 +68,7 @@ public sealed class RoomServiceTests
         var code = RoomCode.From("ABC123");
         var repository = new InMemoryRoomRepository();
         var generator = new StubRoomCodeGenerator(code);
-        var service = new RoomService(repository, generator, NullLogger<RoomService>.Instance);
+        var service = CreateRoomService(repository, generator);
 
         await service.CreateRoomAsync(GameMode.Normal);
         var result = await service.JoinRoomAsync("ABC123", "PlayerOne");
@@ -84,7 +86,7 @@ public sealed class RoomServiceTests
         var code = RoomCode.From("ABC123");
         var repository = new InMemoryRoomRepository();
         var generator = new StubRoomCodeGenerator(code);
-        var service = new RoomService(repository, generator, NullLogger<RoomService>.Instance);
+        var service = CreateRoomService(repository, generator);
 
         await service.CreateRoomAsync(GameMode.Normal);
         await service.JoinRoomAsync("ABC123", "PlayerOne");
@@ -100,7 +102,7 @@ public sealed class RoomServiceTests
         var code = RoomCode.From("ABC123");
         var repository = new InMemoryRoomRepository();
         var generator = new StubRoomCodeGenerator(code);
-        var service = new RoomService(repository, generator, NullLogger<RoomService>.Instance);
+        var service = CreateRoomService(repository, generator);
 
         await service.CreateRoomAsync(GameMode.Normal);
         await service.JoinRoomAsync("ABC123", "PlayerOne");
@@ -116,7 +118,7 @@ public sealed class RoomServiceTests
         var code = RoomCode.From("ABC123");
         var repository = new InMemoryRoomRepository();
         var generator = new StubRoomCodeGenerator(code);
-        var service = new RoomService(repository, generator, NullLogger<RoomService>.Instance);
+        var service = CreateRoomService(repository, generator);
 
         await service.CreateRoomAsync(GameMode.Normal);
         
@@ -138,7 +140,7 @@ public sealed class RoomServiceTests
         var code = RoomCode.From("ABC123");
         var repository = new InMemoryRoomRepository();
         var generator = new StubRoomCodeGenerator(code);
-        var service = new RoomService(repository, generator, NullLogger<RoomService>.Instance);
+        var service = CreateRoomService(repository, generator);
 
         await service.CreateRoomAsync(GameMode.Normal);
         
@@ -159,7 +161,7 @@ public sealed class RoomServiceTests
         var code = RoomCode.From("ABC123");
         var repository = new InMemoryRoomRepository();
         var generator = new StubRoomCodeGenerator(code);
-        var service = new RoomService(repository, generator, NullLogger<RoomService>.Instance);
+        var service = CreateRoomService(repository, generator);
 
         await service.CreateRoomAsync(GameMode.Normal);
         
@@ -177,7 +179,7 @@ public sealed class RoomServiceTests
     {
         var repository = new InMemoryRoomRepository();
         var generator = new StubRoomCodeGenerator(RoomCode.From("ABC123"));
-        var service = new RoomService(repository, generator, NullLogger<RoomService>.Instance);
+        var service = CreateRoomService(repository, generator);
 
         await Assert.ThrowsAsync<InvalidOperationException>(() => 
             service.JoinRoomAsync("XYZ999", "PlayerOne"));
@@ -188,7 +190,7 @@ public sealed class RoomServiceTests
     {
         var repository = new InMemoryRoomRepository();
         var generator = new StubRoomCodeGenerator(RoomCode.From("ABC123"));
-        var service = new RoomService(repository, generator, NullLogger<RoomService>.Instance);
+        var service = CreateRoomService(repository, generator);
 
         await Assert.ThrowsAsync<ArgumentException>(() => 
             service.JoinRoomAsync("INVALID", "PlayerOne"));
@@ -200,7 +202,7 @@ public sealed class RoomServiceTests
     {
         var repository = new InMemoryRoomRepository();
         var generator = new StubRoomCodeGenerator(RoomCode.From("ABC123"));
-        var service = new RoomService(repository, generator, NullLogger<RoomService>.Instance);
+        var service = CreateRoomService(repository, generator);
 
         var url = service.GenerateRoomUrl("ABC123", "https://example.com");
 
@@ -212,7 +214,7 @@ public sealed class RoomServiceTests
     {
         var repository = new InMemoryRoomRepository();
         var generator = new StubRoomCodeGenerator(RoomCode.From("ABC123"));
-        var service = new RoomService(repository, generator, NullLogger<RoomService>.Instance);
+        var service = CreateRoomService(repository, generator);
 
         var url = service.GenerateRoomUrl("ABC123", "https://example.com/");
 
@@ -224,10 +226,21 @@ public sealed class RoomServiceTests
     {
         var repository = new InMemoryRoomRepository();
         var generator = new StubRoomCodeGenerator(RoomCode.From("ABC123"));
-        var service = new RoomService(repository, generator, NullLogger<RoomService>.Instance);
+        var service = CreateRoomService(repository, generator);
 
         Assert.Throws<ArgumentException>(() => 
             service.GenerateRoomUrl("INVALID", "https://example.com"));
+    }
+
+    private static RoomService CreateRoomService(
+        IRoomRepository repository,
+        IRoomCodeGenerator codeGenerator,
+        TestGuidGenerator? guidGenerator = null,
+        TestClock? clock = null)
+    {
+        var resolvedGuidGenerator = guidGenerator ?? new TestGuidGenerator();
+        var resolvedClock = clock ?? new TestClock();
+        return new RoomService(repository, codeGenerator, NullLogger<RoomService>.Instance, resolvedGuidGenerator, resolvedClock);
     }
 
     private sealed class StubRoomCodeGenerator : IRoomCodeGenerator
@@ -328,6 +341,66 @@ public sealed class RoomServiceTests
         public Task<IReadOnlyCollection<Room>> GetAllAsync(CancellationToken cancellationToken = default)
         {
             return Task.FromResult<IReadOnlyCollection<Room>>(StoredRooms);
+        }
+    }
+
+    private sealed class TestGuidGenerator : IGuidGenerator
+    {
+        private readonly Queue<Guid> _predefinedIds;
+
+        public TestGuidGenerator(IEnumerable<Guid>? ids = null)
+        {
+            _predefinedIds = ids is null ? new Queue<Guid>() : new Queue<Guid>(ids);
+        }
+
+        public Guid Create()
+        {
+            if (_predefinedIds.Count > 0)
+            {
+                return _predefinedIds.Dequeue();
+            }
+
+            return Guid.NewGuid();
+        }
+
+        public void Enqueue(Guid identifier)
+        {
+            _predefinedIds.Enqueue(identifier);
+        }
+    }
+
+    private sealed class TestClock : IClock
+    {
+        private DateTime _utcNow;
+
+        public TestClock(DateTime? initial = null)
+        {
+            var timestamp = initial ?? DateTime.UtcNow;
+            _utcNow = timestamp.Kind == DateTimeKind.Utc
+                ? timestamp
+                : DateTime.SpecifyKind(timestamp, DateTimeKind.Utc);
+        }
+
+        public DateTime UtcNow
+        {
+            get
+            {
+                var current = _utcNow;
+                _utcNow = _utcNow.AddMilliseconds(1);
+                return current;
+            }
+        }
+
+        public void Set(DateTime value)
+        {
+            _utcNow = value.Kind == DateTimeKind.Utc
+                ? value
+                : DateTime.SpecifyKind(value, DateTimeKind.Utc);
+        }
+
+        public void Advance(TimeSpan interval)
+        {
+            _utcNow = _utcNow.Add(interval);
         }
     }
 }

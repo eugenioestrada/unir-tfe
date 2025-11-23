@@ -30,7 +30,7 @@ public sealed class RoomTests
     {
         var room = Room.Create(RoomCode.From("ABC123"), GameMode.Normal);
         
-        var player = room.AddPlayer("Player1");
+        var player = AddPlayer(room, "Player1");
 
         Assert.NotNull(player);
         Assert.Equal("Player1", player.Alias);
@@ -43,9 +43,9 @@ public sealed class RoomTests
     {
         var room = Room.Create(RoomCode.From("ABC123"), GameMode.Normal);
         
-        room.AddPlayer("Player1");
-        room.AddPlayer("Player2");
-        room.AddPlayer("Player3");
+        AddPlayer(room, "Player1");
+        AddPlayer(room, "Player2");
+        AddPlayer(room, "Player3");
 
         Assert.Equal(3, room.Players.Count);
     }
@@ -54,19 +54,19 @@ public sealed class RoomTests
     public void AddPlayer_DuplicateAlias_Throws()
     {
         var room = Room.Create(RoomCode.From("ABC123"), GameMode.Normal);
-        room.AddPlayer("Player1");
+        AddPlayer(room, "Player1");
 
-        Assert.Throws<InvalidOperationException>(() => room.AddPlayer("Player1"));
+        Assert.Throws<InvalidOperationException>(() => room.AddPlayer("Player1", Guid.NewGuid(), DateTime.UtcNow));
     }
 
     [Fact]
     public void AddPlayer_DuplicateAliasCaseInsensitive_Throws()
     {
         var room = Room.Create(RoomCode.From("ABC123"), GameMode.Normal);
-        room.AddPlayer("Player1");
+        AddPlayer(room, "Player1");
 
-        Assert.Throws<InvalidOperationException>(() => room.AddPlayer("PLAYER1"));
-        Assert.Throws<InvalidOperationException>(() => room.AddPlayer("player1"));
+        Assert.Throws<InvalidOperationException>(() => room.AddPlayer("PLAYER1", Guid.NewGuid(), DateTime.UtcNow));
+        Assert.Throws<InvalidOperationException>(() => room.AddPlayer("player1", Guid.NewGuid(), DateTime.UtcNow));
     }
 
     [Fact]
@@ -77,11 +77,11 @@ public sealed class RoomTests
         // Add 16 players (max capacity)
         for (int i = 1; i <= Room.MaxPlayers; i++)
         {
-            room.AddPlayer($"Player{i}");
+            AddPlayer(room, $"Player{i}");
         }
 
         Assert.Equal(Room.MaxPlayers, room.Players.Count);
-        Assert.Throws<InvalidOperationException>(() => room.AddPlayer("ExtraPlayer"));
+        Assert.Throws<InvalidOperationException>(() => room.AddPlayer("ExtraPlayer", Guid.NewGuid(), DateTime.UtcNow));
     }
 
     [Theory]
@@ -91,7 +91,7 @@ public sealed class RoomTests
     {
         var room = Room.Create(RoomCode.From("ABC123"), GameMode.Normal);
 
-        Assert.Throws<ArgumentException>(() => room.AddPlayer(alias!));
+        Assert.Throws<ArgumentException>(() => room.AddPlayer(alias!, Guid.NewGuid(), DateTime.UtcNow));
     }
 
     [Fact]
@@ -99,7 +99,7 @@ public sealed class RoomTests
     {
         var room = Room.Create(RoomCode.From("ABC123"), GameMode.Normal);
 
-        Assert.Throws<ArgumentNullException>(() => room.AddPlayer(null!));
+        Assert.Throws<ArgumentNullException>(() => room.AddPlayer(null!, Guid.NewGuid(), DateTime.UtcNow));
     }
 
     [Fact]
@@ -109,13 +109,13 @@ public sealed class RoomTests
         
         Assert.False(room.CanStartGame());
 
-        room.AddPlayer("Player1");
+        AddPlayer(room, "Player1");
         Assert.False(room.CanStartGame());
 
-        room.AddPlayer("Player2");
+        AddPlayer(room, "Player2");
         Assert.False(room.CanStartGame());
 
-        room.AddPlayer("Player3");
+        AddPlayer(room, "Player3");
         Assert.False(room.CanStartGame());
     }
 
@@ -124,10 +124,10 @@ public sealed class RoomTests
     {
         var room = Room.Create(RoomCode.From("ABC123"), GameMode.Normal);
         
-        room.AddPlayer("Player1");
-        room.AddPlayer("Player2");
-        room.AddPlayer("Player3");
-        room.AddPlayer("Player4");
+        AddPlayer(room, "Player1");
+        AddPlayer(room, "Player2");
+        AddPlayer(room, "Player3");
+        AddPlayer(room, "Player4");
 
         Assert.True(room.CanStartGame());
     }
@@ -139,7 +139,7 @@ public sealed class RoomTests
         
         for (int i = 1; i <= 8; i++)
         {
-            room.AddPlayer($"Player{i}");
+            AddPlayer(room, $"Player{i}");
         }
 
         Assert.True(room.CanStartGame());
@@ -152,7 +152,7 @@ public sealed class RoomTests
         
         for (int i = 1; i <= Room.MaxPlayers; i++)
         {
-            room.AddPlayer($"Player{i}");
+            AddPlayer(room, $"Player{i}");
         }
 
         Assert.True(room.CanStartGame());
@@ -167,5 +167,10 @@ public sealed class RoomTests
         var room = Room.Create(RoomCode.From("ABC123"), mode);
 
         Assert.Equal(mode, room.Mode);
+    }
+
+    private static Player AddPlayer(Room room, string alias)
+    {
+        return room.AddPlayer(alias, Guid.NewGuid(), DateTime.UtcNow);
     }
 }

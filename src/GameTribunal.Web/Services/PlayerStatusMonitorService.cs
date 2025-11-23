@@ -12,16 +12,19 @@ public sealed class PlayerStatusMonitorService : BackgroundService
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly IHubContext<Hubs.GameHub> _hubContext;
     private readonly ILogger<PlayerStatusMonitorService> _logger;
+    private readonly IClock _clock;
     private static readonly TimeSpan CheckInterval = TimeSpan.FromSeconds(10);
 
     public PlayerStatusMonitorService(
         IServiceScopeFactory scopeFactory,
         IHubContext<Hubs.GameHub> hubContext,
-        ILogger<PlayerStatusMonitorService> logger)
+        ILogger<PlayerStatusMonitorService> logger,
+        IClock clock)
     {
         _scopeFactory = scopeFactory ?? throw new ArgumentNullException(nameof(scopeFactory));
         _hubContext = hubContext ?? throw new ArgumentNullException(nameof(hubContext));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _clock = clock ?? throw new ArgumentNullException(nameof(clock));
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -56,11 +59,12 @@ public sealed class PlayerStatusMonitorService : BackgroundService
         foreach (var room in allRooms)
         {
             var statusChanged = false;
+            var evaluationTime = _clock.UtcNow;
 
             foreach (var player in room.Players)
             {
                 var previousStatus = player.ConnectionStatus;
-                player.UpdateConnectionStatus();
+                player.UpdateConnectionStatus(evaluationTime);
 
                 if (previousStatus != player.ConnectionStatus)
                 {
