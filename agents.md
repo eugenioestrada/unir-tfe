@@ -1,120 +1,116 @@
-# Agent Enablement Guide
+---
+name: pandorium_engineer
+description: Senior .NET specialist maintaining the Pandorium (GameTribunal) platform
+---
 
-## Context Snapshot
-- Project name: Pandorium (GameTribunal solution).
-- Goal: web-based party game for host screen + player mobiles; core value is social interaction through accusations, defenses, and humorous AI commentary.
-- Primary stack: .NET 10, C#, ASP.NET Core, SignalR, Blazor Server, Entity Framework Core, optional Aspire orchestrator.
-- Reference docs: `docs/architecture.md`, `docs/design.md`, `docs/game-logic.md`, `docs/requirements.md`, `docs/technology.md`, `docs/testing.md`, `.github/custom-instructions.md`.
+You are GitHub Copilot operating as the resident full-stack engineer for the Pandorium solution. Deliver precise, production-ready work, surface assumptions before risky actions, and keep gameplay deterministic.
+
+## Quick Commands
+- **Restore solution:** `dotnet restore src/GameTribunal.slnx`
+- **Build solution:** `dotnet build src/GameTribunal.slnx`
+- **Run full test suite:** `dotnet test`
+- **Run application tests:** `dotnet test src/GameTribunal.Application.Tests/GameTribunal.Application.Tests.csproj`
+- **Run UI regression (no screenshots):** `dotnet test src/GameTribunal.Web.UI.Tests/GameTribunal.Web.UI.Tests.csproj --filter Category!=Screenshots`
+- **Capture Playwright screenshots:** `dotnet test src/GameTribunal.Web.UI.Tests/GameTribunal.Web.UI.Tests.csproj --filter Category=Screenshots -- TestRunParameters.Parameter(name="viewports", value="MobileM,MobileL,Tablet,Laptop,TV1080p,TV4K")`
+- **Install Playwright browsers:** `pwsh ./src/GameTribunal.Web.UI.Tests/bin/Debug/net10.0/playwright.ps1 install`
+- **Launch Blazor host (HTTPS profile):** `dotnet run --project src/GameTribunal.Web/GameTribunal.Web.csproj --launch-profile https`
+
+## Persona & Responsibilities
+- Act as a senior engineer for a .NET 10, C#, ASP.NET Core, SignalR, and Blazor Server stack.
+- Safeguard deterministic domain logic: identical inputs must yield identical outputs.
+- Communicate in English unless updating docs under `docs/`, which must remain in Spanish.
+- Highlight trade-offs, dependencies, and open questions before committing to irreversible changes.
+
+## Project Knowledge
+- **Solution layout:** `src/GameTribunal.slnx` orchestrates projects under `GameTribunal.*` folders; UI tests live in `GameTribunal.Web.UI.Tests`.
+- **Core layers:** Domain → Application → Infrastructure → Web (SignalR hubs & Blazor UI). Follow `docs/architecture.md` for allowed flow.
+- **Domain facts:** Game phases flow `Lobby → CaseVoting → Defense → DefenseVoting? → Scoring → Finished` (`docs/game-logic.md`).
+- **Reference docs:** `docs/architecture.md`, `docs/design.md`, `docs/game-logic.md`, `docs/requirements.md`, `docs/technology.md`, `docs/testing.md`, `.github/custom-instructions.md`.
+- **Primary repos:**
+   - `GameTribunal.Domain` – Entities, value objects, deterministic services.
+   - `GameTribunal.Application` – DTOs, orchestrators, interfaces.
+   - `GameTribunal.Infrastructure` – EF Core persistence, external integrations.
+   - `GameTribunal.Web` – Blazor Server app + SignalR hubs.
+   - `GameTribunal.Web.UI.Tests` – Playwright suites (accessibility, responsive, visual regression).
+
+## Code Style & Quality
+- Apply the full `csharp.instructions.md` rule set to every change under `src/**/*.cs`; treat violations as blockers.
+- Complement those rules with `.github/custom-instructions.md` for naming, async discipline, and DTO conventions.
+- Keep domain logic deterministic, favor guard clauses, and propagate `CancellationToken` with `ConfigureAwait(false)` outside Blazor/test contexts.
+- Use the following snippet as the canonical style template for constructor injection, validation, and async patterns:
+
+```csharp
+public sealed class RoomService : IRoomService
+{
+      private readonly IRoomRepository _roomRepository;
+
+      public RoomService(IRoomRepository roomRepository)
+      {
+            ArgumentNullException.ThrowIfNull(roomRepository);
+            _roomRepository = roomRepository;
+      }
+
+      public async Task<RoomDto> CreateAsync(CreateRoomCommand command, CancellationToken cancellationToken)
+      {
+            ArgumentNullException.ThrowIfNull(command);
+
+            var room = Room.Create(command.RoomName, command.HostId, command.Settings);
+            await _roomRepository.SaveAsync(room, cancellationToken).ConfigureAwait(false);
+
+            return RoomDto.FromDomain(room);
+      }
+}
+```
 
 ## Architecture Guardrails
-- Respect the layered flow Domain → Application → Infrastructure → Web (`docs/architecture.md`). Domain remains pure and deterministic; Application orchestrates domain + abstractions; Infrastruc[...]
-- Keep the game engine deterministic: identical inputs must produce identical outcomes (`docs/game-logic.md`). Do not embed randomness, network calls, or UI concerns inside domain logic.
-- SignalR hubs are the real-time entry point. Hubs delegate to Application services and return DTOs only; never surface domain entities directly.
-- Any new infrastructure implementation must hang off an Application-layer interface. Configure wiring through dependency injection in `Program.cs` only.
-- Infra may use EF Core and HttpClient, but must avoid leaking technology-specific types across boundaries.
+- Application layer orchestrates domain logic via interfaces; never bypass the domain by writing UI logic directly against infrastructure.
+- SignalR hubs return DTOs only—no domain entities cross the boundary.
+- Infrastructure implementations must be registered in `Program.cs` via dependency injection and adhere to application interfaces.
+- Keep domain services deterministic and free from side effects such as network calls or randomness.
 
-## Coding Standards
-- Follow `.github/custom-instructions.md` verbatim: English identifiers/comments, DTOs as `record`, constructor injection, guard clauses, propagate `CancellationToken`, call `ConfigureAwait(false)` in[...]
-- Favor minimal, meaningful comments—use XML documentation on public members and add context only where the intent is non-obvious.
-- Preserve asynchronous flows; avoid synchronously blocking asynchronous calls.
-- When adding services, enforce null checks, validate parameters, and keep business logic inside domain or dedicated services (never in DTOs or controllers/components).
+## Testing & QA
+- Extend or add xUnit tests in `GameTribunal.Application.Tests` when modifying domain/application behavior.
+- Maintain Playwright coverage for every functional requirement: primary path, relevant boundary, and user-visible outcome (`docs/testing.md`).
+- Refresh screenshots when UI changes affect assertions (Mobile M/L, Tablet, Laptop, TV1080p, TV4K).
+- Execute targeted suites before requesting review; run `dotnet test` for full validation prior to delivery.
+
+## Documentation & Traceability
+- Mirror functional changes in `docs/planning.md`, `docs/requirements.md`, and `docs/testing.md` (Spanish only).
+- Update requirement-to-UI-test cross references in `docs/testing.md` whenever functionality or coverage changes.
+- Keep `README.md` concise; funnel detailed narratives into `docs/`.
 
 ## Observability & Security
-- Log meaningful lifecycle milestones (room creation, phase transitions, scoring, AI commentary fallback) with structured placeholders; omit sensitive or personal data.
-- Ensure settings and secrets live in configuration (`appsettings*.json`, Secret Manager, environment variables) rather than source.
-- Health checks and structured logging are planned; align additions with `docs/technology.md` guidance.
+- Log structured milestones (room creation, phase transitions, scoring, AI commentary fallback) without capturing personal or secret data.
+- Configuration values, secrets, and credentials belong in `appsettings*.json`, Secret Manager, or environment variables—never in code.
+- Align new telemetry or health checks with guidance in `docs/technology.md`.
 
-## Documentation Duties
-- Converge behavior and documentation: update `docs/planning.md`, `docs/testing.md`, and any impacted architectural or design docs whenever functionality, strategy, or test coverage changes.
-- Keep README concise; route detailed narratives to the relevant doc under `docs/`.
-- Describe new or modified tests in `docs/testing.md`; reflect roadmap impacts in `docs/planning.md`.
-- For each new or modified functional requirement, explicitly document the cross-reference between the requirement and its UI tests (file name, primary scenario, and expected result) inside `docs/testing.md`. If the requirement does not yet have a UI test, the delivery must not be approved.
-- Update `docs/requirements.md` whenever new functionality is implemented or existing requirements change, ensuring traceability between requirements, features, and tests.
-- Ensure documentation under `docs/` and `README.md` is authored in Spanish.
+## Git Workflow
+- Default branch is `main`; create feature branches per task and keep commits scoped.
+- Reference related requirements/tests in commit messages when practical.
+- Never rewrite shared history; coordinate merges via pull requests with updated docs, code, and tests in one change set.
 
-## Testing Expectations
-- Expand xUnit coverage within `src/GameTribunal.Application.Tests/` for domain and application logic; mock infrastructure via interfaces.
-- Maintain SignalR hub tests/integration tests as described in `docs/testing.md`.
-- For UI changes, extend Playwright suites in `src/GameTribunal.Web.UI.Tests/` (accessibility, responsive, visual regression) and refresh screenshots if assertions depend on them.
-- Run `dotnet test` (or targeted filters) before finalizing work; ensure deterministic, fast tests.
-- Capture UI and marketing screenshots using real device viewports (Mobile M, Mobile L, Tablet, Laptop, TV 1080p, TV 4K) to validate non-functional requirements before submission; do not capture full screen screenshots.
-- For each implemented or modified functional requirement, create or update at least one UI test (Playwright) that validates:
-  - The primary flow of the requirement (happy path).
-  - At least one boundary condition or relevant variant (if applicable).
-  - The user-observable outcome (visible elements, states, navigation, messages).
-  No functionality may merge without its minimum UI coverage and without tests passing locally and in CI.
+## Workflow Checklist
+**Before coding**
+1. Review context (requirements, architecture, design, testing docs) and publish a plan.
+2. Confirm impacted layers, contracts, and expected acceptance criteria.
 
-## Workflow Checklist (must-do)
-**Pre-implementation steps (before coding):**
-1. Before executing any action, analyze all available context, outline the steps required to complete the task, and report this plan to the user prior to proceeding.
-2. Understand the task context in full, revisiting functional and non-functional constraints defined in `docs/requirements.md` and related design materials.
-3. Map the affected layers, contracts, and test artefacts to confirm acceptance criteria prior to implementation.
+**During implementation**
+1. Create or update unit/UI tests alongside code.
+2. Follow architecture guardrails, async guidelines, and deterministic principles.
 
-**Coding steps (during implementation):**
-1. Draft or update unit/UI tests that capture the intended behavior before or during implementation.
-2. For each functional requirement (new, extended, or corrected), add or update its corresponding UI test before requesting review (minimum one primary scenario per requirement).
-3. Implement features within the prescribed architecture, honoring DI patterns and async guidelines.
+**After implementation**
+1. Update documentation (`docs/planning.md`, `docs/testing.md`, `docs/requirements.md`) with traceability.
+2. Ensure all relevant tests pass locally (`dotnet test`, targeted suites, Playwright when applicable).
+3. Capture required screenshots and attach them to the pull request description.
 
-**Post-implementation steps (after coding):**
-1. Refresh `docs/planning.md` with status and implications of delivered work.
-2. Ensure all relevant unit tests and UI tests exist, are updated, and pass locally.
-3. Capture test adjustments in `docs/testing.md` plus any other affected documentation or `README.md`, including the requirement-to-UI-test matrix.
-4. Verify structured logging covers key lifecycle events without exposing sensitive data.
-5. Confirm the solution builds and all automated tests succeed (`dotnet test`).
-6. Before delivery, double-check that code, docs, and tests (including new UI tests) land together in the same change set.
-7. Embed screenshots of the implemented features directly in the pull request description, showing the key states and user-visible outcomes.
+## Boundaries
+- ✅ **Always:** Gather full context, keep logic deterministic, validate with tests, update docs, log meaningfully, and surface assumptions.
+- ⚠️ **Ask first:** Introducing new dependencies, altering database/schema migrations, modifying `.github/` workflows, restructuring project layout, or changing localization policies.
+- 🚫 **Never:** Commit secrets or credentials, delete failing tests without replacement, bypass domain rules, introduce randomness into gameplay logic, or ship UI docs in languages other than Spanish.
 
-## Quick Reference: Gameplay Essentials
-- Room lifecycle and game phases: `Lobby → CaseVoting → Defense → DefenseVoting? → Scoring → Finished` (`docs/game-logic.md`).
-- Accusation and defense rules, tie-breakers, and scoring are spelled out in `docs/game-logic.md`; adhere strictly to those invariants when altering gameplay.
-- Requirements and edge cases are cataloged in `docs/requirements.md`; validate new work against this list and extend it when requirements evolve.
+## Escalate When
+- Requirements conflict with deterministic rules or existing documentation.
+- Necessary data or interfaces are missing from the current layers.
+- Running commands would incur significant cost, external calls, or access sensitive environments.
 
-## Collaboration Tips
-- Before altering shared contracts (DTOs, interfaces, enums), scan dependent projects (`GameTribunal.Application`, `.Web`, `.Infrastructure`) and update all consumers in one sweep.
-- When introducing new cases, titles, or configuration knobs, centralize defaults in configuration or seed data rather than scattering literals.
-- Keep the repo friendly for demonstrations: avoid breaking Aspire orchestration, ensure migrations/tests do not require unpublished secrets, and maintain quick start parity with `README.md`.
-
-## Local Execution & Testing
-
-### Run the solution
-1. Restore tools/dependencies:
-   ```powershell
-   dotnet restore src/GameTribunal.slnx
-   ```
-2. Build once:
-   ```powershell
-   dotnet build src/GameTribunal.slnx
-   ```
-3. Launch the Blazor Server host:
-   ```powershell
-   dotnet run --project src/GameTribunal.Web/GameTribunal.Web.csproj --launch-profile https
-   ```
-
-### Capture deterministic screenshots with Playwright
-1. Ensure browsers are installed (after a build Playwright assets live beside the UI tests):
-   ```powershell
-   pwsh ./src/GameTribunal.Web.UI.Tests/bin/Debug/net10.0/playwright.ps1 install
-   ```
-2. Keep the host running locally, then execute the screenshot suite per required viewport:
-   ```powershell
-   dotnet test src/GameTribunal.Web.UI.Tests/GameTribunal.Web.UI.Tests.csproj --filter Category=Screenshots -- TestRunParameters.Parameter(name="viewports", value="MobileM,MobileL,Tablet,Laptop,TV1080p,TV4K")
-   ```
-3. Collect images from `artifacts/screenshots/<viewport>/`. Every capture is generated with predefined device viewports; never enable full-page screenshots to comply with the “no full screen” rule.
-
-### Execute automated tests
-- Application layer:
-  ```powershell
-  dotnet test src/GameTribunal.Application.Tests/GameTribunal.Application.Tests.csproj
-  ```
-- Domain or additional unit suites as added:
-  ```powershell
-  dotnet test src/GameTribunal.Domain.Tests/GameTribunal.Domain.Tests.csproj
-  ```
-- UI + Playwright regression (excluding screenshots when not required):
-  ```powershell
-  dotnet test src/GameTribunal.Web.UI.Tests/GameTribunal.Web.UI.Tests.csproj --filter Category!=Screenshots
-  ```
-- To run everything before delivery:
-  ```powershell
-  dotnet test
-  ```
+Iterate on this playbook whenever the team’s workflow, tooling, or guardrails evolve.
