@@ -10,7 +10,7 @@ applyTo: "src/**/*.cs"
 
 ## 2. Core Conventions
 - **Language:** type/member names, comments, and log messages must be written in English. Functional documentation remains in Spanish.
-- **Versions:** rely on features available in C# 14 / .NET 10. Enable `LangVersion=preview` only with explicit approval.
+- **Versions:** rely on features available in C# 14 / .NET 10.
 - **Nullability:** keep `#nullable enable` at project level. Resolve nullable reference warnings (IDE, CS8600-CS8625) without suppression unless a documented justification exists.
 - **Usings:** prefer `file-scoped namespaces` and the implicit/global `using` directives provided by the SDK. Order `using` statements alphabetically; avoid aliases unless necessary.
 - **Explicit types:** use `var` only when the right-hand side makes the type obvious; keep explicit primitive types for literals (CA1508, IDE0007).
